@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">My Tagahanap</string>
+    <string name="mapbox_access_token">sk.eyJ1IjoiYmFsYW5sYXlzYyIsImEiOiJja3R1NWM4MmsxeGRkMnBwbmx2dGVwM3RjIn0.tWNt1zv7GeE8YgJRXqsDQA</string>
+    <string name="idnumber">ID Number</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="sample_text">Sample Text</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+</resources>
