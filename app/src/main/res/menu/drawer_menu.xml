@@ -4,7 +4,10 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
-        <!-- TODO add an item here also create an icon/vector of a map -->
+        <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/ic_map"
+            android:title="Map" />
         <item
             android:id="@+id/nav_subjects"
             android:icon="@drawable/ic_subject_list"
