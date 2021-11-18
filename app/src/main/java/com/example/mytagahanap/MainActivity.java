@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-
+dasdasd
         initViews();
     }
 
