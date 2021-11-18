@@ -17,7 +17,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 
 public class MapFragment extends Fragment {
     private MapView mapView;
-    private String styleUrl = "mapbox://styles/balanlaysc/ckw4gajbz18vp14jtncm68rm3";
+    private static final String STYLE_URL = "mapbox://styles/balanlaysc/ckw4gajbz18vp14jtncm68rm3";
 
     @Nullable
     @Override
@@ -30,7 +30,7 @@ public class MapFragment extends Fragment {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
-                mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
+                mapboxMap.setStyle(new Style.Builder().fromUri(STYLE_URL));
 
             }
         });
