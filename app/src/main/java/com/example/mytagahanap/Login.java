@@ -20,7 +20,6 @@ public class Login extends AppCompatActivity {
     TextInputEditText textInputEditTextIDNumber, textInputEditTextPassword;
     Button buttonLogin;
     ProgressBar progressBar;
-    DBHelper mySQLiteDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,8 +30,6 @@ public class Login extends AppCompatActivity {
         textInputEditTextPassword = findViewById(R.id.textInputLayoutPassword);
         buttonLogin = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progress);
-
-        mySQLiteDB = new DBHelper(this);
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
