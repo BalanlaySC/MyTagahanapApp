@@ -12,7 +12,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PASSWORD = "Password";
 
     public DBHelper(Context context) {
-        super(context, "MyTagahanap.db", null, 1);
+        super(context, "", null, 1);
     }
 
     // this is called the first time a database is accessed
