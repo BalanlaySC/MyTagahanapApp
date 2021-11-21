@@ -4,8 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseAccess {
+    private static final String TAG = "DatabaseAccess";
+
     private SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase mySQLiteDB;
     private static DatabaseAccess dbInstance;
@@ -37,6 +40,15 @@ public class DatabaseAccess {
     // query to the database and return the result
     // TODO change this into arraylist, so that coordinates can be used in navigation
     public String getCoordinates(String locationName) {
-        cursor = mySQLiteDB.rawQuery();
+        String queryCoordinates = "SELECT x, y FROM Coordinates WHERE Location = '" + locationName + "'";
+        cursor = mySQLiteDB.rawQuery(queryCoordinates, new String[]{});
+        StringBuffer buffer = new StringBuffer();
+        while (cursor.moveToNext()) {
+            String xCoordinates = cursor.getString(0);
+            String yCoordinates = cursor.getString(1);
+            buffer.append(xCoordinates + ", " + yCoordinates);
+            Log.d(TAG, buffer.toString());
+        }
+        return buffer.toString();
     }
 }
