@@ -37,6 +37,8 @@ public class SearchFragment extends Fragment {
 
                 String location = edtTxtLocation.getText().toString();
                 String coordinates = databaseAccess.getCoordinates(location);
+
+                databaseAccess.closeDatabase();
                 Toast.makeText(getActivity(), coordinates, Toast.LENGTH_SHORT).show();
             }
         });

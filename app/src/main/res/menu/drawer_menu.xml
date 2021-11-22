@@ -25,5 +25,4 @@
             android:icon="@drawable/ic_aboutdevs"
             android:title="About Us" />
     </group>
-
 </menu>

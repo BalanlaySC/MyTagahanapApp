@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/actionSearch"
+        android:title="Search"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+    <!--TODO for first-time user guide  -->
+    <item
+        android:id="@+id/actionHelp"
+        android:title="Help"
+        android:icon="@drawable/ic_help"
+        app:showAsAction="ifRoom|collapseActionView"/>
+</menu>

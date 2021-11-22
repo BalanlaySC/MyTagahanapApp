@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class DatabaseAccess {
     private static final String TAG = "DatabaseAccess";
 
@@ -50,5 +52,19 @@ public class DatabaseAccess {
             Log.d(TAG, buffer.toString());
         }
         return buffer.toString();
+    }
+
+    public ArrayList<String> getAllLocations() {
+        String queryLocations = "SELECT Location FROM Coordinates";
+        ArrayList<String> locations = new ArrayList<String>();
+
+        cursor = mySQLiteDB.rawQuery(queryLocations, null);
+        if (cursor.moveToFirst()) {
+            do {
+                String location = cursor.getString(0);
+                locations.add(location);
+            } while (cursor.moveToNext());
+        }
+        return locations;
     }
 }
