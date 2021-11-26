@@ -11,6 +11,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,18 +19,20 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
-    private static final String[] COUNTRIES = new String[] { "Belgium",
-            "France", "France_", "Italy", "Germany", "Spain" };
 
     private DatabaseAccess databaseAccess;
+    // TODO use LocationModel
     private ArrayAdapter<String> arrayAdapter;
 
     private AutoCompleteTextView autoCompleteTextView;
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private ArrayList<String> locations;
+    private BottomSheetDialog bottomSheetDialog;
+    private TextView btsTxtLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,12 +74,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
-        databaseAccess.openDatabase();
-
         locations = new ArrayList<String>();
         locations = databaseAccess.getAllLocations();
-        // TODO now proceed to autocomplete using locations ArrayList
-        databaseAccess.closeDatabase();
+
+        bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(R.layout.layout_bottom_sheet,
+                        (LinearLayout) findViewById(R.id.bottomSheetContainer));
+        // OnClickListener for Directions Button
+        bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, "Generating path to ", Toast.LENGTH_SHORT).show();
+                bottomSheetDialog.dismiss();
+            }
+        });
+        bottomSheetDialog.setContentView(bottomSheetView);
+        btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
     }
 
     @Override
@@ -112,6 +128,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // TODO Refer to the setOnItemClickListener
+                bottomSheetDialog.show();
+                btsTxtLocation.setText(query);
                 return false;
             }
 
@@ -123,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    // Selecting something on the menu will switch into that fragment
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -143,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         new AboutDevsFragment()).commit();
                 break;
         }
-
         drawer.closeDrawer(GravityCompat.START);
 
         return true;

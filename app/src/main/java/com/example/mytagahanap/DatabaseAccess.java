@@ -39,8 +39,7 @@ public class DatabaseAccess {
         }
     }
 
-    // query to the database and return the result
-    // TODO change this into arraylist, so that coordinates can be used in navigation
+    // Query to the database and return the coordinates
     public String getCoordinates(String locationName) {
         String queryCoordinates = "SELECT x, y FROM Coordinates WHERE Location = '" + locationName + "'";
         cursor = mySQLiteDB.rawQuery(queryCoordinates, new String[]{});
@@ -49,12 +48,15 @@ public class DatabaseAccess {
             String xCoordinates = cursor.getString(0);
             String yCoordinates = cursor.getString(1);
             buffer.append(xCoordinates + ", " + yCoordinates);
-            Log.d(TAG, buffer.toString());
         }
         return buffer.toString();
     }
 
+    // Query to the database and return all locations
+    // TODO change this into arraylist, so that coordinates can be used in navigation
+    // TODO use the LocationModel for the location name and its coordinates
     public ArrayList<String> getAllLocations() {
+        openDatabase();
         String queryLocations = "SELECT Location FROM Coordinates";
         ArrayList<String> locations = new ArrayList<String>();
 
@@ -65,6 +67,7 @@ public class DatabaseAccess {
                 locations.add(location);
             } while (cursor.moveToNext());
         }
+        closeDatabase();
         return locations;
     }
 }
