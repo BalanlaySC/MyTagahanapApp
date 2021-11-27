@@ -6,14 +6,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +32,7 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         setSupportActionBar(toolbar);
 
-        drawer = findViewById(R.id.main_drawer_layout);
+        drawer = findViewById(R.id.main_layout);
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -137,6 +139,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(locations.contains(query)) {
                     bottomSheetDialog.show();
                     btsTxtLocation.setText(query);
+                    if(!isLocationEnabled(MainActivity.this)) {
+                        Toast.makeText(MainActivity.this, "To start at your current location you must enable location", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(MainActivity.this, "Location not found\nPlease Try Again", Toast.LENGTH_LONG).show();
                 }
@@ -201,5 +206,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         return super.dispatchTouchEvent( event );
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
     }
 }
