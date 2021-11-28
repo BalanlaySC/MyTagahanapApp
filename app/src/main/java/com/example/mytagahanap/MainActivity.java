@@ -126,8 +126,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int itemIndex, long id) {
                 String queryString = (String) adapterView.getItemAtPosition(itemIndex);
+                searchView.clearFocus();
                 searchAutoComplete.setText(queryString);
                 // TODO proceed to then get then mark the map
+                bottomSheetDialog.show();
+                btsTxtLocation.setText(queryString);
+                if(!isLocationEnabled(MainActivity.this)) {
+                    Toast.makeText(MainActivity.this, "To start at your current location you must enable location", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -137,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextSubmit(String query) {
                 // TODO Refer to the setOnItemClickListener
                 if(locations.contains(query)) {
+                    searchView.clearFocus();
                     bottomSheetDialog.show();
                     btsTxtLocation.setText(query);
                     if(!isLocationEnabled(MainActivity.this)) {

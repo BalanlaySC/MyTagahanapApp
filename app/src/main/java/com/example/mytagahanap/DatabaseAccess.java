@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class DatabaseAccess {
     private static final String TAG = "DatabaseAccess";
 
-    private SQLiteOpenHelper sqLiteOpenHelper;
+    private final SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase mySQLiteDB;
     private static DatabaseAccess dbInstance;
     Cursor cursor = null;
@@ -41,7 +41,7 @@ public class DatabaseAccess {
 
     // Query to the database and return the coordinates
     public String getCoordinates(String locationName) {
-        String queryCoordinates = "SELECT x, y FROM Coordinates WHERE Location = '" + locationName + "'";
+        String queryCoordinates = "SELECT x, y FROM Coordinates WHERE Title = '" + locationName + "'";
         cursor = mySQLiteDB.rawQuery(queryCoordinates, new String[]{});
         StringBuffer buffer = new StringBuffer();
         while (cursor.moveToNext()) {
@@ -57,7 +57,7 @@ public class DatabaseAccess {
     // TODO use the LocationModel for the location name and its coordinates
     public ArrayList<String> getAllLocations() {
         openDatabase();
-        String queryLocations = "SELECT Location FROM Coordinates";
+        String queryLocations = "SELECT Title FROM Coordinates";
         ArrayList<String> locations = new ArrayList<String>();
 
         cursor = mySQLiteDB.rawQuery(queryLocations, null);

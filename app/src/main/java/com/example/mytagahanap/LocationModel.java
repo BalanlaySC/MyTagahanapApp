@@ -1,9 +1,9 @@
 package com.example.mytagahanap;
 
 public class LocationModel {
-    private String locationName;
-    private int xCord;
-    private int yCord;
+    private final String locationName;
+    private final int xCord;
+    private final int yCord;
 
     public LocationModel(String locationName, int xCord, int yCord) {
         this.locationName = locationName;

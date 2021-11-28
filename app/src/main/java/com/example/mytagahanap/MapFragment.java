@@ -1,16 +1,14 @@
 package com.example.mytagahanap;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -25,10 +23,13 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 
-public class MapFragment extends Fragment {
-    private static final String STYLE_URL = "mapbox://styles/balanlaysc/ckw4gajbz18vp14jtncm68rm3";
+import java.util.List;
+
+public class MapFragment extends Fragment implements PermissionsListener {
+    private static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
 
     private MapView mapView;
+
     private PermissionsManager permissionsManager;
     private Context mapFragmentContext;
 
@@ -55,6 +56,7 @@ public class MapFragment extends Fragment {
         return view;
     }
 
+    @SuppressLint("MissingPermission")
     private void enableLocationComponent(@NonNull Style loadedMapStyle, MapboxMap mapboxMap) {
         // Check if permissions are enabled and if not request
         if (PermissionsManager.areLocationPermissionsGranted(mapFragmentContext)) {
@@ -67,19 +69,6 @@ public class MapFragment extends Fragment {
                     LocationComponentActivationOptions.builder(mapFragmentContext, loadedMapStyle).build());
 
             // Enable to make component visible
-            if (ActivityCompat.checkSelfPermission(mapFragmentContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(mapFragmentContext,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
             locationComponent.setLocationComponentEnabled(true);
 
             // Set the component's camera mode
@@ -88,7 +77,7 @@ public class MapFragment extends Fragment {
             // Set the component's render mode
             locationComponent.setRenderMode(RenderMode.COMPASS);
         } else {
-            permissionsManager = new PermissionsManager((PermissionsListener) this);
+            permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
         }
     }
@@ -133,5 +122,25 @@ public class MapFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+    }
+
+    @Override
+    public void onExplanationNeeded(List<String> list) {
+        Toast.makeText(mapFragmentContext, "You didn't grand permission.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onPermissionResult(boolean granted) {
+//        if (granted) {
+//            mapboxMap.getStyle(new Style.OnStyleLoaded() {
+//                @Override
+//                public void onStyleLoaded(@NonNull Style style) {
+//                    enableLocationComponent(style);
+//                }
+//            });
+//        } else {
+//            Toast.makeText(mapFragmentContext, "onPermissionResult", Toast.LENGTH_SHORT).show();
+//            getActivity().finish();
+//        }
     }
 }
