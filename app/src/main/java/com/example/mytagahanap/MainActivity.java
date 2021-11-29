@@ -13,7 +13,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.location.LocationRequest;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -54,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArrayList<String> locations;
     private BottomSheetDialog bottomSheetDialog;
     private TextView btsTxtLocation;
-    private LocationRequest locationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +101,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.layout_bottom_sheet,
                         (LinearLayout) findViewById(R.id.bottomSheetContainer));
+
         // OnClickListener for Directions Button
         bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
@@ -111,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
 
                 TextView editTxtDestination = findViewById(R.id.editTxtDestination);
+
                 editTxtDestination.setText(btsTxtLocation.getText());
 
                 layoutDirections.setVisibility(View.VISIBLE);
@@ -267,7 +270,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void enableLocationMan() {
-//        locationRequest = new LocationRequest;
+    // Return the current location of the device
+    @SuppressLint("MissingPermission")
+    public double[] getDevCurrentLocation() {
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        double[] coordinates = new double[2];
+
+        coordinates[0] = location.getLongitude();
+        coordinates[1] = location.getLatitude();
+
+        return coordinates;
     }
 }
