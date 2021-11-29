@@ -26,7 +26,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawer = findViewById(R.id.main_layout);
 
+
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -93,8 +96,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "Generating path to ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
                 bottomSheetDialog.dismiss();
+
+                RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
+
+                TextView editTxtDestination = findViewById(R.id.editTxtDestination);
+                editTxtDestination.setText(btsTxtLocation.getText());
+
+                layoutDirections.setVisibility(View.VISIBLE);
+
+                ImageButton btnStartDirections = findViewById(R.id.btnStartDirections);
+                btnStartDirections.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        layoutDirections.setVisibility(View.GONE);
+                    }
+                });
             }
         });
         bottomSheetDialog.setContentView(bottomSheetView);
