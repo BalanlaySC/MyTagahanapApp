@@ -5,12 +5,16 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -34,7 +38,6 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
@@ -64,6 +67,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new MapFragment()).commit();
             navigationView.setCheckedItem(R.id.nav_map);
+
+            if (!isLocationEnabled(this)) {
+                Intent gpsOptionsIntent = new Intent(
+                        Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(gpsOptionsIntent);
+            }
         }
     }
 
@@ -92,8 +101,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.layout_bottom_sheet,
                         (LinearLayout) findViewById(R.id.bottomSheetContainer));
+
         // OnClickListener for Directions Button
         bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
                 Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
@@ -102,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
 
                 TextView editTxtDestination = findViewById(R.id.editTxtDestination);
+
                 editTxtDestination.setText(btsTxtLocation.getText());
 
                 layoutDirections.setVisibility(View.VISIBLE);
@@ -119,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
     }
 
+    // Initializing the option menu, specifically the search function
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the search menu action bar.
@@ -207,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    // This will minimize the drawer instead of closing the app
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -216,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // Remove focus from a edit text and minimize keyboard
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -233,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.dispatchTouchEvent( event );
     }
 
+    // Check if GPS/Location is enabled
     public static boolean isLocationEnabled(Context context) {
         int locationMode = 0;
         String locationProviders;
@@ -252,5 +268,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             return !TextUtils.isEmpty(locationProviders);
         }
+    }
+
+    // Return the current location of the device
+    @SuppressLint("MissingPermission")
+    public double[] getDevCurrentLocation() {
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        double[] coordinates = new double[2];
+
+        coordinates[0] = location.getLongitude();
+        coordinates[1] = location.getLatitude();
+
+        return coordinates;
     }
 }
