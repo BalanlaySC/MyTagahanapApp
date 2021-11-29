@@ -1,15 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:elevation="20dp">
 
-    <!-- TODO add this as fragment, also add 'Home' in the Menu -->
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mapbox_cameraTargetLat="12.50931"
         app:mapbox_cameraTargetLng="124.66552"
-        app:mapbox_cameraZoom="16"/>
+        app:mapbox_cameraZoom="16" />
+
+    <RelativeLayout
+        android:id="@+id/layoutDirections"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/roundcorner_lightblue"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/editTxtStartLoc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_toStartOf="@+id/btnStartDirections"
+            android:background="@drawable/roundcorner_grayish"
+            android:paddingStart="5dp"
+            android:text="Current location"
+            android:textSize="18sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/editTxtDestination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/editTxtStartLoc"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/roundcorner_grayish"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingStart="5dp"
+            android:scrollHorizontally="true"
+            android:text="Destination"
+            android:textSize="18sp"
+            tools:ignore="HardcodedText" />
+
+        <ImageButton
+            android:id="@+id/btnStartDirections"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/ic_close"
+            android:contentDescription="Close the view"
+            android:minWidth="35dip"
+            android:minHeight="35dip"
+            android:scaleType="centerCrop"
+            tools:ignore="HardcodedText" />
+    </RelativeLayout>
 </RelativeLayout>
