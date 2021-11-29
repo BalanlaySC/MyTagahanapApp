@@ -1,8 +1,12 @@
 package com.example.mytagahanap;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.mapbox.android.core.permissions.PermissionsListener;
@@ -59,7 +64,6 @@ public class MapFragment extends Fragment implements PermissionsListener {
         return view;
     }
 
-    @SuppressLint("MissingPermission")
     private void enableLocationComponent(@NonNull Style loadedMapStyle, MapboxMap mapboxMap) {
         // Check if permissions are enabled and if not request
         if (PermissionsManager.areLocationPermissionsGranted(mapFragmentContext)) {
@@ -72,6 +76,12 @@ public class MapFragment extends Fragment implements PermissionsListener {
                     LocationComponentActivationOptions.builder(mapFragmentContext, loadedMapStyle).build());
 
             // Enable to make component visible
+            if (ActivityCompat.checkSelfPermission(mapFragmentContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(mapFragmentContext, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             locationComponent.setLocationComponentEnabled(true);
 
             // Set the component's camera mode
@@ -135,12 +145,7 @@ public class MapFragment extends Fragment implements PermissionsListener {
     @Override
     public void onPermissionResult(boolean granted) {
 //        if (granted) {
-//            mapboxMap.getStyle(new Style.OnStyleLoaded() {
-//                @Override
-//                public void onStyleLoaded(@NonNull Style style) {
-//                    enableLocationComponent(style);
-//                }
-//            });
+//            Toast.makeText(mapFragmentContext, "onPermissionResult", Toast.LENGTH_SHORT).show();
 //        } else {
 //            Toast.makeText(mapFragmentContext, "onPermissionResult", Toast.LENGTH_SHORT).show();
 //            getActivity().finish();
