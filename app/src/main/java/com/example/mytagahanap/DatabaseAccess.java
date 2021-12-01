@@ -55,16 +55,20 @@ public class DatabaseAccess {
     // Query to the database and return all locations
     // TODO change this into arraylist, so that coordinates can be used in navigation
     // TODO use the LocationModel for the location name and its coordinates
-    public ArrayList<String> getAllLocations() {
+    public ArrayList<LocationModel> getAllLocations() {
         openDatabase();
-        String queryLocations = "SELECT Title FROM Coordinates";
-        ArrayList<String> locations = new ArrayList<String>();
+        String queryLocations = "SELECT * FROM Coordinates";
+        ArrayList<LocationModel> locations = new ArrayList<LocationModel>();
 
         cursor = mySQLiteDB.rawQuery(queryLocations, null);
         if (cursor.moveToFirst()) {
             do {
-                String location = cursor.getString(0);
-                locations.add(location);
+                String locationName = cursor.getString(0);
+                float locationLng = cursor.getFloat(1);
+                float locationLat = cursor.getFloat(2);
+
+                LocationModel newLocation = new LocationModel(locationName, locationLat, locationLng);
+                locations.add(newLocation);
             } while (cursor.moveToNext());
         }
         closeDatabase();

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/roundcorner_grayish"
     android:elevation="20dp">
 
     <com.mapbox.mapboxsdk.maps.MapView
@@ -63,11 +64,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="10dp"
-            android:background="@drawable/ic_close"
             android:contentDescription="Close the view"
             android:minWidth="35dip"
             android:minHeight="35dip"
             android:scaleType="centerCrop"
+            android:src="@drawable/ic_close"
             tools:ignore="HardcodedText" />
     </RelativeLayout>
 </RelativeLayout>

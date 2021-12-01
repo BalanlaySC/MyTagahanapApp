@@ -52,6 +52,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.2'
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.8.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.5.0'
 
     implementation 'com.github.VishnuSivadasVS:Advanced-HttpURLConnection:1.2'
