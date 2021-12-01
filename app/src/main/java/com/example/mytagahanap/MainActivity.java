@@ -38,14 +38,29 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.LineString;
+import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
 
     private DatabaseAccess databaseAccess;
-    // TODO use LocationModel
     private ArrayAdapter<LocationModel> arrayAdapter;
 
     private AutoCompleteTextView autoCompleteTextView;
@@ -55,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArrayList<LocationModel> locations;
     private BottomSheetDialog bottomSheetDialog;
     private TextView btsTxtLocation;
+
+    private Point origin, destination;
+    private double[] coords;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +125,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Directions clicked");
                 Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
                 bottomSheetDialog.dismiss();
+                coords = getDevCurrentLocation();
+                LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
+
+                origin = Point.fromLngLat(coords[0], coords[1]);
+                destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
 
                 // Popup when pressing directions/starting navigation
                 RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
@@ -123,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(View view) {
                         layoutDirections.setVisibility(View.GONE);
-                        // TODO proceed to then get then mark the map
                     }
                 });
             }
@@ -157,7 +180,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int itemIndex, long id) {
-                String queryString = ((LocationModel) adapterView.getItemAtPosition(itemIndex)).getLocationName();
+                LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
+                String queryString = clickedLocation.getLocationName();
+
                 searchView.clearFocus();
                 searchAutoComplete.setText(queryString);
                 initBottomSheet(queryString);
@@ -261,7 +286,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // Return the current location of the device
+    // Return the current location of the device.
+    // 0 is long, 1 is lat
     @SuppressLint("MissingPermission")
     public double[] getDevCurrentLocation() {
         LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -275,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return coordinates;
     }
 
+    // Check if the string loc is in the Arraylist location
     public boolean containsLocation(String loc) {
         for(LocationModel locationModel : locations) {
             if(locationModel.getLocationName().equals(loc)) {
@@ -284,11 +311,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
+    // Return LocationModel object with locationName loc
+    public LocationModel getLocationObj(String loc) {
+        for(LocationModel locationModel : locations) {
+            if(locationModel.getLocationName().equals(loc)) {
+                return locationModel;
+            }
+        }
+        return null;
+    }
+
+    // Initialize bottom sheet
     public void initBottomSheet(String query) {
+        // TODO proceed to then get then mark the map
         bottomSheetDialog.show();
         btsTxtLocation.setText(query);
         if(!isLocationEnabled(MainActivity.this)) {
-            Toast.makeText(MainActivity.this, "To start at your current location you must enable location", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "To start at your current location you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
         }
     }
 }
