@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -36,6 +37,10 @@ public class MapFragment extends Fragment implements PermissionsListener {
     private static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
 
     private MapView mapView;
+    private Point origin, destination;
+    private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.5079);
+    private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.513034);
+    private final Point defOrigAdminBldg = Point.fromLngLat(124.666905, 12.509913);
 
     private PermissionsManager permissionsManager;
     private Context mapFragmentContext;

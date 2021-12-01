@@ -2,24 +2,29 @@ package com.example.mytagahanap;
 
 public class LocationModel {
     private final String locationName;
-    private final int xCord;
-    private final int yCord;
+    private final float locationLat;
+    private final float locationLng;
 
-    public LocationModel(String locationName, int xCord, int yCord) {
+    public LocationModel(String locationName, float locationLat, float locationLng) {
         this.locationName = locationName;
-        this.xCord = xCord;
-        this.yCord = yCord;
+        this.locationLat = locationLat;
+        this.locationLng = locationLng;
+    }
+
+    @Override
+    public String toString() {
+        return locationName;
     }
 
     public String getLocationName() {
         return locationName;
     }
 
-    public int getxCord() {
-        return xCord;
+    public float getLocationLat() {
+        return locationLat;
     }
 
-    public int getyCord() {
-        return yCord;
+    public float getLocationLng() {
+        return locationLng;
     }
 }

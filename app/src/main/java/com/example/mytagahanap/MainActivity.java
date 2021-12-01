@@ -5,7 +5,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -19,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,13 +46,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DatabaseAccess databaseAccess;
     // TODO use LocationModel
-    private ArrayAdapter<String> arrayAdapter;
+    private ArrayAdapter<LocationModel> arrayAdapter;
 
     private AutoCompleteTextView autoCompleteTextView;
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private ArrayList<String> locations;
+    private ArrayList<LocationModel> locations;
     private BottomSheetDialog bottomSheetDialog;
     private TextView btsTxtLocation;
 
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
-        locations = new ArrayList<String>();
+        locations = new ArrayList<LocationModel>();
         locations = databaseAccess.getAllLocations();
 
         bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
                 bottomSheetDialog.dismiss();
 
+                // Popup when pressing directions/starting navigation
                 RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
-
                 TextView editTxtDestination = findViewById(R.id.editTxtDestination);
 
                 editTxtDestination.setText(btsTxtLocation.getText());
@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(View view) {
                         layoutDirections.setVisibility(View.GONE);
+                        // TODO proceed to then get then mark the map
                     }
                 });
             }
@@ -149,22 +150,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchAutoComplete.setDropDownBackgroundResource(android.R.color.holo_blue_light);
 
         // Create a new ArrayAdapter and add data (locations) to search auto complete object.
-        ArrayAdapter<String> newsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, locations);
+        ArrayAdapter<LocationModel> newsAdapter = new ArrayAdapter<LocationModel>(this, android.R.layout.simple_dropdown_item_1line, locations);
         searchAutoComplete.setAdapter(newsAdapter);
 
         // Listen to search view item on click event.
         searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int itemIndex, long id) {
-                String queryString = (String) adapterView.getItemAtPosition(itemIndex);
+                String queryString = ((LocationModel) adapterView.getItemAtPosition(itemIndex)).getLocationName();
                 searchView.clearFocus();
                 searchAutoComplete.setText(queryString);
-                // TODO proceed to then get then mark the map
-                bottomSheetDialog.show();
-                btsTxtLocation.setText(queryString);
-                if(!isLocationEnabled(MainActivity.this)) {
-                    Toast.makeText(MainActivity.this, "To start at your current location you must enable location", Toast.LENGTH_SHORT).show();
-                }
+                initBottomSheet(queryString);
             }
         });
 
@@ -172,16 +168,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // TODO Refer to the setOnItemClickListener
-                if(locations.contains(query)) {
-                    searchView.clearFocus();
-                    bottomSheetDialog.show();
-                    btsTxtLocation.setText(query);
-                    if(!isLocationEnabled(MainActivity.this)) {
-                        Toast.makeText(MainActivity.this, "To start at your current location you must enable location", Toast.LENGTH_SHORT).show();
-                    }
+                searchView.clearFocus();
+                if(containsLocation(query)) {
+                    initBottomSheet(query);
                 } else {
-                    Toast.makeText(MainActivity.this, "Location not found\nPlease Try Again", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, query + " not found, please try again", Toast.LENGTH_LONG).show();
                 }
                 return false;
             }
@@ -282,5 +273,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         coordinates[1] = location.getLatitude();
 
         return coordinates;
+    }
+
+    public boolean containsLocation(String loc) {
+        for(LocationModel locationModel : locations) {
+            if(locationModel.getLocationName().equals(loc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void initBottomSheet(String query) {
+        bottomSheetDialog.show();
+        btsTxtLocation.setText(query);
+        if(!isLocationEnabled(MainActivity.this)) {
+            Toast.makeText(MainActivity.this, "To start at your current location you must enable location", Toast.LENGTH_SHORT).show();
+        }
     }
 }
