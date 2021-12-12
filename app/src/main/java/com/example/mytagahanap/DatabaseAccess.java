@@ -64,8 +64,8 @@ public class DatabaseAccess {
         if (cursor.moveToFirst()) {
             do {
                 String locationName = cursor.getString(0);
-                float locationLng = cursor.getFloat(1);
-                float locationLat = cursor.getFloat(2);
+                float locationLng = cursor.getFloat(2);
+                float locationLat = cursor.getFloat(1);
 
                 LocationModel newLocation = new LocationModel(locationName, locationLat, locationLng);
                 locations.add(newLocation);
