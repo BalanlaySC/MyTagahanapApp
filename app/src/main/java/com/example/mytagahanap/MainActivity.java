@@ -1,13 +1,5 @@
 package com.example.mytagahanap;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -26,9 +18,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -36,40 +26,32 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
-import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.api.directions.v5.MapboxDirections;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.Mapbox;
 
 import java.util.ArrayList;
-import java.util.Objects;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static com.mapbox.core.constants.Constants.PRECISION_6;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
 
-    private DatabaseAccess databaseAccess;
-    private ArrayAdapter<LocationModel> arrayAdapter;
-
-    private AutoCompleteTextView autoCompleteTextView;
-    private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private ArrayList<LocationModel> locations;
     private BottomSheetDialog bottomSheetDialog;
     private TextView btsTxtLocation;
+
+    private MapFragment mapFragment;
+    private MapInterface mapInterface;
 
     private Point origin, destination;
     private double[] coords;
@@ -82,11 +64,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initViews();
 
         if (savedInstanceState == null) {
+            mapFragment = new MapFragment();
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                    new MapFragment()).commit();
+                    mapFragment).commit();
+            setMapInterface(mapFragment);
             navigationView.setCheckedItem(R.id.nav_map);
 
-            if (!isLocationEnabled(this)) {
+            if (isLocationEnabled(this)) {
                 Intent gpsOptionsIntent = new Intent(
                         Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(gpsOptionsIntent);
@@ -95,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initViews() {
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.other_menu);
 
         setSupportActionBar(toolbar);
@@ -111,8 +95,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
-        locations = new ArrayList<LocationModel>();
+        DatabaseAccess databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
+        locations = new ArrayList<>();
         locations = databaseAccess.getAllLocations();
 
         bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
@@ -121,35 +105,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         (LinearLayout) findViewById(R.id.bottomSheetContainer));
 
         // OnClickListener for Directions Button
-        bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "Directions clicked");
-                Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
-                bottomSheetDialog.dismiss();
-                coords = getDevCurrentLocation();
-                LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
+        bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
+            Log.d(TAG, "Directions clicked");
+            Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
+            bottomSheetDialog.dismiss();
+            coords = getDevCurrentLocation();
+            LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
 
-                origin = Point.fromLngLat(coords[0], coords[1]);
-                destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
+            origin = Point.fromLngLat(coords[0], coords[1]);
+            destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
+            mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
+            Log.d(TAG, Mapbox.getAccessToken());
 
-                // Popup when pressing directions/starting navigation
-                RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
-                TextView editTxtDestination = findViewById(R.id.editTxtDestination);
+            // Popup when pressing directions/starting navigation
+            RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
+            TextView editTxtDestination = findViewById(R.id.editTxtDestination);
 
-                editTxtDestination.setText(btsTxtLocation.getText());
+            editTxtDestination.setText(btsTxtLocation.getText());
 
-                layoutDirections.setVisibility(View.VISIBLE);
+            layoutDirections.setVisibility(View.VISIBLE);
 
-                ImageButton btnStartDirections = findViewById(R.id.btnStartDirections);
-                btnStartDirections.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        layoutDirections.setVisibility(View.GONE);
-                    }
-                });
-            }
+            ImageButton btnStartDirections = findViewById(R.id.btnStartDirections);
+            btnStartDirections.setOnClickListener(view1 -> {
+                layoutDirections.setVisibility(View.GONE);
+                mapInterface.removeLayer();
+            });
         });
         bottomSheetDialog.setContentView(bottomSheetView);
         btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
@@ -173,20 +153,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchAutoComplete.setDropDownBackgroundResource(android.R.color.holo_blue_light);
 
         // Create a new ArrayAdapter and add data (locations) to search auto complete object.
-        ArrayAdapter<LocationModel> newsAdapter = new ArrayAdapter<LocationModel>(this, android.R.layout.simple_dropdown_item_1line, locations);
-        searchAutoComplete.setAdapter(newsAdapter);
+        ArrayAdapter<LocationModel> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, locations);
+        searchAutoComplete.setAdapter(arrayAdapter);
 
         // Listen to search view item on click event.
-        searchAutoComplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int itemIndex, long id) {
-                LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
-                String queryString = clickedLocation.getLocationName();
+        searchAutoComplete.setOnItemClickListener((adapterView, view, itemIndex, id) -> {
+            LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
+            String queryString = clickedLocation.getLocationName();
 
-                searchView.clearFocus();
-                searchAutoComplete.setText(queryString);
-                initBottomSheet(queryString);
-            }
+            searchView.clearFocus();
+            searchAutoComplete.setText(queryString);
+            initBottomSheet(queryString);
         });
 
         // Below event is triggered when submit search query.
@@ -266,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Check if GPS/Location is enabled
     public static boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
+        int locationMode;
         String locationProviders;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
@@ -275,14 +252,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             } catch (Settings.SettingNotFoundException e) {
                 e.printStackTrace();
-                return false;
+                return true;
             }
 
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+            return locationMode == Settings.Secure.LOCATION_MODE_OFF;
 
         }else{
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+            return TextUtils.isEmpty(locationProviders);
         }
     }
 
@@ -326,8 +303,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // TODO proceed to then get then mark the map
         bottomSheetDialog.show();
         btsTxtLocation.setText(query);
-        if(!isLocationEnabled(MainActivity.this)) {
+        if(isLocationEnabled(MainActivity.this)) {
             Toast.makeText(MainActivity.this, "To start at your current location you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void setMapInterface(MapInterface mapInterface) {
+        this.mapInterface = mapInterface;
     }
 }
