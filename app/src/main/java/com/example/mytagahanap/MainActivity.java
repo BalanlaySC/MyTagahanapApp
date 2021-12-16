@@ -2,7 +2,7 @@ package com.example.mytagahanap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Rect;
 import android.location.Location;
 import android.location.LocationManager;
@@ -21,7 +21,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,10 +33,18 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.Mapbox;
 
 import java.util.ArrayList;
 
@@ -54,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapInterface mapInterface;
 
     private Point origin, destination;
+    private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.50784);
+    private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.51298);
+    private final Point defOrigAdminBldg = Point.fromLngLat(124.666905, 12.509913);
     private double[] coords;
 
     @Override
@@ -70,10 +80,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setMapInterface(mapFragment);
             navigationView.setCheckedItem(R.id.nav_map);
 
-            if (isLocationEnabled(this)) {
-                Intent gpsOptionsIntent = new Intent(
-                        Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(gpsOptionsIntent);
+            // reversed so that when location is disabled (= false) turns to true
+            if(isLocationEnabled(MainActivity.this)) {
+                enableLoc();
             }
         }
     }
@@ -101,21 +110,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
-                .inflate(R.layout.layout_bottom_sheet,
-                        (LinearLayout) findViewById(R.id.bottomSheetContainer));
+                .inflate(R.layout.layout_bottom_sheet, findViewById(R.id.bottomSheetContainer));
 
         // OnClickListener for Directions Button
         bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
             Log.d(TAG, "Directions clicked");
-            Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
             bottomSheetDialog.dismiss();
-            coords = getDevCurrentLocation();
             LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
 
-            origin = Point.fromLngLat(coords[0], coords[1]);
+            origin = getDevCurrentLocation();
             destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
             mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
-            Log.d(TAG, Mapbox.getAccessToken());
 
             // Popup when pressing directions/starting navigation
             RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
@@ -149,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SearchView searchView = (SearchView) searchMenu.getActionView();
 
         // Get SearchView autocomplete object.
-        final SearchView.SearchAutoComplete searchAutoComplete = (SearchView.SearchAutoComplete) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        final SearchView.SearchAutoComplete searchAutoComplete = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         searchAutoComplete.setDropDownBackgroundResource(android.R.color.holo_blue_light);
 
         // Create a new ArrayAdapter and add data (locations) to search auto complete object.
@@ -194,6 +200,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_map:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         new MapFragment()).commit();
+
+                if(isLocationEnabled(MainActivity.this)) {
+                    enableLoc();
+                }
                 break;
             case R.id.nav_subjects:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -241,14 +251,65 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.dispatchTouchEvent( event );
     }
 
-    // Check if GPS/Location is enabled
+    private void enableLoc() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(30 * 1000); // 30 secs
+        locationRequest.setFastestInterval(5 * 1000);   // 5 secs
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+
+        builder.setAlwaysShow(true);
+
+        Task<LocationSettingsResponse> result =
+                LocationServices.getSettingsClient(this).checkLocationSettings(builder.build());
+
+        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
+                try {
+                    LocationSettingsResponse response = task.getResult(ApiException.class);
+                    // All location settings are satisfied. The client can initialize location
+                    // requests here.
+                } catch (ApiException exception) {
+                    switch (exception.getStatusCode()) {
+                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                            // Location settings are not satisfied. But could be fixed by showing the
+                            // user a dialog.
+                            try {
+                                // Cast to a resolvable exception.
+                                ResolvableApiException resolvable = (ResolvableApiException) exception;
+                                // Show the dialog by calling startResolutionForResult(),
+                                // and check the result in onActivityResult().
+                                resolvable.startResolutionForResult(MainActivity.this, 1);
+                            } catch (IntentSender.SendIntentException e) {
+                                // Ignore the error.
+                            } catch (ClassCastException e) {
+                                // Ignore, should be an impossible error.
+                            }
+                            break;
+                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                            // Location settings are not satisfied. However, we have no way to fix the
+                            // settings so we won't show the dialog.
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    /* Check if GPS/Location is enabled
+     * !isLocationEnabled return true if enabled and false if disabled
+     */
     public static boolean isLocationEnabled(Context context) {
         int locationMode;
         String locationProviders;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+                locationMode = Settings.Secure.getInt(context.getContentResolver(),
+                        Settings.Secure.LOCATION_MODE);
 
             } catch (Settings.SettingNotFoundException e) {
                 e.printStackTrace();
@@ -257,25 +318,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             return locationMode == Settings.Secure.LOCATION_MODE_OFF;
 
-        }else{
+        } else {
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-            return TextUtils.isEmpty(locationProviders);
+            return !TextUtils.isEmpty(locationProviders);
         }
     }
 
     // Return the current location of the device.
     // 0 is long, 1 is lat
     @SuppressLint("MissingPermission")
-    public double[] getDevCurrentLocation() {
-        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+    public Point getDevCurrentLocation() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        double[] coordinates = new double[2];
+        if(!isLocationEnabled(MainActivity.this)){
+            Log.d(TAG, "L336-User location is on " + !isLocationEnabled(MainActivity.this));
+            if(location != null) {
+                origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+            } else {
+                Log.d(TAG, "L340-:Location is null");
+                origin = defOrigAdminBldg;
+            }
+        } else {
+            Log.d(TAG, "L344-User location is off " + !isLocationEnabled(MainActivity.this));
+            origin = defOrigAdminBldg;
+        }
 
-        coordinates[0] = location.getLongitude();
-        coordinates[1] = location.getLatitude();
-
-        return coordinates;
+        return origin;
     }
 
     // Check if the string loc is in the Arraylist location
@@ -304,7 +373,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bottomSheetDialog.show();
         btsTxtLocation.setText(query);
         if(isLocationEnabled(MainActivity.this)) {
-            Toast.makeText(MainActivity.this, "To start at your current location you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "To start at your current location " +
+                    "you must enable GPS/Location Access",Toast.LENGTH_SHORT).show();
         }
     }
 
