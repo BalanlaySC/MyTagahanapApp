@@ -77,9 +77,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private MapboxDirections mapboxDirections;
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGeoJsonSource, iconGeoJsonSource;
-    private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.50784);
-    private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.51298);
-    private final Point defOrigAdminBldg = Point.fromLngLat(124.666905, 12.509913);
 
     private PermissionsManager permissionsManager;
     private Context mapFragmentContext;
@@ -212,7 +209,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
 
             @Override
-            public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+            public void onFailure(@NonNull Call<DirectionsResponse> call, Throwable throwable) {
                 Log.d(TAG, "Error: " + throwable.getMessage());
                 Toast.makeText(mapFragmentContext, "Error: " + throwable.getMessage(),
                         Toast.LENGTH_SHORT).show();
