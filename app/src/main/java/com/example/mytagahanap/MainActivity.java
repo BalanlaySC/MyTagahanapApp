@@ -125,10 +125,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Popup when pressing directions/starting navigation
             RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
+            TextView editTxtStartLoc = findViewById(R.id.editTxtStartLoc);
             TextView editTxtDestination = findViewById(R.id.editTxtDestination);
 
             editTxtDestination.setText(btsTxtLocation.getText());
-
             layoutDirections.setVisibility(View.VISIBLE);
 
             ImageButton btnStartDirections = findViewById(R.id.btnStartDirections);
@@ -265,35 +265,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Task<LocationSettingsResponse> result =
                 LocationServices.getSettingsClient(this).checkLocationSettings(builder.build());
 
-        result.addOnCompleteListener(new OnCompleteListener<LocationSettingsResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<LocationSettingsResponse> task) {
-                try {
-                    LocationSettingsResponse response = task.getResult(ApiException.class);
-                    // All location settings are satisfied. The client can initialize location
-                    // requests here.
-                } catch (ApiException exception) {
-                    switch (exception.getStatusCode()) {
-                        case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                            // Location settings are not satisfied. But could be fixed by showing the
-                            // user a dialog.
-                            try {
-                                // Cast to a resolvable exception.
-                                ResolvableApiException resolvable = (ResolvableApiException) exception;
-                                // Show the dialog by calling startResolutionForResult(),
-                                // and check the result in onActivityResult().
-                                resolvable.startResolutionForResult(MainActivity.this, 1);
-                            } catch (IntentSender.SendIntentException e) {
-                                // Ignore the error.
-                            } catch (ClassCastException e) {
-                                // Ignore, should be an impossible error.
-                            }
-                            break;
-                        case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                            // Location settings are not satisfied. However, we have no way to fix the
-                            // settings so we won't show the dialog.
-                            break;
-                    }
+        result.addOnCompleteListener(task -> {
+            try {
+                LocationSettingsResponse response = task.getResult(ApiException.class);
+                // All location settings are satisfied. The client can initialize location
+                // requests here.
+            } catch (ApiException exception) {
+                switch (exception.getStatusCode()) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the
+                        // user a dialog.
+                        try {
+                            // Cast to a resolvable exception.
+                            ResolvableApiException resolvable = (ResolvableApiException) exception;
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            resolvable.startResolutionForResult(MainActivity.this, 1);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        } catch (ClassCastException e) {
+                            // Ignore, should be an impossible error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
                 }
             }
         });
@@ -350,9 +347,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Check if the string loc is in the Arraylist location
     public boolean containsLocation(String loc) {
         for(LocationModel locationModel : locations) {
-            if(locationModel.getLocationName().equals(loc)) {
-                return true;
-            }
+            if(locationModel.getLocationName().equals(loc)) { return true; }
         }
         return false;
     }
@@ -360,9 +355,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Return LocationModel object with locationName loc
     public LocationModel getLocationObj(String loc) {
         for(LocationModel locationModel : locations) {
-            if(locationModel.getLocationName().equals(loc)) {
-                return locationModel;
-            }
+            if(locationModel.getLocationName().equals(loc)) { return locationModel; }
         }
         return null;
     }

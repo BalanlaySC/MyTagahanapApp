@@ -13,9 +13,6 @@
         android:theme="@style/Theme.MyTagahanap"
         android:usesCleartextTraffic="true">
         <activity android:name=".Login"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
-        </activity>
-        <activity android:name=".MainActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             android:exported="true">
             <intent-filter>
@@ -23,6 +20,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".MainActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
         </activity>
     </application>
 

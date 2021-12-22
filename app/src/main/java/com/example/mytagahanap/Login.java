@@ -50,7 +50,8 @@ public class Login extends AppCompatActivity {
                             String[] data = new String[2];
                             data[0] = idnumber;
                             data[1] = password;
-                            PutData putData = new PutData("https://9bb6-175-176-71-31.ngrok.io/TagahanapLogin/login.php", "POST", field, data);
+                            // https://9bb6-175-176-71-31.ngrok.io/TagahanapLogin/login.php local access
+                            PutData putData = new PutData("http://mytagahanap.000webhostapp.com/TagahanapLogin/login.php", "POST", field, data);
                             if(putData.startPut()) {
                                 if(putData.onComplete()) {
                                     progressBar.setVisibility(View.GONE);
