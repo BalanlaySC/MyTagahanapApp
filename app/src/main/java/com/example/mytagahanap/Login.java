@@ -1,78 +1,174 @@
 package com.example.mytagahanap;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.textfield.TextInputEditText;
 import com.vishnusivadas.advanced_httpurlconnection.PutData;
 
-public class Login extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    TextInputEditText textInputEditTextIDNumber, textInputEditTextPassword;
+import java.security.SecureRandom;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Login extends AppCompatActivity {
+    private static final String TAG = "Login";
+    private static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/";
+    public static final String URL_LOGIN = ROOT_URL + "userLogin.php";
+
+    private String token, idnumber, password;
+
+    TextInputEditText tietIDNumber, tietPassword;
+    TextView tvForgotPass;
     Button buttonLogin;
+    CheckBox checkboxKMSI;
     ProgressBar progressBar;
+
+    Context loginContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        textInputEditTextIDNumber = findViewById(R.id.textInputLayoutIDNumber);
-        textInputEditTextPassword = findViewById(R.id.textInputLayoutPassword);
+        loginContext = getApplicationContext();
+
+        // check if user enabled keep me signed in
+        // if not then log out and clear shared pref
+        if (SharedPrefManager.getInstance(loginContext).getKeepMeSignedIn()) {
+            // uncomment if need to view user info
+//            Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
+            finish();
+            Intent intent = new Intent(loginContext, MainActivity.class);
+            startActivity(intent);
+            return;
+        } else {
+            SharedPrefManager.getInstance(loginContext).logOut();
+            // uncomment if need to view user info
+//            Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
+        }
+
+        tietIDNumber = findViewById(R.id.tietIDNumber);
+        tietPassword = findViewById(R.id.tietPassword);
+        tvForgotPass = findViewById(R.id.tvForgotPass);
         buttonLogin = findViewById(R.id.btnLogin);
+        checkboxKMSI = findViewById(R.id.checkboxKMSI);
         progressBar = findViewById(R.id.progress);
 
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final String idnumber, password;
-                idnumber = String.valueOf(textInputEditTextIDNumber.getText());
-                password = String.valueOf(textInputEditTextPassword.getText());
+//        checkToken(token);
 
-                if(!idnumber.equals("") && !password.equals("")) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    Handler handler = new Handler();
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            String[] field = new String[2];
-                            field[0] = "idnumber";
-                            field[1] = "password";
-                            String[] data = new String[2];
-                            data[0] = idnumber;
-                            data[1] = password;
-                            // https://9bb6-175-176-71-31.ngrok.io/TagahanapLogin/login.php local access
-                            PutData putData = new PutData("http://mytagahanap.000webhostapp.com/TagahanapLogin/login.php", "POST", field, data);
-                            if(putData.startPut()) {
-                                if(putData.onComplete()) {
-                                    progressBar.setVisibility(View.GONE);
-                                    String result = putData.getResult();
-                                    if(result.equals("Login Success")) {
-                                        Log.d(TAG, result);
-                                        Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                    else {
-                                        Log.d(TAG, result);
-                                        Toast.makeText(getApplicationContext(), result, Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
+        buttonLogin.setOnClickListener(view -> {
+            idnumber = String.valueOf(tietIDNumber.getText()).trim();
+            password = String.valueOf(tietPassword.getText()).trim();
+            logIn(idnumber, password);
         });
+    }
+
+    private void logIn(String idnumber, String password) {
+        progressBar.setVisibility(View.VISIBLE);
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, URL_LOGIN,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        progressBar.setVisibility(View.GONE);
+                        try {
+                            token = generateToken();
+                            if (checkboxKMSI.isChecked()) {
+                                Calendar cal = Calendar.getInstance(); // creates calendar
+                                cal.setTime(new Date());               // sets calendar time/date
+                                cal.add(Calendar.MINUTE, 10);       // adds 10 minute .HOUR_OF_DAY for hours
+                                Date expiryDate = cal.getTime();
+                            }
+                            JSONObject obj = new JSONObject(response);
+                            if (!obj.getBoolean("error")) {
+                                SharedPrefManager.getInstance(loginContext)
+                                        .userLogin(
+                                                obj.getInt("idnumber"),
+                                                obj.getString("f_name"),
+                                                obj.getString("l_name"),
+                                                checkboxKMSI.isChecked(),
+                                                token
+                                        );
+                                // uncomment if need to view user info
+//                                Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
+                                Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(loginContext, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(loginContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(loginContext, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+        ) {
+            @Nullable
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("idnumber", idnumber);
+                params.put("password", password);
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    // Generate token with SecureRandom
+    public String generateToken() {
+        byte[] bytes = new byte[20];
+        new SecureRandom().nextBytes(bytes);
+        StringBuilder result = new StringBuilder();
+        for (byte temp : bytes) {
+            result.append(String.format("%02x", temp));
+        }
+        return result.toString();
+    }
+
+    private void checkToken(String token) {
+        if (!token.equals("")) {
+            Log.d(TAG, "Login Success");
+            Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(loginContext, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    /*  Compare two Date objects
+        -1 is past, 0 is equal, 1 is future */
+    public int compareDates(Date date1, Date date2) {
+        return date1.compareTo(date2);
     }
 }

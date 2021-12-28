@@ -10,5 +10,7 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="keep_me_signed_in">Keep me Signed in</string>
+    <string name="forgot_password">Forgot Password?</string>
     <integer name="TEXT_NO_SUGGESTIONS">524288</integer>
 </resources>

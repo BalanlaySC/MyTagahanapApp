@@ -53,8 +53,6 @@ public class DatabaseAccess {
     }
 
     // Query to the database and return all locations
-    // TODO change this into arraylist, so that coordinates can be used in navigation
-    // TODO use the LocationModel for the location name and its coordinates
     public ArrayList<LocationModel> getAllLocations() {
         openDatabase();
         String queryLocations = "SELECT * FROM Coordinates";

@@ -2,6 +2,7 @@ package com.example.mytagahanap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
 import android.location.Location;
@@ -9,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +74,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+          // check if token is still valid
+//        if(!SharedPrefManager.getInstance(this).isLoggedIn()) {
+//            SharedPrefManager.getInstance(this).logOut();
+//            Toast.makeText(this, "Token expired. Login Again", Toast.LENGTH_LONG).show();
+//            finish();
+//            Intent intent = new Intent(getApplicationContext(), Login.class);
+//            startActivity(intent);
+//            return;
+//        }
+
         initViews();
 
         if (savedInstanceState == null) {
@@ -81,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_map);
 
             // reversed so that when location is disabled (= false) turns to true
-            if(isLocationEnabled(MainActivity.this)) {
+            if (isLocationEnabled(MainActivity.this)) {
                 enableLoc();
             }
         }
@@ -95,9 +108,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawer = findViewById(R.id.main_layout);
 
-
         navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        TextView navheaderName = (TextView) headerView.findViewById(R.id.navheaderName);
+        TextView navheaderidNumber = (TextView) headerView.findViewById(R.id.navheaderidNumber);
+        LinearLayout navheaderLayout = (LinearLayout) headerView.findViewById(R.id.navheaderLayout);
+
+        navheaderName.setText(SharedPrefManager.getInstance(this).getFullName());
+        navheaderidNumber.setText(String.valueOf(SharedPrefManager.getInstance(this).getIdnumber()));
         navigationView.setNavigationItemSelectedListener(this);
+        navheaderLayout.setOnClickListener(view -> {
+            SharedPrefManager.getInstance(this).logOut();
+            // uncomment if need to view user info
+//            Log.d(TAG, SharedPrefManager.getInstance(this).getAllSharedPref());
+            Toast.makeText(this, "Logout Successfully", Toast.LENGTH_LONG).show();
+            finish();
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+        });
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -177,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public boolean onQueryTextSubmit(String query) {
                 searchView.clearFocus();
-                if(containsLocation(query)) {
+                if (containsLocation(query)) {
                     initBottomSheet(query);
                 } else {
                     Toast.makeText(MainActivity.this, query + " not found, please try again", Toast.LENGTH_LONG).show();
@@ -201,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         new MapFragment()).commit();
 
-                if(isLocationEnabled(MainActivity.this)) {
+                if (isLocationEnabled(MainActivity.this)) {
                     enableLoc();
                 }
                 break;
@@ -238,19 +266,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             View v = getCurrentFocus();
-            if ( v instanceof EditText) {
+            if (v instanceof EditText) {
                 Rect outRect = new Rect();
                 v.getGlobalVisibleRect(outRect);
-                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
                     v.clearFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         }
-        return super.dispatchTouchEvent( event );
+        return super.dispatchTouchEvent(event);
     }
 
+    // Ask user to turn on GPS/Location
     private void enableLoc() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -303,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int locationMode;
         String locationProviders;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             try {
                 locationMode = Settings.Secure.getInt(context.getContentResolver(),
                         Settings.Secure.LOCATION_MODE);
@@ -328,9 +357,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        if(!isLocationEnabled(MainActivity.this)){
+        if (!isLocationEnabled(MainActivity.this)) {
             Log.d(TAG, "L336-User location is on " + !isLocationEnabled(MainActivity.this));
-            if(location != null) {
+            if (location != null) {
                 origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
             } else {
                 Log.d(TAG, "L340-:Location is null");
@@ -346,28 +375,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Check if the string loc is in the Arraylist location
     public boolean containsLocation(String loc) {
-        for(LocationModel locationModel : locations) {
-            if(locationModel.getLocationName().equals(loc)) { return true; }
+        for (LocationModel locationModel : locations) {
+            if (locationModel.getLocationName().equals(loc)) {
+                return true;
+            }
         }
         return false;
     }
 
     // Return LocationModel object with locationName loc
     public LocationModel getLocationObj(String loc) {
-        for(LocationModel locationModel : locations) {
-            if(locationModel.getLocationName().equals(loc)) { return locationModel; }
+        for (LocationModel locationModel : locations) {
+            if (locationModel.getLocationName().equals(loc)) {
+                return locationModel;
+            }
         }
         return null;
     }
 
     // Initialize bottom sheet
     public void initBottomSheet(String query) {
-        // TODO proceed to then get then mark the map
         bottomSheetDialog.show();
         btsTxtLocation.setText(query);
-        if(isLocationEnabled(MainActivity.this)) {
+        if (isLocationEnabled(MainActivity.this)) {
             Toast.makeText(MainActivity.this, "To start at your current location " +
-                    "you must enable GPS/Location Access",Toast.LENGTH_SHORT).show();
+                    "you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
         }
     }
 
