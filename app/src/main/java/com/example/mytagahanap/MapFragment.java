@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +73,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private static final String ICON_LAYER_ID = "icon-layer-id";
     private static final String ICON_SOURCE_ID = "icon-source-id";
     private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
+    final Handler handler = new Handler(Looper.getMainLooper());
 
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -136,6 +139,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
+            handler.postDelayed(() -> enableLocationComponent(loadedMapStyle), 10000);
         }
     }
 
