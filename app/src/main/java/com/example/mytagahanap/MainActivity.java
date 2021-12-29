@@ -1,6 +1,8 @@
 package com.example.mytagahanap;
 
 import android.annotation.SuppressLint;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -94,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_map);
 
             // reversed so that when location is disabled (= false) turns to true
-            if (isLocationEnabled(MainActivity.this)) {
+            if (isLocationEnabled(this)) {
                 enableLoc();
             }
         }
@@ -280,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // Ask user to turn on GPS/Location
-    private void enableLoc() {
+    public void enableLoc() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(30 * 1000); // 30 secs
@@ -309,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             ResolvableApiException resolvable = (ResolvableApiException) exception;
                             // Show the dialog by calling startResolutionForResult(),
                             // and check the result in onActivityResult().
-                            resolvable.startResolutionForResult(MainActivity.this, 1);
+                            resolvable.startResolutionForResult(this, 1);
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
                         } catch (ClassCastException e) {
@@ -336,14 +338,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 locationMode = Settings.Secure.getInt(context.getContentResolver(),
                         Settings.Secure.LOCATION_MODE);
-
             } catch (Settings.SettingNotFoundException e) {
                 e.printStackTrace();
                 return true;
             }
-
             return locationMode == Settings.Secure.LOCATION_MODE_OFF;
-
         } else {
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
             return !TextUtils.isEmpty(locationProviders);
