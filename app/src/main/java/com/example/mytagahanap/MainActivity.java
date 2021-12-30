@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // OnClickListener for Directions Button
         bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
             Log.d(TAG, "Directions clicked");
-//            Toast.makeText(MainActivity.this, "Generating path to " + btsTxtLocation.getText(), Toast.LENGTH_SHORT).show();
+
             bottomSheetDialog.dismiss();
             LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
 
@@ -177,6 +177,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Inflate the search menu action bar.
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.other_menu, menu);
+        MenuItem currentMenuItem = navigationView.getCheckedItem();
+        MenuItem mapMenuItem = menu.findItem(R.id.nav_map);
 
         // Get the search menu.
         MenuItem searchMenu = menu.findItem(R.id.actionSearch);
@@ -196,10 +198,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         searchAutoComplete.setOnItemClickListener((adapterView, view, itemIndex, id) -> {
             LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
             String queryString = clickedLocation.getLocationName();
-
             searchView.clearFocus();
             searchAutoComplete.setText(queryString);
             initBottomSheet(queryString);
+            if (mapMenuItem != currentMenuItem) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                        mapFragment).commit();
+                navigationView.setCheckedItem(R.id.nav_map);
+            }
         });
 
         // Below event is triggered when submit search query.
@@ -209,8 +215,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 searchView.clearFocus();
                 if (containsLocation(query)) {
                     initBottomSheet(query);
+                    if (mapMenuItem != currentMenuItem) {
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                mapFragment).commit();
+                        navigationView.setCheckedItem(R.id.nav_map);
+                    }
                 } else {
-                    Toast.makeText(MainActivity.this, query + " not found, please try again", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, query + "\nnot found, please try again", Toast.LENGTH_LONG).show();
                 }
                 return false;
             }
@@ -229,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.nav_map:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new MapFragment()).commit();
+                        mapFragment).commit();
 
                 if (isLocationEnabled(MainActivity.this)) {
                     enableLoc();
