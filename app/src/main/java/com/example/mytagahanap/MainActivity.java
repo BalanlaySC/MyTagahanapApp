@@ -161,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editTxtDestination.setText(btsTxtLocation.getText());
             layoutDirections.setVisibility(View.VISIBLE);
 
-            ImageButton btnStartDirections = findViewById(R.id.btnStartDirections);
-            btnStartDirections.setOnClickListener(view1 -> {
+            ImageButton btnCloseDirections = findViewById(R.id.btnCloseDirections);
+            btnCloseDirections.setOnClickListener(view1 -> {
                 layoutDirections.setVisibility(View.GONE);
                 mapInterface.removeLayer();
             });

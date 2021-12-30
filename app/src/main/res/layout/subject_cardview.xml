@@ -1,32 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="4dp"
     app:cardCornerRadius="4dp">
 
     <RelativeLayout
         android:id="@+id/cvRelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="4dp">
+        android:layout_margin="4dp"
+        android:elevation="8dp">
 
         <TextView
             android:id="@+id/cvtxtDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:text="Subject Description"
             android:textColor="@android:color/black"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="Interactive Programming and Technologies 2" />
+
+        <ImageButton
+            android:id="@+id/cvimgDirections"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignTop="@+id/cvtxtRoom"
+            android:layout_alignBottom="@+id/cvtxtDay"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/ic_direction"
+            android:background="@drawable/circle_grayish" />
 
         <TextView
             android:id="@+id/cvtxtSubjectCode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_toEndOf="@id/cvtxtDescription"
+            android:layout_below="@+id/cvtxtDescription"
+            android:layout_marginStart="20dp"
             android:text="(Subject Code)"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -35,7 +51,7 @@
             android:id="@+id/cvtxtClassID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/cvtxtDescription"
+            android:layout_below="@+id/cvtxtSubjectCode"
             android:layout_marginStart="20dp"
             android:layout_marginTop="4dp"
             android:text="ClassID"
@@ -45,7 +61,7 @@
             android:id="@+id/cvtxtRoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/cvtxtDescription"
+            android:layout_below="@+id/cvtxtSubjectCode"
             android:layout_marginStart="175dp"
             android:layout_marginTop="4dp"
             android:text="Room"
