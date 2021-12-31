@@ -3,6 +3,7 @@ package com.example.mytagahanap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,12 +13,22 @@ import java.util.ArrayList;
 
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectViewHolder> {
     private ArrayList<SubjectModel> mClassSched;
+    private OnItemClickListener mListener;
+
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mListener = listener;
+    }
 
     public static class SubjectViewHolder extends RecyclerView.ViewHolder {
         public TextView cvtxtDescription, cvtxtSubjectCode,
                 cvtxtClassID, cvtxtRoom, cvtxtTime, cvtxtDay;
+        private ImageButton cvimgDirections;
 
-        public SubjectViewHolder(@NonNull View itemView) {
+        public SubjectViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
 
             cvtxtDescription = itemView.findViewById(R.id.cvtxtDescription);
@@ -26,6 +37,19 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
             cvtxtRoom = itemView.findViewById(R.id.cvtxtRoom);
             cvtxtTime = itemView.findViewById(R.id.cvtxtTime);
             cvtxtDay = itemView.findViewById(R.id.cvtxtDay);
+            cvimgDirections = itemView.findViewById(R.id.cvimgDirections);
+
+            cvimgDirections.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (listener != null) {
+                        int position = getBindingAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(position);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -37,7 +61,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
     @Override
     public SubjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.subject_cardview, parent, false);
-        SubjectViewHolder svh = new SubjectViewHolder(v);
+        SubjectViewHolder svh = new SubjectViewHolder(v, mListener);
         return svh;
     }
 
