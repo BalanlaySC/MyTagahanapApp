@@ -90,7 +90,7 @@ public class SharedPrefManager {
     }
 
     public String getFullName() {
-        return getfName() + ", " + getlName();
+        return getlName() + ", " + getfName();
     }
 
     public String getAllSharedPref() {
@@ -98,6 +98,5 @@ public class SharedPrefManager {
                 getlName() + " " + getKeepMeSignedIn() + " " + getToken();
     }
 
-//    public long getExpiryDate() {
-//    }
+//    public long getExpiryDate() { }
 }

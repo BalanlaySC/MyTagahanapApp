@@ -21,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/roundcorner_lightblue"
+        android:layout_margin="8dp"
         android:visibility="gone">
 
         <TextView
@@ -29,8 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_toStartOf="@+id/btnStartDirections"
+            android:layout_toStartOf="@+id/btnCloseDirections"
             android:background="@drawable/roundcorner_grayish"
             android:ellipsize="end"
             android:maxLines="1"
@@ -59,15 +59,17 @@
             tools:ignore="HardcodedText" />
 
         <ImageButton
-            android:id="@+id/btnStartDirections"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/btnCloseDirections"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_above="@+id/editTxtDestination"
             android:layout_alignParentEnd="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
+            android:background="@drawable/circle_grayish"
             android:contentDescription="Close the view"
-            android:minWidth="35dip"
-            android:minHeight="35dip"
-            android:scaleType="centerCrop"
+            android:scaleType="center"
             android:src="@drawable/ic_close"
             tools:ignore="HardcodedText" />
     </RelativeLayout>

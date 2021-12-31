@@ -271,6 +271,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             if (routeGeoJsonSource != null ) {
                 routeGeoJsonSource.setGeoJson(FeatureCollection.fromJson(""));
                 iconGeoJsonSource.setGeoJson(FeatureCollection.fromJson(""));
+                handler.postDelayed(() -> enableLocationComponent(style), 1000);
             }
         });
     }
