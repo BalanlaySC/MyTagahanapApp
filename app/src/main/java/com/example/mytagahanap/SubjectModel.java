@@ -1,20 +1,35 @@
 package com.example.mytagahanap;
 
-public class SubjectModel {
-    private String mClassID,
-            mDescription, mSubjectCode,
-            mRoom, mTime, mDay;
+import androidx.annotation.NonNull;
 
-    public SubjectModel(String mClassID,
-                        String mDescription, String mSubjectCode,
-                        String mRoom, String mTime, String mDay) {
+public class SubjectModel {
+    private String mClassID, mSubjectCode,
+            mDescription,
+            mTime, mDay, mRoom;
+
+    public SubjectModel(String mClassID, String mSubjectCode,
+                        String mDescription,
+                        String mTime, String mDay, String mRoom) {
 
         this.mClassID = mClassID;
-        this.mDescription = mDescription;
         this.mSubjectCode = mSubjectCode;
-        this.mRoom = mRoom;
+        this.mDescription = mDescription;
         this.mTime = mTime;
         this.mDay = mDay;
+        this.mRoom = mRoom;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "SubjectModel{" +
+                "mClassID='" + mClassID + '\'' +
+                ", mSubjectCode='" + mSubjectCode + '\'' +
+                ", mDescription='" + mDescription + '\'' +
+                ", mTime='" + mTime + '\'' +
+                ", mDay='" + mDay + '\'' +
+                ", mRoom='" + mRoom + '\'' +
+                '}';
     }
 
     public String getmClassID() {
