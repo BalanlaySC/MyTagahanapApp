@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -81,6 +82,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     final Handler handler = new Handler(Looper.getMainLooper());
 
     private MapView mapView;
+    private View view;
     private MapboxMap mapboxMap;
     private MapboxDirections mapboxDirections;
     private DirectionsRoute currentRoute;
@@ -96,6 +98,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         mapFragmentContext = getContext().getApplicationContext();
         Mapbox.getInstance(mapFragmentContext, getString(R.string.mapbox_access_token));
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+        setMapFragView(view);
 
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -229,16 +232,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
     }
 
-    @Override
-    public void setMapboxMap(MapboxMap mapboxMap) {
-        MapFragment.this.mapboxMap = mapboxMap;
-    }
-
-    @Override
-    public MapboxMap getMapboxMap() {
-        return MapFragment.this.mapboxMap;
-    }
-
     /**
      * Add the route and marker icon layers to the map
      */
@@ -356,6 +349,18 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 //            getActivity().finish();
 //        }
     }
+
+    @Override
+    public void setMapboxMap(MapboxMap mapboxMap) { MapFragment.this.mapboxMap = mapboxMap; }
+
+    @Override
+    public void setMapFragView(View v) { MapFragment.this.view = v; }
+
+    @Override
+    public MapboxMap getMapboxMap() { return MapFragment.this.mapboxMap; }
+
+    @Override
+    public View getMapFragView() { return MapFragment.this.view; }
 
 //    public void
 //    destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
