@@ -107,6 +107,7 @@ public class Login extends AppCompatActivity {
                                                 obj.getInt("idnumber"),
                                                 obj.getString("f_name"),
                                                 obj.getString("l_name"),
+                                                obj.getString("def_loc"),
                                                 checkboxKMSI.isChecked(),
                                                 token
                                         );

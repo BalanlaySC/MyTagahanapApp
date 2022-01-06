@@ -38,6 +38,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -51,25 +53,39 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.mapbox.geojson.Point;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainInterface {
     private static final String TAG = "MainActivity";
+    private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.50784);
+    private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.51298);
+    private final Point defOrigAdminBldg = Point.fromLngLat(124.666905, 12.509913);
 
     private DrawerLayout drawer;
+    private RelativeLayout relativeLayout;
     private NavigationView navigationView;
     private ArrayList<LocationModel> locations;
     private BottomSheetDialog bottomSheetDialog;
-    private TextView btsTxtLocation;
+    private TextView btsTxtLocation, textView1, textView2;
+    private ImageButton imageButton;
 
     private MapFragment mapFragment;
     private MapInterface mapInterface;
 
     private Point origin, destination;
-    private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.50784);
-    private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.51298);
-    private final Point defOrigAdminBldg = Point.fromLngLat(124.666905, 12.509913);
+    private String fullName;
+    private int idnumber;
     private double[] coords;
+
+    public MainActivity() {}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //            return;
 //        }
 
+        loadSharedPreference();
         initViews();
 
         if (savedInstanceState == null) {
@@ -102,6 +119,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void loadSharedPreference() {
+        fullName = SharedPrefManager.getInstance(this).getFullName();
+        idnumber = SharedPrefManager.getInstance(this).getIdnumber();
+    }
+
     private void initViews() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.other_menu);
@@ -116,8 +138,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView navheaderidNumber = (TextView) headerView.findViewById(R.id.navheaderidNumber);
         LinearLayout navheaderLayout = (LinearLayout) headerView.findViewById(R.id.navheaderLayout);
 
-        navheaderName.setText(SharedPrefManager.getInstance(this).getFullName());
-        navheaderidNumber.setText(String.valueOf(SharedPrefManager.getInstance(this).getIdnumber()));
+        navheaderName.setText(fullName);
+        navheaderidNumber.setText(String.valueOf(idnumber));
         navigationView.setNavigationItemSelectedListener(this);
         navheaderLayout.setOnClickListener(view -> {
             SharedPrefManager.getInstance(this).logOut();
@@ -155,14 +177,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Popup when pressing directions/starting navigation
             RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
-            TextView editTxtStartLoc = findViewById(R.id.editTxtStartLoc);
-            TextView editTxtDestination = findViewById(R.id.editTxtDestination);
-
-            editTxtDestination.setText(btsTxtLocation.getText());
-            layoutDirections.setVisibility(View.VISIBLE);
-
+            TextView txtViewStartLoc = findViewById(R.id.txtViewStartLoc);
+            TextView txtViewDestination = findViewById(R.id.txtViewDestination);
             ImageButton btnCloseDirections = findViewById(R.id.btnCloseDirections);
-            btnCloseDirections.setOnClickListener(view1 -> {
+            setLayoutDirections(layoutDirections);
+            setTxtViewStartLoc(txtViewStartLoc);
+            setTxtViewDestination(txtViewDestination);
+            setBtnCloseDirections(btnCloseDirections);
+
+            getTxtViewDestination().setText(btsTxtLocation.getText());
+            getLayoutDirections().setVisibility(View.VISIBLE);
+            getBtnCloseDirections().setOnClickListener(view1 -> {
                 layoutDirections.setVisibility(View.GONE);
                 mapInterface.removeLayer();
             });
@@ -368,15 +393,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         if (!isLocationEnabled(MainActivity.this)) {
-            Log.d(TAG, "L336-User location is on " + !isLocationEnabled(MainActivity.this));
+            Log.d(TAG, "L380-User location is on " + !isLocationEnabled(MainActivity.this));
             if (location != null) {
                 origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
             } else {
-                Log.d(TAG, "L340-:Location is null");
+                Log.d(TAG, "L384-:Location is null");
                 origin = defOrigAdminBldg;
             }
         } else {
-            Log.d(TAG, "L344-User location is off " + !isLocationEnabled(MainActivity.this));
+            Log.d(TAG, "L388-User location is off " + !isLocationEnabled(MainActivity.this));
             origin = defOrigAdminBldg;
         }
 
@@ -413,7 +438,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void setMapInterface(MapInterface mapInterface) {
-        this.mapInterface = mapInterface;
-    }
+    public void setMapInterface(MapInterface mapInterface) { this.mapInterface = mapInterface; }
+
+    public void setLayoutDirections(RelativeLayout rl) { this.relativeLayout = rl; }
+
+    public void setTxtViewStartLoc(TextView tv1) { this.textView1 = tv1; }
+
+    public void setTxtViewDestination(TextView tv2) { this.textView2 = tv2; }
+
+    public void setBtnCloseDirections(ImageButton im) { this.imageButton = im; }
+
+    public RelativeLayout getLayoutDirections() { return MainActivity.this.relativeLayout; }
+
+    public TextView getTxtViewStartLoc() { return MainActivity.this.textView1; }
+
+    public TextView getTxtViewDestination() { return MainActivity.this.textView2;}
+
+    public ImageButton getBtnCloseDirections() { return MainActivity.this.imageButton; }
 }

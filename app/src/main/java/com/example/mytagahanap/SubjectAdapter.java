@@ -70,6 +70,14 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         SubjectModel currentSubject = mClassSched.get(position);
 
         holder.cvtxtDescription.setText(currentSubject.getmDescription());
+        if(holder.cvtxtDescription.getText().toString().compareTo("Unable to get subjects") == 0) {
+            holder.cvtxtSubjectCode.setVisibility(View.GONE);
+            holder.cvtxtClassID.setVisibility(View.GONE);
+            holder.cvtxtRoom.setVisibility(View.GONE);
+            holder.cvtxtTime.setVisibility(View.GONE);
+            holder.cvtxtDay.setVisibility(View.GONE);
+            holder.cvimgDirections.setVisibility(View.GONE);
+        }
         holder.cvtxtSubjectCode.setText(currentSubject.getmSubjectCode());
         holder.cvtxtClassID.setText(currentSubject.getmClassID());
         holder.cvtxtRoom.setText(currentSubject.getmRoom());

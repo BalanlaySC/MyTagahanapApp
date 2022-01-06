@@ -25,7 +25,7 @@
         android:visibility="gone">
 
         <TextView
-            android:id="@+id/editTxtStartLoc"
+            android:id="@+id/txtViewStartLoc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -41,10 +41,10 @@
             tools:ignore="HardcodedText" />
 
         <TextView
-            android:id="@+id/editTxtDestination"
+            android:id="@+id/txtViewDestination"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/editTxtStartLoc"
+            android:layout_below="@+id/txtViewStartLoc"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
@@ -62,7 +62,7 @@
             android:id="@+id/btnCloseDirections"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_above="@+id/editTxtDestination"
+            android:layout_above="@+id/txtViewDestination"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
