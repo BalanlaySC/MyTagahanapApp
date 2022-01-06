@@ -51,7 +51,6 @@ public class ScheduleFragment extends Fragment {
     private MapFragment mapFragment;
     private MainActivity mainActivity;
     private MapInterface mapInterface;
-    private MainInterface mainInterface;
 
     @Nullable
     @Override
@@ -70,7 +69,6 @@ public class ScheduleFragment extends Fragment {
     public void initAccess(View view) {
         mapFragment = new MapFragment();
         mainActivity = new MainActivity();
-        setMainInterface(mainActivity);
 
         pbSchedFrag = view.findViewById(R.id.pbSchedFrag);
 
@@ -155,8 +153,6 @@ public class ScheduleFragment extends Fragment {
 
     public void setMapInterface(MapInterface mapInterface) { this.mapInterface = mapInterface; }
 
-    public void setMainInterface(MainInterface mainInterface) { this.mainInterface = mainInterface; }
-
     // Return LocationModel object with locationName loc
     public LocationModel getLocationObj(String loc) {
         for (LocationModel locationModel : locations) {
@@ -183,9 +179,9 @@ public class ScheduleFragment extends Fragment {
                 Point.fromLngLat(origin.getLocationLng(), origin.getLocationLat()),
                 Point.fromLngLat(destination.getLocationLng(), destination.getLocationLat()));
 
-        RelativeLayout layoutDirections = mainInterface.getLayoutDirections();
-        TextView editTxtStartLoc = mainInterface.getTxtViewStartLoc();
-        TextView editTxtDestination = mainInterface.getTxtViewDestination();
+        RelativeLayout layoutDirections = viewFragMap.findViewById(R.id.layoutDirections);
+        TextView editTxtStartLoc = viewFragMap.findViewById(R.id.txtViewStartLoc);
+        TextView editTxtDestination = viewFragMap.findViewById(R.id.txtViewDestination);
         ImageButton btnCloseDirections = viewFragMap.findViewById(R.id.btnCloseDirections);
 
         editTxtStartLoc.setText(origin.getLocationName());

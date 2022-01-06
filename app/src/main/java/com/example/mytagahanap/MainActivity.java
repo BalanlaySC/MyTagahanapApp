@@ -63,7 +63,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainInterface {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
     private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.50784);
     private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.51298);
@@ -180,14 +180,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             TextView txtViewStartLoc = findViewById(R.id.txtViewStartLoc);
             TextView txtViewDestination = findViewById(R.id.txtViewDestination);
             ImageButton btnCloseDirections = findViewById(R.id.btnCloseDirections);
-            setLayoutDirections(layoutDirections);
-            setTxtViewStartLoc(txtViewStartLoc);
-            setTxtViewDestination(txtViewDestination);
-            setBtnCloseDirections(btnCloseDirections);
 
-            getTxtViewDestination().setText(btsTxtLocation.getText());
-            getLayoutDirections().setVisibility(View.VISIBLE);
-            getBtnCloseDirections().setOnClickListener(view1 -> {
+            txtViewDestination.setText(btsTxtLocation.getText());
+            layoutDirections.setVisibility(View.VISIBLE);
+            btnCloseDirections.setOnClickListener(view1 -> {
                 layoutDirections.setVisibility(View.GONE);
                 mapInterface.removeLayer();
             });
@@ -439,20 +435,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void setMapInterface(MapInterface mapInterface) { this.mapInterface = mapInterface; }
-
-    public void setLayoutDirections(RelativeLayout rl) { this.relativeLayout = rl; }
-
-    public void setTxtViewStartLoc(TextView tv1) { this.textView1 = tv1; }
-
-    public void setTxtViewDestination(TextView tv2) { this.textView2 = tv2; }
-
-    public void setBtnCloseDirections(ImageButton im) { this.imageButton = im; }
-
-    public RelativeLayout getLayoutDirections() { return MainActivity.this.relativeLayout; }
-
-    public TextView getTxtViewStartLoc() { return MainActivity.this.textView1; }
-
-    public TextView getTxtViewDestination() { return MainActivity.this.textView2;}
-
-    public ImageButton getBtnCloseDirections() { return MainActivity.this.imageButton; }
 }
