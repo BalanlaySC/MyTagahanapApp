@@ -34,8 +34,6 @@ import java.util.Map;
 
 public class ScheduleFragment extends Fragment {
     private static final String TAG = "ScheduleFragment";
-    private static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/";
-    public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php";
     public final Handler handler = new Handler(Looper.getMainLooper());
 
     private ArrayList<SubjectModel> classSchedule;
@@ -99,7 +97,7 @@ public class ScheduleFragment extends Fragment {
     public void getClassSchedule(View view1) {
         classSchedule = new ArrayList<>();
         pbSchedFrag.setVisibility(View.VISIBLE);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, ScheduleFragment.URL_CLASS_SCHED,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.URL_CLASS_SCHED,
                 response -> {
                     try {
                         JSONObject obj = new JSONObject(response);

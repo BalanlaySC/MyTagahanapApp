@@ -1,5 +1,19 @@
 package com.example.mytagahanap;
 
+import static com.mapbox.core.constants.Constants.PRECISION_6;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textFont;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOffset;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,7 +26,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,7 +52,6 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
@@ -54,67 +66,36 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.mapbox.core.constants.Constants.PRECISION_6;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textFont;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOffset;
-
 public class MapFragment extends Fragment implements PermissionsListener, MapInterface {
     private static final String TAG = "MapFragment";
-    private static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
-    private static final String ROUTE_LAYER_ID = "route-layer-id";
-    private static final String ROUTE_SOURCE_ID = "route-source-id";
-    private static final String ICON_LAYER_ID_O = "icon-layer-id-origin";
-    private static final String ICON_SOURCE_ID_O = "icon-source-id-origin";
-    private static final String ICON_LAYER_ID_D = "icon-layer-id-destination";
-    private static final String ICON_SOURCE_ID_D = "icon-source-id-destination";
-    private static final String RED_PIN_ICON_ID = "red-pin-icon-id";
-    private static final String GREEN_PIN_ICON_ID = "green-pin-icon-id";
     final Handler handler = new Handler(Looper.getMainLooper());
 
     private MapView mapView;
     private View view;
     private MapboxMap mapboxMap;
-    private MapboxDirections mapboxDirections;
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGeoJsonSource, iconGeoJsonSourceOrigin, iconGeoJsonSourceDestination;
 
-    private PermissionsManager permissionsManager;
     private Context mapFragmentContext;
 
     public MapFragment() { }
 
+    @SuppressLint("WrongConstant")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mapFragmentContext = getContext().getApplicationContext();
+        mapFragmentContext = requireContext().getApplicationContext();
         Mapbox.getInstance(mapFragmentContext, getString(R.string.mapbox_access_token));
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         setMapFragView(view);
 
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @SuppressLint("WrongConstant")
-            @Override
-            public void onMapReady(@NonNull MapboxMap mapboxMap) {
-                setMapboxMap(mapboxMap);
-                mapboxMap.setStyle(STYLE_URL, new Style.OnStyleLoaded() {
-                    @Override
-                    public void onStyleLoaded(@NonNull Style style) {
-                        enableLocationComponent(style);
-                        initLayers(style);
-                    }
-                });
-            }
+        mapView.getMapAsync(mapboxMap -> {
+            setMapboxMap(mapboxMap);
+            mapboxMap.setStyle(Constants.STYLE_URL, style -> {
+                enableLocationComponent(style);
+                initLayers(style);
+            });
         });
         return view;
     }
@@ -145,7 +126,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             // Set the component's render mode
             locationComponent.setRenderMode(RenderMode.COMPASS);
         } else {
-            permissionsManager = new PermissionsManager(this);
+            PermissionsManager permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
             handler.postDelayed(() -> enableLocationComponent(loadedMapStyle), 10000);
         }
@@ -159,7 +140,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
      * @param destination the desired finish point of the route
      */
     public void getRoute(MapboxMap mapboxMap, Point origin, Point destination) {
-        mapboxDirections = MapboxDirections.builder()
+        MapboxDirections mapboxDirections = MapboxDirections.builder()
                 .origin(origin)
                 .destination(destination)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
@@ -169,7 +150,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
         mapboxDirections.enqueueCall(new Callback<DirectionsResponse>() {
             @Override
-            public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+            public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
                 // You can get the generic HTTP info about the response
                 Log.d(TAG, "Response code: " + response.code());
                 if (response.body() == null) {
@@ -190,41 +171,38 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
                 Log.d(TAG, "mapboxMap is " + mapboxMap);
                 if (mapboxMap != null) {
-                    mapboxMap.getStyle(new Style.OnStyleLoaded() {
-                        @Override
-                        public void onStyleLoaded(@NonNull Style style) {
-                            // Retrieve and update the source designated for showing the directions route
-                            routeGeoJsonSource = style.getSourceAs(ROUTE_SOURCE_ID);
-                            iconGeoJsonSourceOrigin = style.getSourceAs(ICON_SOURCE_ID_O);
-                            iconGeoJsonSourceDestination = style.getSourceAs(ICON_SOURCE_ID_D);
+                    mapboxMap.getStyle(style -> {
+                        // Retrieve and update the source designated for showing the directions route
+                        routeGeoJsonSource = style.getSourceAs(Constants.ROUTE_SOURCE_ID);
+                        iconGeoJsonSourceOrigin = style.getSourceAs(Constants.ICON_SOURCE_ID_O);
+                        iconGeoJsonSourceDestination = style.getSourceAs(Constants.ICON_SOURCE_ID_D);
 
-                            mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(
-                                    new LatLngBounds.Builder()
-                                            .include(new LatLng(origin.latitude(), origin.longitude()))
-                                            .include(new LatLng(destination.latitude(), destination.longitude()))
-                                            .build(), 50), 3000);
+                        mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(
+                                new LatLngBounds.Builder()
+                                        .include(new LatLng(origin.latitude(), origin.longitude()))
+                                        .include(new LatLng(destination.latitude(), destination.longitude()))
+                                        .build(), 50), 3000);
 
-                            // Create a LineString with the directions route's geometry and
-                            // reset the GeoJSON routeGeoJsonSource for the route LineLayer source
-                            // Also generate markers for origin and destination
-                            if (routeGeoJsonSource != null) {
-                                routeGeoJsonSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(currentRoute.geometry()), PRECISION_6));
-                            }
-                            if (iconGeoJsonSourceOrigin != null) {
-                                iconGeoJsonSourceOrigin.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
-                                        Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude()))}));
-                            }
-                            if (iconGeoJsonSourceDestination != null) {
-                                iconGeoJsonSourceDestination.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
-                                        Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))}));
-                            }
+                        // Create a LineString with the directions route's geometry and
+                        // reset the GeoJSON routeGeoJsonSource for the route LineLayer source
+                        // Also generate markers for origin and destination
+                        if (routeGeoJsonSource != null) {
+                            routeGeoJsonSource.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(currentRoute.geometry()), PRECISION_6));
+                        }
+                        if (iconGeoJsonSourceOrigin != null) {
+                            iconGeoJsonSourceOrigin.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
+                                    Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude()))}));
+                        }
+                        if (iconGeoJsonSourceDestination != null) {
+                            iconGeoJsonSourceDestination.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
+                                    Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))}));
                         }
                     });
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<DirectionsResponse> call, Throwable throwable) {
+            public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
                 Log.d(TAG, "Error: " + throwable.getMessage());
                 Toast.makeText(mapFragmentContext, "Error: " + throwable.getMessage(),
                         Toast.LENGTH_SHORT).show();
@@ -236,12 +214,12 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
      * Add the route and marker icon layers to the map
      */
     private void initLayers(@NonNull Style loadedMapStyle) {
-        LineLayer routeLayer = new LineLayer(ROUTE_LAYER_ID, ROUTE_SOURCE_ID);
+        LineLayer routeLayer = new LineLayer(Constants.ROUTE_LAYER_ID, Constants.ROUTE_SOURCE_ID);
 
         //Add the route and marker sources to the map
-        loadedMapStyle.addSource(new GeoJsonSource(ROUTE_SOURCE_ID));
-        loadedMapStyle.addSource(new GeoJsonSource(ICON_SOURCE_ID_O));
-        loadedMapStyle.addSource(new GeoJsonSource(ICON_SOURCE_ID_D));
+        loadedMapStyle.addSource(new GeoJsonSource(Constants.ROUTE_SOURCE_ID));
+        loadedMapStyle.addSource(new GeoJsonSource(Constants.ICON_SOURCE_ID_O));
+        loadedMapStyle.addSource(new GeoJsonSource(Constants.ICON_SOURCE_ID_D));
 
         // Add the LineLayer to the map. This layer will display the directions route.
         routeLayer.setProperties(
@@ -253,22 +231,24 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         loadedMapStyle.addLayer(routeLayer);
 
         // Add the red marker icon image to the map
-        loadedMapStyle.addImage(RED_PIN_ICON_ID, Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.red_marker))));
-        loadedMapStyle.addImage(GREEN_PIN_ICON_ID, Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.green_marker))));
+        loadedMapStyle.addImage(Constants.RED_PIN_ICON_ID,
+                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.red_marker))));
+        loadedMapStyle.addImage(Constants.GREEN_PIN_ICON_ID,
+                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.green_marker))));
 
         // Add the red marker icon SymbolLayer to the map
-        loadedMapStyle.addLayer(new SymbolLayer(ICON_LAYER_ID_O, ICON_SOURCE_ID_O).withProperties(
-                iconImage(GREEN_PIN_ICON_ID),
+        loadedMapStyle.addLayer(new SymbolLayer(Constants.ICON_LAYER_ID_O, Constants.ICON_SOURCE_ID_O).withProperties(
+                iconImage(Constants.GREEN_PIN_ICON_ID),
                 iconSize((float) 0.25),
                 iconIgnorePlacement(true),
                 iconAllowOverlap(true),
                 iconOffset(new Float[] {0f, -9f}),
-                textField("Start"),
+                textField("You are here"),
                 textFont(new String[] {"Roboto Regular","Arial Unicode MS Regular"}),
                 textOffset(new Float[] {0f, -1.25f})));
 
-        loadedMapStyle.addLayer(new SymbolLayer(ICON_LAYER_ID_D, ICON_SOURCE_ID_D).withProperties(
-                iconImage(RED_PIN_ICON_ID),
+        loadedMapStyle.addLayer(new SymbolLayer(Constants.ICON_LAYER_ID_D, Constants.ICON_SOURCE_ID_D).withProperties(
+                iconImage(Constants.RED_PIN_ICON_ID),
                 iconSize((float) 0.25),
                 iconIgnorePlacement(true),
                 iconAllowOverlap(true),
@@ -318,7 +298,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
     }

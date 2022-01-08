@@ -1,8 +1,6 @@
 package com.example.mytagahanap;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -11,8 +9,9 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
-import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,8 +37,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -47,35 +44,26 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.mapbox.geojson.Point;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.mapbox.geojson.Polygon;
+import com.mapbox.turf.TurfJoins;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
-    private final Point defOrigWhiteBeach = Point.fromLngLat(124.6779, 12.50784);
-    private final Point defOrigUEPWelcome = Point.fromLngLat(124.659079, 12.51298);
-    private final Point defOrigAdminBldg = Point.fromLngLat(124.666905, 12.509913);
 
     private DrawerLayout drawer;
-    private RelativeLayout relativeLayout;
     private NavigationView navigationView;
     private ArrayList<LocationModel> locations;
     private BottomSheetDialog bottomSheetDialog;
-    private TextView btsTxtLocation, textView1, textView2;
-    private ImageButton imageButton;
+    private TextView btsTxtLocation;
 
     private MapFragment mapFragment;
     private MapInterface mapInterface;
@@ -83,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Point origin, destination;
     private String fullName;
     private int idnumber;
-    private double[] coords;
 
     public MainActivity() {}
 
@@ -134,9 +121,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView = findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
-        TextView navheaderName = (TextView) headerView.findViewById(R.id.navheaderName);
-        TextView navheaderidNumber = (TextView) headerView.findViewById(R.id.navheaderidNumber);
-        LinearLayout navheaderLayout = (LinearLayout) headerView.findViewById(R.id.navheaderLayout);
+        TextView navheaderName = headerView.findViewById(R.id.navheaderName);
+        TextView navheaderidNumber = headerView.findViewById(R.id.navheaderidNumber);
+        LinearLayout navheaderLayout = headerView.findViewById(R.id.navheaderLayout);
 
         navheaderName.setText(fullName);
         navheaderidNumber.setText(String.valueOf(idnumber));
@@ -166,14 +153,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // OnClickListener for Directions Button
         bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
-            Log.d(TAG, "Directions clicked");
-
+            Log.d(TAG, "initViews: Directions started");
             bottomSheetDialog.dismiss();
             LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
-
-            origin = getDevCurrentLocation();
-            destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
-            mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
 
             // Popup when pressing directions/starting navigation
             RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
@@ -181,15 +163,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             TextView txtViewDestination = findViewById(R.id.txtViewDestination);
             ImageButton btnCloseDirections = findViewById(R.id.btnCloseDirections);
 
+            origin = getDevCurrentLocation();
+            destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
+            mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
+
+            txtViewStartLoc.setText(SharedPrefManager.getInstance(this).getDefLoc());
             txtViewDestination.setText(btsTxtLocation.getText());
             layoutDirections.setVisibility(View.VISIBLE);
             btnCloseDirections.setOnClickListener(view1 -> {
                 layoutDirections.setVisibility(View.GONE);
                 mapInterface.removeLayer();
             });
+
+            Timer timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    String rlVisibility = layoutDirections.getVisibility() == 0 ? "Visible" : "Gone";
+                    Log.d(TAG, "initViews: layoutDirections is " + rlVisibility);
+                    if(rlVisibility.equals("Visible")) {
+                        Log.d(TAG, "initViews: 15 secs passed executing reroute");
+                        reroute();
+                    } else {
+                        timer.cancel();
+                    }
+                }
+            }, 15000, 15000);
         });
         bottomSheetDialog.setContentView(bottomSheetView);
         btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
+    }
+
+    private void reroute() {
+        origin = getDevCurrentLocation();
+        mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
     }
 
     // Initializing the option menu, specifically the search function
@@ -331,6 +338,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         result.addOnCompleteListener(task -> {
             try {
                 LocationSettingsResponse response = task.getResult(ApiException.class);
+                Toast.makeText(this, String.valueOf(response), Toast.LENGTH_SHORT).show();
                 // All location settings are satisfied. The client can initialize location
                 // requests here.
             } catch (ApiException exception) {
@@ -381,24 +389,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // Return the current location of the device.
-    // 0 is long, 1 is lat
+    /* Return the current location of the device.
+    If outside of UEP the assigned Default Location will be used
+    0 is long, 1 is lat */
     @SuppressLint("MissingPermission")
     public Point getDevCurrentLocation() {
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        if (!isLocationEnabled(MainActivity.this)) {
-            Log.d(TAG, "L380-User location is on " + !isLocationEnabled(MainActivity.this));
+        String defaultLocation = SharedPrefManager.getInstance(this).getDefLoc();
+        Point defaultLocationPoint = Point.fromLngLat(
+                getLocationObj(defaultLocation).getLocationLng(),
+                getLocationObj(defaultLocation).getLocationLat());
+        Polygon polygon = Polygon.fromLngLats(com.example.mytagahanap.Constants.POINTS);
+
+        boolean isLocEnabled = !isLocationEnabled(MainActivity.this);
+        if (isLocEnabled) {
+            Log.d(TAG, "getDevCurrentLocation: L410-User location is on " + true);
             if (location != null) {
-                origin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+                Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+                boolean isLocInsideUEP = TurfJoins.inside(point, polygon);
+                if(isLocInsideUEP) {
+                    Log.d(TAG, "getDevCurrentLocation: L415-Inside UEP " + true);
+                    origin = point;
+                } else {
+                    Log.d(TAG, "getDevCurrentLocation: L418-Inside UEP " + false);
+                    origin = defaultLocationPoint;
+                }
             } else {
-                Log.d(TAG, "L384-:Location is null");
-                origin = defOrigAdminBldg;
+                Log.d(TAG, "getDevCurrentLocation: L422-Location is null");
+                origin = defaultLocationPoint;
             }
         } else {
-            Log.d(TAG, "L388-User location is off " + !isLocationEnabled(MainActivity.this));
-            origin = defOrigAdminBldg;
+            Log.d(TAG, "getDevCurrentLocation: L426-User location is on " + false);
+            origin = defaultLocationPoint;
         }
 
         return origin;
@@ -407,9 +431,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Check if the string loc is in the Arraylist location
     public boolean containsLocation(String loc) {
         for (LocationModel locationModel : locations) {
-            if (locationModel.getLocationName().equals(loc)) {
-                return true;
-            }
+            if (locationModel.getLocationName().equals(loc)) { return true; }
         }
         return false;
     }
@@ -417,9 +439,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Return LocationModel object with locationName loc
     public LocationModel getLocationObj(String loc) {
         for (LocationModel locationModel : locations) {
-            if (locationModel.getLocationName().equals(loc)) {
-                return locationModel;
-            }
+            if (locationModel.getLocationName().equals(loc)) { return locationModel; }
         }
         return null;
     }
