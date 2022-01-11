@@ -9,8 +9,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -157,46 +155,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             bottomSheetDialog.dismiss();
             LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
 
-            // Popup when pressing directions/starting navigation
-            RelativeLayout layoutDirections = findViewById(R.id.layoutDirections);
-            TextView txtViewStartLoc = findViewById(R.id.txtViewStartLoc);
-            TextView txtViewDestination = findViewById(R.id.txtViewDestination);
-            ImageButton btnCloseDirections = findViewById(R.id.btnCloseDirections);
-
-            origin = getDevCurrentLocation();
-            destination = Point.fromLngLat(clickedLocation.getLocationLng(), clickedLocation.getLocationLat());
-            mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
-
-            txtViewStartLoc.setText(SharedPrefManager.getInstance(this).getDefLoc());
-            txtViewDestination.setText(btsTxtLocation.getText());
-            layoutDirections.setVisibility(View.VISIBLE);
-            btnCloseDirections.setOnClickListener(view1 -> {
-                layoutDirections.setVisibility(View.GONE);
-                mapInterface.removeLayer();
-            });
-
-            Timer timer = new Timer();
-            timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    String rlVisibility = layoutDirections.getVisibility() == 0 ? "Visible" : "Gone";
-                    Log.d(TAG, "initViews: layoutDirections is " + rlVisibility);
-                    if(rlVisibility.equals("Visible")) {
-                        Log.d(TAG, "initViews: 15 secs passed executing reroute");
-                        reroute();
-                    } else {
-                        timer.cancel();
-                    }
-                }
-            }, 15000, 15000);
+            // Popup dialog when pressing directions/starting navigation
+            mapInterface.initDirectionDialog(clickedLocation);
         });
         bottomSheetDialog.setContentView(bottomSheetView);
         btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
-    }
-
-    private void reroute() {
-        origin = getDevCurrentLocation();
-        mapInterface.getRoute(mapInterface.getMapboxMap(), origin, destination);
     }
 
     // Initializing the option menu, specifically the search function
@@ -224,11 +187,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Listen to search view item on click event.
         searchAutoComplete.setOnItemClickListener((adapterView, view, itemIndex, id) -> {
-            LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
-            String queryString = clickedLocation.getLocationName();
             searchView.clearFocus();
-            searchAutoComplete.setText(queryString);
-            initBottomSheet(queryString);
+            LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
+            searchAutoComplete.setText(clickedLocation.getLocationName());
+            initBottomSheet(clickedLocation.getLocationName());
+            mapInterface.markMapboxMapOffset(mapInterface.getMapboxMap(), clickedLocation);
             if (mapMenuItem != currentMenuItem) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         mapFragment).commit();
@@ -242,7 +205,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onQueryTextSubmit(String query) {
                 searchView.clearFocus();
                 if (containsLocation(query)) {
+                    LocationModel clickedLocation = getLocationObj(query);
                     initBottomSheet(query);
+                    mapInterface.markMapboxMapOffset(mapInterface.getMapboxMap(), clickedLocation);
                     if (mapMenuItem != currentMenuItem) {
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 mapFragment).commit();
@@ -387,45 +352,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
             return !TextUtils.isEmpty(locationProviders);
         }
-    }
-
-    /* Return the current location of the device.
-    If outside of UEP the assigned Default Location will be used
-    0 is long, 1 is lat */
-    @SuppressLint("MissingPermission")
-    public Point getDevCurrentLocation() {
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        String defaultLocation = SharedPrefManager.getInstance(this).getDefLoc();
-        Point defaultLocationPoint = Point.fromLngLat(
-                getLocationObj(defaultLocation).getLocationLng(),
-                getLocationObj(defaultLocation).getLocationLat());
-        Polygon polygon = Polygon.fromLngLats(com.example.mytagahanap.Constants.POINTS);
-
-        boolean isLocEnabled = !isLocationEnabled(MainActivity.this);
-        if (isLocEnabled) {
-            Log.d(TAG, "getDevCurrentLocation: L410-User location is on " + true);
-            if (location != null) {
-                Point point = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-                boolean isLocInsideUEP = TurfJoins.inside(point, polygon);
-                if(isLocInsideUEP) {
-                    Log.d(TAG, "getDevCurrentLocation: L415-Inside UEP " + true);
-                    origin = point;
-                } else {
-                    Log.d(TAG, "getDevCurrentLocation: L418-Inside UEP " + false);
-                    origin = defaultLocationPoint;
-                }
-            } else {
-                Log.d(TAG, "getDevCurrentLocation: L422-Location is null");
-                origin = defaultLocationPoint;
-            }
-        } else {
-            Log.d(TAG, "getDevCurrentLocation: L426-User location is on " + false);
-            origin = defaultLocationPoint;
-        }
-
-        return origin;
     }
 
     // Check if the string loc is in the Arraylist location

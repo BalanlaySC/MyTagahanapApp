@@ -17,8 +17,11 @@ public class Constants {
     public static final String ICON_SOURCE_ID_O = "icon-source-id-origin";
     public static final String ICON_LAYER_ID_D = "icon-layer-id-destination";
     public static final String ICON_SOURCE_ID_D = "icon-source-id-destination";
+    public static final String ICON_LAYER_ID_LC = "icon-layer-id-long-click";
+    public static final String ICON_SOURCE_ID_LC = "icon-source-id-long-click";
     public static final String RED_PIN_ICON_ID = "red-pin-icon-id";
     public static final String GREEN_PIN_ICON_ID = "green-pin-icon-id";
+    public static final String BLUE_PIN_ICON_ID = "blue-pin-icon-id";
 
     public static final List<List<Point>> POINTS = new ArrayList<>();
     private static final List<Point> OUTER_POINTS = new ArrayList<>();

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/roundcorner_grayish"
@@ -14,63 +13,4 @@
         app:mapbox_cameraTargetLat="12.50931"
         app:mapbox_cameraTargetLng="124.66552"
         app:mapbox_cameraZoom="16" />
-
-    <RelativeLayout
-        android:id="@+id/layoutDirections"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/roundcorner_lightblue"
-        android:layout_margin="8dp"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/txtViewStartLoc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_toStartOf="@+id/btnCloseDirections"
-            android:background="@drawable/roundcorner_grayish"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingStart="5dp"
-            android:scrollHorizontally="true"
-            android:text="Current location"
-            android:textSize="18sp"
-            tools:ignore="HardcodedText" />
-
-        <TextView
-            android:id="@+id/txtViewDestination"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/txtViewStartLoc"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/roundcorner_grayish"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingStart="5dp"
-            android:scrollHorizontally="true"
-            android:text="Destination"
-            android:textSize="18sp"
-            tools:ignore="HardcodedText" />
-
-        <ImageButton
-            android:id="@+id/btnCloseDirections"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_above="@+id/txtViewDestination"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/circle_grayish"
-            android:contentDescription="Close the view"
-            android:scaleType="center"
-            android:src="@drawable/ic_close"
-            tools:ignore="HardcodedText" />
-    </RelativeLayout>
 </RelativeLayout>

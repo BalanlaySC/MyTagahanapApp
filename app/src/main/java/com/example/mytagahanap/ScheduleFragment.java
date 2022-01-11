@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ScheduleFragment extends Fragment {
     private static final String TAG = "ScheduleFragment";
@@ -59,7 +62,7 @@ public class ScheduleFragment extends Fragment {
 
     public void initAccess(View view) {
         mapFragment = new MapFragment();
-
+        setMapInterface(mapFragment);
         pbSchedFrag = view.findViewById(R.id.pbSchedFrag);
 
         DatabaseAccess databaseAccess = DatabaseAccess.getInstance(scheduleFragmentContext);
@@ -81,8 +84,7 @@ public class ScheduleFragment extends Fragment {
 
         mAdapter.setOnItemClickListener(position -> {
             String currentRoom = classSchedule.get(position).getmRoom();
-            LocationModel origin = getLocationObj(SharedPrefManager.getInstance(scheduleFragmentContext).getDefLoc());
-            LocationModel destination = getLocationObj(getRoomObj(currentRoom).getLocationName());
+            LocationModel destinationLM = getLocationObj(getRoomObj(currentRoom).getLocationName());
             // TODO optimization, have a popup confirmation to generate path
 
             getParentFragmentManager().popBackStack();
@@ -90,7 +92,7 @@ public class ScheduleFragment extends Fragment {
                     mapFragment).commit();
             setMapInterface(mapFragment);
 
-            handler.postDelayed(() -> startRoute(origin, destination), 1000);
+            handler.postDelayed(() -> mapInterface.initDirectionDialog(destinationLM), 1000);
         });
     }
 
@@ -160,27 +162,5 @@ public class ScheduleFragment extends Fragment {
             }
         }
         return null;
-    }
-
-    public void startRoute(LocationModel origin, LocationModel destination) {
-        mapInterface.getRoute(mapInterface.getMapboxMap(),
-                Point.fromLngLat(origin.getLocationLng(), origin.getLocationLat()),
-                Point.fromLngLat(destination.getLocationLng(), destination.getLocationLat()));
-
-        RelativeLayout layoutDirections = mapInterface.getMapFragView().findViewById(R.id.layoutDirections);
-        layoutDirections.setVisibility(View.VISIBLE);
-        TextView editTxtStartLoc = mapInterface.getMapFragView().findViewById(R.id.txtViewStartLoc);
-        TextView editTxtDestination = mapInterface.getMapFragView().findViewById(R.id.txtViewDestination);
-        ImageButton btnCloseDirections = mapInterface.getMapFragView().findViewById(R.id.btnCloseDirections);
-
-        editTxtStartLoc.setText(origin.getLocationName());
-        editTxtDestination.setText(destination.getLocationName());
-        btnCloseDirections.setOnClickListener(view1 -> {
-            layoutDirections.setVisibility(View.GONE);
-            mapInterface.removeLayer();
-        });
-
-//        NavigationView navigationView = viewMain.findViewById(R.id.nav_view);
-//        navigationView.setCheckedItem(R.id.nav_map);
     }
 }
