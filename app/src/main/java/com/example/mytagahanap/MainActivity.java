@@ -1,6 +1,7 @@
 package com.example.mytagahanap;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
@@ -97,6 +98,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         initViews();
 
+        DatabaseAccess databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
+        locations = new ArrayList<>();
+        locations = databaseAccess.getAllLocations();
+
         if (savedInstanceState == null) {
             mapFragment = new MapFragment();
             scheduleFragment = new ScheduleFragment();
@@ -104,6 +109,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     mapFragment).commit();
             setMapInterface(mapFragment);
             navigationView.setCheckedItem(R.id.nav_map);
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList("Locations", locations);
+            mapFragment.setArguments(bundle);
 
             // reversed so that when location is disabled (= false) turns to true
             if (isLocationEnabled(this)) {
@@ -169,10 +178,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        DatabaseAccess databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
-        locations = new ArrayList<>();
-        locations = databaseAccess.getAllLocations();
-
         bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.layout_bottom_sheet, findViewById(R.id.bottomSheetContainer));
@@ -207,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Get SearchView autocomplete object.
         final SearchView.SearchAutoComplete searchAutoComplete = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-        searchAutoComplete.setDropDownBackgroundResource(android.R.color.holo_blue_light);
+        searchAutoComplete.setDropDownBackgroundResource(R.color.divider);
 
         // Create a new ArrayAdapter and add data (locations) to search auto complete object.
         ArrayAdapter<LocationModel> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, locations);
@@ -263,6 +268,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         mapFragment).commit();
 
+                Bundle bundleLoc = new Bundle();
+                bundleLoc.putParcelableArrayList("Locations", locations);
+                mapFragment.setArguments(bundleLoc);
+
                 if (isLocationEnabled(MainActivity.this)) {
                     enableLoc();
                 }
@@ -271,9 +280,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         scheduleFragment).commit();
 
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("Class Schedule", classSchedule);
-                scheduleFragment.setArguments(bundle);
+                Bundle bundleSched = new Bundle();
+                bundleSched.putParcelableArrayList("Class Schedule", classSchedule);
+                scheduleFragment.setArguments(bundleSched);
                 break;
             case R.id.nav_bldginfo:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -410,6 +419,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Toast.makeText(MainActivity.this, "To start at your current location " +
                     "you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
         }
+        bottomSheetDialog.setOnCancelListener(dialogInterface -> mapInterface.clearLayers());
     }
 
     // Parse the class schedule of the current user
