@@ -12,13 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,7 +30,7 @@ import java.util.Map;
 public class Login extends AppCompatActivity {
     private static final String TAG = "Login";
 
-    private String token, idnumber, password;
+    private String idnumber, password;
 
     private TextInputEditText tietIDNumber, tietPassword;
     private CheckBox checkboxKMSI;
@@ -87,39 +83,34 @@ public class Login extends AppCompatActivity {
                 response -> {
                     progressBar.setVisibility(View.GONE);
                     try {
-                        token = generateToken();
                         if (checkboxKMSI.isChecked()) {
-                            Calendar cal = Calendar.getInstance(); // creates calendar
-                            cal.setTime(new Date());               // sets calendar time/date
-                            cal.add(Calendar.MINUTE, 10);       // adds 10 minute .HOUR_OF_DAY for hours
-                            Date expiryDate = cal.getTime();
-                        }
-                        JSONObject obj = new JSONObject(response);
-                        if (!obj.getBoolean("error")) {
-                            SharedPrefManager.getInstance(loginContext)
-                                    .userLogin(
-                                            obj.getInt("idnumber"),
-                                            obj.getString("f_name"),
-                                            obj.getString("l_name"),
-                                            obj.getString("def_loc"),
-                                            checkboxKMSI.isChecked(),
-                                            token
-                                    );
-                            // uncomment if need to view user info
+                            JSONObject obj = new JSONObject(response);
+                            if (!obj.getBoolean("error")) {
+                                SharedPrefManager.getInstance(loginContext)
+                                        .userLogin(
+                                                obj.getInt("idnumber"),
+                                                obj.getString("f_name"),
+                                                obj.getString("l_name"),
+                                                obj.getString("def_loc"),
+                                                checkboxKMSI.isChecked(),
+                                                obj.getString("token"),
+                                                initTimeSession());
+                                // uncomment if need to view user info
 //                                Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
-                            Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(loginContext, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(loginContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(loginContext, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(loginContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }, error -> {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(loginContext, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show();
                 }
         ) {
             @NonNull
@@ -135,30 +126,10 @@ public class Login extends AppCompatActivity {
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    // Generate token with SecureRandom
-    public String generateToken() {
-        byte[] bytes = new byte[20];
-        new SecureRandom().nextBytes(bytes);
-        StringBuilder result = new StringBuilder();
-        for (byte temp : bytes) {
-            result.append(String.format("%02x", temp));
-        }
-        return result.toString();
-    }
-
-    private void checkToken(String token) {
-        if (!token.equals("")) {
-            Log.d(TAG, "Login Success");
-            Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(loginContext, MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
-    }
-
-    /*  Compare two Date objects
-        -1 is past, 0 is equal, 1 is future */
-    public int compareDates(Date date1, Date date2) {
-        return date1.compareTo(date2);
+    private long initTimeSession() {
+        Calendar cal = Calendar.getInstance();              // creates calendar
+        cal.setTime(new Date(System.currentTimeMillis()));  // sets calendar time/date
+        cal.add(Calendar.HOUR_OF_DAY, 2);                // adds 2 hrs .HOUR_OF_DAY for hours
+        return cal.getTime().getTime();
     }
 }

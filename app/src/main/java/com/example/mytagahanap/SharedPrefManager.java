@@ -1,10 +1,7 @@
 package com.example.mytagahanap;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import java.util.Date;
 
 public class SharedPrefManager {
     private static volatile SharedPrefManager mInstance;
@@ -17,6 +14,8 @@ public class SharedPrefManager {
     private static final String KEY_DEF_LOC = "userDefLoc";
     private static final String KEEP_ME_SIGNED_IN = "keepMeSignedIn";
     private static final String KEY_USER_TOKEN = "userToken";
+    private static final String KEY_CONT_COUNTER = "contributionCounter";
+    private static final String KEY_TIME_OUT_SESSION = "timeOutSession";
 
     private SharedPrefManager(Context context) {
         mCtx = context;
@@ -33,7 +32,14 @@ public class SharedPrefManager {
         return mInstance;
     }
 
-    public boolean userLogin(int idnumber, String fName, String lName, String defloc, boolean kmsi, String token) {
+    public boolean userLogin(
+            int idnumber,
+            String fName,
+            String lName,
+            String defloc,
+            boolean kmsi,
+            String token,
+            long timeOutSession) {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -43,6 +49,8 @@ public class SharedPrefManager {
         editor.putString(KEY_DEF_LOC, defloc);
         editor.putBoolean(KEEP_ME_SIGNED_IN, kmsi);
         editor.putString(KEY_USER_TOKEN, token);
+        editor.putInt(KEY_CONT_COUNTER, 0);
+        editor.putLong(KEY_TIME_OUT_SESSION, timeOutSession);
         editor.apply();
 
         return true;
@@ -55,6 +63,16 @@ public class SharedPrefManager {
             result = true;
         }
         return result;
+    }
+
+    public void incrementContribution() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        if(getContributionCounter() < 5) {
+            editor.putInt(KEY_CONT_COUNTER, getContributionCounter() + 1);
+        }
+        editor.apply();
     }
 
     public boolean logOut() {
@@ -96,6 +114,11 @@ public class SharedPrefManager {
         return sharedPreferences.getString(KEY_USER_TOKEN, "");
     }
 
+    public long getTimeOutSession() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getLong(KEY_TIME_OUT_SESSION, 0);
+    }
+
     public String getFullName() {
         return getlName() + ", " + getfName();
     }
@@ -103,6 +126,11 @@ public class SharedPrefManager {
     public String getAllSharedPref() {
         return getIdnumber() + " " + getfName() + " " +
                 getlName() + " " + getKeepMeSignedIn() + " " + getToken();
+    }
+
+    public int getContributionCounter() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_CONT_COUNTER, 0);
     }
 
 //    public long getExpiryDate() { }

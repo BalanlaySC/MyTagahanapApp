@@ -13,6 +13,7 @@
     <color name="mapboxGrayLight">#c6d2e1</color>
 
     <color name="UEP_blue">#002366</color>
+    <color name="UEP_yellow">#cc8635</color>
     <color name="go_button">#2196F3</color>
     <color name="divider">#ECECEC</color>
 </resources>

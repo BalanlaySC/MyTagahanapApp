@@ -7,8 +7,9 @@ import java.util.List;
 
 public class Constants {
     public static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/";
-    public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php";
+    public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php?idnumber=";
     public static final String URL_LOGIN = ROOT_URL + "userLogin.php";
+    public static final String URL_SUBMIT_SUGGESTION = ROOT_URL + "submitSuggestion.php";
 
     public static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
     public static final String ROUTE_LAYER_ID = "route-layer-id";

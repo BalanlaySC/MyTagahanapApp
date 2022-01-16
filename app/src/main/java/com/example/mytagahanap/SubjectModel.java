@@ -1,8 +1,11 @@
 package com.example.mytagahanap;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
-public class SubjectModel {
+public class SubjectModel implements Parcelable {
     private String mClassID, mSubjectCode,
             mDescription,
             mTime, mDay, mRoom;
@@ -18,6 +21,27 @@ public class SubjectModel {
         this.mDay = mDay;
         this.mRoom = mRoom;
     }
+
+    protected SubjectModel(Parcel in) {
+        mClassID = in.readString();
+        mSubjectCode = in.readString();
+        mDescription = in.readString();
+        mTime = in.readString();
+        mDay = in.readString();
+        mRoom = in.readString();
+    }
+
+    public static final Creator<SubjectModel> CREATOR = new Creator<SubjectModel>() {
+        @Override
+        public SubjectModel createFromParcel(Parcel in) {
+            return new SubjectModel(in);
+        }
+
+        @Override
+        public SubjectModel[] newArray(int size) {
+            return new SubjectModel[size];
+        }
+    };
 
     @NonNull
     @Override
@@ -54,5 +78,20 @@ public class SubjectModel {
 
     public String getmDay() {
         return mDay;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(mClassID);
+        parcel.writeString(mSubjectCode);
+        parcel.writeString(mDescription);
+        parcel.writeString(mTime);
+        parcel.writeString(mDay);
+        parcel.writeString(mRoom);
     }
 }

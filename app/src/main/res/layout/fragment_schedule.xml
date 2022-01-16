@@ -10,12 +10,4 @@
         android:padding="4dp"
         android:scrollbars="vertical"
         android:background="@android:color/darker_gray"/>
-
-    <ProgressBar
-        android:id="@+id/pbSchedFrag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:progressTint="@color/black"
-        android:visibility="gone" />
 </RelativeLayout>

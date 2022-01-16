@@ -1,14 +1,13 @@
 package com.example.mytagahanap;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Rect;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,9 +20,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +33,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -45,30 +45,37 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
-import com.mapbox.geojson.Point;
-import com.mapbox.geojson.Polygon;
-import com.mapbox.turf.TurfJoins;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
+    public final Handler handler = new Handler(Looper.getMainLooper());
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private ArrayList<LocationModel> locations;
     private BottomSheetDialog bottomSheetDialog;
     private TextView btsTxtLocation;
+    private ProgressBar pbMainActivity;
 
     private MapFragment mapFragment;
+    private ScheduleFragment scheduleFragment;
     private MapInterface mapInterface;
 
-    private Point origin, destination;
+    private ArrayList<LocationModel> locations;
+    private ArrayList<SubjectModel> classSchedule;
     private String fullName;
     private int idnumber;
+    private long sessionTimeOut;
 
     public MainActivity() {}
 
@@ -77,21 +84,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-          // check if token is still valid
-//        if(!SharedPrefManager.getInstance(this).isLoggedIn()) {
-//            SharedPrefManager.getInstance(this).logOut();
-//            Toast.makeText(this, "Token expired. Login Again", Toast.LENGTH_LONG).show();
-//            finish();
-//            Intent intent = new Intent(getApplicationContext(), Login.class);
-//            startActivity(intent);
-//            return;
-//        }
-
         loadSharedPreference();
+
+          // check if token is still valid
+        if(isSessionTimedOut(sessionTimeOut) < 0) {
+            SharedPrefManager.getInstance(this).logOut();
+            Toast.makeText(this, "Your session has timed out.\nPlease log in again.", Toast.LENGTH_LONG).show();
+            finish();
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            return;
+        }
         initViews();
 
         if (savedInstanceState == null) {
             mapFragment = new MapFragment();
+            scheduleFragment = new ScheduleFragment();
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     mapFragment).commit();
             setMapInterface(mapFragment);
@@ -102,11 +110,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 enableLoc();
             }
         }
+
+        handler.postDelayed(this::parseUserClassSchedule, 1000);
+    }
+
+    private int isSessionTimedOut(long userTimeMillis) {
+        Date userDate = new Date(userTimeMillis);
+        Calendar cal = Calendar.getInstance();              // creates calendar
+        cal.setTime(new Date(System.currentTimeMillis()));  // sets calendar time/date
+        int result = compareDates(userDate, cal.getTime());
+        if(result > 0) {
+            Log.d(TAG, "isSessionTimedOut: Session is active " + userDate);
+        }
+        else if (result < 0) {
+            Log.d(TAG, "isSessionTimedOut: Session invalid " + userDate);
+        }
+        else {
+            Log.d(TAG, "isSessionTimedOut: Date is equal" + userDate);
+        }
+        return result;
     }
 
     private void loadSharedPreference() {
         fullName = SharedPrefManager.getInstance(this).getFullName();
         idnumber = SharedPrefManager.getInstance(this).getIdnumber();
+        sessionTimeOut = SharedPrefManager.getInstance(this).getTimeOutSession();
     }
 
     private void initViews() {
@@ -162,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
     }
 
-    // Initializing the option menu, specifically the search function
+    // Initializing the option menu, also the search function
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the search menu action bar.
@@ -241,7 +269,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_subjects:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new ScheduleFragment()).commit();
+                        scheduleFragment).commit();
+
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("Class Schedule", classSchedule);
+                scheduleFragment.setArguments(bundle);
                 break;
             case R.id.nav_bldginfo:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -380,5 +412,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // Parse the class schedule of the current user
+    public void parseUserClassSchedule() {
+        Log.d(TAG, "parseUserClassSchedule: Parsing data");
+        classSchedule = new ArrayList<>();
+        pbMainActivity = mapInterface.getMapFragView().findViewById(R.id.pbMapFragment);
+        pbMainActivity.setVisibility(View.VISIBLE);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET,
+                Constants.URL_CLASS_SCHED + idnumber,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        if (!obj.getBoolean("error")) {
+                            pbMainActivity.setVisibility(View.GONE);
+                            JSONArray allSubj = obj.getJSONArray("class_schedule");
+                            for (int i = 0; i < allSubj.length(); i++) {
+                                JSONObject arrayJObj = allSubj.getJSONObject(i);
+                                classSchedule.add(new SubjectModel(arrayJObj.getString("class_id"),
+                                        arrayJObj.getString("subj_code"),
+                                        arrayJObj.getString("description"),
+                                        arrayJObj.getString("time"),
+                                        arrayJObj.getString("day"),
+                                        arrayJObj.getString("room")));
+                            }
+                            classSchedule.sort(Comparator.comparing(SubjectModel::getmDescription));
+                        } else {
+                            Toast.makeText(this, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> {
+            pbMainActivity.setVisibility(View.GONE);
+            classSchedule.add(new SubjectModel("", "", "Unable to get subjects",
+                    "", "", ""));
+            Toast.makeText(this, "Server is down.", Toast.LENGTH_SHORT).show();
+        }) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("idnumber", String.valueOf(SharedPrefManager.getInstance(getApplicationContext()).getIdnumber()));
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
     public void setMapInterface(MapInterface mapInterface) { this.mapInterface = mapInterface; }
+    
+    /*  Compare two Date objects
+        -1 is past, 0 is equal, 1 is future */
+    public int compareDates(Date date1, Date date2) { return date1.compareTo(date2); }
 }

@@ -88,6 +88,7 @@
             android:layout_marginRight="5dp"
             android:background="@drawable/circle_holo_blue"
             android:elevation="8dp"
-            android:src="@drawable/ic_direction" />
+            android:src="@drawable/ic_direction"
+            android:contentDescription="Provide direction to the room of your subject" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

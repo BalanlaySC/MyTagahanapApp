@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -39,6 +40,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +49,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.android.volley.Request;
+import com.android.volley.toolbox.StringRequest;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -76,7 +80,12 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.turf.TurfJoins;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -96,7 +105,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private Point origin, destination;
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
-    private Dialog longClickDialog;
+    private Dialog longClickDialog, suggestionDialog;
 
     private Context mapFragmentContext;
 
@@ -128,6 +137,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             });
         });
         longClickDialog = new Dialog(getActivity());
+        suggestionDialog = new Dialog(getActivity());
         return view;
     }
 
@@ -252,6 +262,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                             routeGJS.setGeoJson(FeatureCollection.fromJson(""));
                             iconGJSOrigin.setGeoJson(FeatureCollection.fromJson(""));
                             iconGJSDestination.setGeoJson(FeatureCollection.fromJson(""));
+                        }
+                        if(iconGJSLongClick != null) {
+                            iconGJSLongClick.setGeoJson(FeatureCollection.fromJson(""));
                         }
                         routeGJS = style.getSourceAs(Constants.ROUTE_SOURCE_ID);
                         iconGJSOrigin = style.getSourceAs(Constants.ICON_SOURCE_ID_O);
@@ -386,6 +399,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         loadedMapStyle.addLayer(symbolLayer);
     }
 
+    // Display a dialog for generating path or submit a suggestion
     private void openLongClickedDialog(LatLng point) {
         longClickDialog.setOnCancelListener(dialogInterface -> iconGJSLongClick.setGeoJson(FeatureCollection.fromJson("")));
         longClickDialog.setContentView(R.layout.layout_dialog_longclick);
@@ -404,12 +418,56 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         ImageButton longClickImgBtnClose = longClickDialog.findViewById(R.id.longClickImgBtnClose);
         longClickDialog.show();
 
+        longClickBtnPath.setOnClickListener(view -> {
+            String pointName = String.format("%1$.7f, %2$.7f", point.getLatitude(), point.getLongitude());
+            initDirectionDialog(new LocationModel(pointName,
+                    (float) point.getLatitude(), (float) point.getLongitude()));
+            longClickDialog.dismiss();
+        });
+        longClickBtnSuggest.setOnClickListener(view -> {
+            clearLayers();
+            longClickDialog.dismiss();
+            int counter = SharedPrefManager.getInstance(mapFragmentContext).getContributionCounter();
+            if(counter < 5) {
+                SharedPrefManager.getInstance(mapFragmentContext).incrementContribution();
+                String toastMsg = String.format("You have %s suggestion query left.", (5 - counter));
+                Toast.makeText(mapFragmentContext, toastMsg, Toast.LENGTH_SHORT).show();
+                handler.postDelayed(() -> openSuggestionDialog(point), 250);
+            } else {
+                Toast.makeText(mapFragmentContext, "You have run out of suggestion query", Toast.LENGTH_SHORT).show();
+            }
+        });
         longClickImgBtnClose.setOnClickListener(view -> {
             clearLayers();
             longClickDialog.dismiss();
         });
     }
 
+    private void openSuggestionDialog(LatLng point) {
+        suggestionDialog.setContentView(R.layout.layout_dialog_suggestion);
+        suggestionDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        TextView suggestionLong = suggestionDialog.findViewById(R.id.suggestionLong);
+        suggestionLong.setText(String.valueOf(point.getLongitude()));
+        TextView suggestionLat = suggestionDialog.findViewById(R.id.suggestionLat);
+        suggestionLat.setText(String.valueOf(point.getLatitude()));
+        EditText suggestionLocName = suggestionDialog.findViewById(R.id.suggestionLocName);
+        EditText suggestionDescription = suggestionDialog.findViewById(R.id.suggestionDescription);
+        Button suggestionSendBtn = suggestionDialog.findViewById(R.id.suggestionSendBtn);
+        ImageButton suggestionImgBtnClose = suggestionDialog.findViewById(R.id.suggestionImgBtnClose);
+
+        suggestionSendBtn.setOnClickListener(view -> {
+            sendSuggestion(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+                    String.valueOf(suggestionLocName.getText()), String.valueOf(suggestionLong.getText()),
+                    String.valueOf(suggestionLat.getText()), String.valueOf(suggestionDescription.getText()));
+            suggestionDialog.dismiss();
+        });
+        suggestionImgBtnClose.setOnClickListener(view -> suggestionDialog.dismiss());
+
+        suggestionDialog.show();
+    }
+
+    // Display a Dialog for a current location and destination
     public void initDirectionDialog(LocationModel destinationLM) {
         Dialog directionsDialog = new Dialog(getActivity());
         directionsDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
@@ -477,6 +535,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }, 10000, 10000);
     }
 
+    // Remove generated icons or path
     @Override
     public void clearLayers() {
         // Where LAYER_ID is a valid id of a layer that already
@@ -493,6 +552,35 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 iconGJSLongClick.setGeoJson(FeatureCollection.fromJson(""));
             }
         });
+    }
+
+    private void sendSuggestion(String userIdNumber, String locName,
+                                String longitude, String latitude, String locDescription) {
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.URL_SUBMIT_SUGGESTION,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        Toast.makeText(mapFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> Toast.makeText(mapFragmentContext, "No connection to server.", Toast.LENGTH_SHORT).show()
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_idnumber", userIdNumber);
+                params.put("loc_name", locName);
+                params.put("longitude", longitude);
+                params.put("latitude", latitude);
+                params.put("loc_description", locDescription);
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
     }
 
     @Override
