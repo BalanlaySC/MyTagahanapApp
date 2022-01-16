@@ -20,8 +20,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -30,7 +28,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -48,9 +45,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -83,6 +84,8 @@ import com.mapbox.turf.TurfJoins;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,15 +108,17 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private Point origin, destination;
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
-    private Dialog longClickDialog, suggestionDialog;
+    private Dialog longClickDialog, suggestionDialog, locationsDialog;
+    private ExtendedFloatingActionButton mapfragmentFab;
 
     private Context mapFragmentContext;
 
-    String symbolLayerId;
+    private String symbolLayerId;
+    private ArrayList<LocationModel> locations;
 
     public MapFragment() { }
 
-    @SuppressLint("WrongConstant")
+    @SuppressLint({"WrongConstant", "ResourceType"})
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mapFragmentContext = requireContext().getApplicationContext();
@@ -136,8 +141,31 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 });
             });
         });
+
+        mapfragmentFab = view.findViewById(R.id.mapfragmentFab);
+        mapfragmentFab.shrink();
+        mapfragmentFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openLocationsDialog();
+                mapfragmentFab.hide();
+            }
+        });
+        mapfragmentFab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(!mapfragmentFab.isExtended()) {
+                    mapfragmentFab.extend();
+                } else {
+                    mapfragmentFab.shrink();
+                }
+                return true;
+            }
+        });
+
         longClickDialog = new Dialog(getActivity());
         suggestionDialog = new Dialog(getActivity());
+        locationsDialog = new Dialog(getActivity());
         return view;
     }
 
@@ -533,6 +561,45 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 }
             }
         }, 10000, 10000);
+    }
+
+    private void openLocationsDialog() {
+        locationsDialog.setContentView(R.layout.layout_dialog_locations);
+        locationsDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
+            if (i == KeyEvent.KEYCODE_BACK) {
+                locationsDialog.dismiss();
+                mapfragmentFab.show();
+            }
+            return true;
+        });
+        locationsDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        locations = new ArrayList<>();
+        Bundle bundle = getArguments();
+        if(bundle != null) {
+            locations = getArguments().getParcelableArrayList("Locations");
+            locations.sort(Comparator.comparing(LocationModel::getLocationName));
+        } else {
+            locations.add(new LocationModel("Unable to retrieve data", (float) 0.0, (float) 0.0));
+        }
+
+        RecyclerView mRecyclerView = locationsDialog.findViewById(R.id.recvLocations);
+        mRecyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mapFragmentContext);
+        LocationAdapter mAdapter = new LocationAdapter(locations);
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mAdapter.setOnItemClickListener(new LocationAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                String clckdLoc = locations.get(position).getLocationName();
+                Toast.makeText(mapFragmentContext, "Clicked location: " + clckdLoc, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        locationsDialog.show();
     }
 
     // Remove generated icons or path
