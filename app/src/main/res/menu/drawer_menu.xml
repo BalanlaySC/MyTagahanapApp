@@ -15,7 +15,7 @@
         <item
             android:id="@+id/nav_bldginfo"
             android:icon="@drawable/ic_info"
-            android:title="College Information" />
+            android:title="School Information" />
         <item
             android:id="@+id/nav_aboutdevs"
             android:icon="@drawable/ic_aboutdevs"
