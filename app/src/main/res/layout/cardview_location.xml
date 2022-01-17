@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cvrlLocations"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/divider"
+    tools:ignore="RtlSymmetry">
 
     <TextView
         android:id="@+id/cvtxtLocationName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:paddingStart="4dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:text="(Location Name)"
+        android:textColor="@color/light_gray_75darker"
         android:textSize="20sp"
         android:textStyle="bold" />
 
-</androidx.cardview.widget.CardView>
+</RelativeLayout>

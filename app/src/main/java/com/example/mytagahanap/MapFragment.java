@@ -50,8 +50,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -108,6 +108,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private Point origin, destination;
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
+    private BottomSheetDialog bottomSheetDialog;
     private Dialog longClickDialog, suggestionDialog, locationsDialog;
     private ExtendedFloatingActionButton mapfragmentFab;
 
@@ -116,7 +117,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private String symbolLayerId;
     private ArrayList<LocationModel> locations;
 
-    public MapFragment() { }
+    public MapFragment() {
+    }
 
     @SuppressLint({"WrongConstant", "ResourceType"})
     @Override
@@ -144,23 +146,17 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
         mapfragmentFab = view.findViewById(R.id.mapfragmentFab);
         mapfragmentFab.shrink();
-        mapfragmentFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openLocationsDialog();
-                mapfragmentFab.hide();
-            }
+        mapfragmentFab.setOnClickListener(view1 -> {
+            openLocationsDialog();
+            mapfragmentFab.hide();
         });
-        mapfragmentFab.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if(!mapfragmentFab.isExtended()) {
-                    mapfragmentFab.extend();
-                } else {
-                    mapfragmentFab.shrink();
-                }
-                return true;
+        mapfragmentFab.setOnLongClickListener(view12 -> {
+            if (!mapfragmentFab.isExtended()) {
+                mapfragmentFab.extend();
+            } else {
+                mapfragmentFab.shrink();
             }
+            return true;
         });
 
         longClickDialog = new Dialog(getActivity());
@@ -212,8 +208,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         LocationModel currentLM = new LocationModel(null, 0, 0);
         LocationModel origin;
 
-        for(LocationModel locationModel : DatabaseAccess.getInstance(mapFragmentContext).getAllLocations()) {
-            if(locationModel.getLocationName().equals(defaultLocation)) {
+        for (LocationModel locationModel : DatabaseAccess.getInstance(mapFragmentContext).getAllLocations()) {
+            if (locationModel.getLocationName().equals(defaultLocation)) {
                 currentLM = locationModel;
             }
         }
@@ -226,8 +222,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 LocationModel point = new LocationModel("Current Location",
                         (float) location.getLatitude(), (float) location.getLongitude());
                 boolean isLocInsideUEP = TurfJoins.inside(
-                        Point.fromLngLat(point.getLocationLng(), point.getLocationLat()),polygon);
-                if(isLocInsideUEP) {
+                        Point.fromLngLat(point.getLocationLng(), point.getLocationLat()), polygon);
+                if (isLocInsideUEP) {
                     Log.d(TAG, "getDevCurrentLocation: L415-Inside UEP " + true);
                     origin = point;
                 } else {
@@ -248,11 +244,14 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         return origin;
     }
 
-    /**Make a request to the Mapbox Directions API. Once successful, pass the route to the
+    /**
+     * Make a request to the Mapbox Directions API. Once successful, pass the route to the
      * route layer.
-     * @param mapboxMap the Mapbox map object that the route will be drawn on
+     *
+     * @param mapboxMap   the Mapbox map object that the route will be drawn on
      * @param origin      the starting point of the route
-     * @param destination the desired finish point of the route */
+     * @param destination the desired finish point of the route
+     */
     public void getRoute(MapboxMap mapboxMap, Point origin, Point destination) {
         MapboxDirections mapboxDirections = MapboxDirections.builder()
                 .origin(origin)
@@ -291,7 +290,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                             iconGJSOrigin.setGeoJson(FeatureCollection.fromJson(""));
                             iconGJSDestination.setGeoJson(FeatureCollection.fromJson(""));
                         }
-                        if(iconGJSLongClick != null) {
+                        if (iconGJSLongClick != null) {
                             iconGJSLongClick.setGeoJson(FeatureCollection.fromJson(""));
                         }
                         routeGJS = style.getSourceAs(Constants.ROUTE_SOURCE_ID);
@@ -309,11 +308,11 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                             routeGJS.setGeoJson(LineString.fromPolyline(Objects.requireNonNull(currentRoute.geometry()), PRECISION_6));
                         }
                         if (iconGJSOrigin != null) {
-                            iconGJSOrigin.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
+                            iconGJSOrigin.setGeoJson(FeatureCollection.fromFeatures(new Feature[]{
                                     Feature.fromGeometry(Point.fromLngLat(origin.longitude(), origin.latitude()))}));
                         }
                         if (iconGJSDestination != null) {
-                            iconGJSDestination.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
+                            iconGJSDestination.setGeoJson(FeatureCollection.fromFeatures(new Feature[]{
                                     Feature.fromGeometry(Point.fromLngLat(destination.longitude(), destination.latitude()))}));
                         }
                     });
@@ -334,11 +333,11 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         mapboxMap.getStyle(style -> {
             Objects.requireNonNull(style.getLayer(symbolLayerId)).setProperties(
                     textField(""),
-                    textFont(new String[] {"Roboto Regular","Arial Unicode MS Regular"}),
-                    textOffset(new Float[] {0f, -1.25f}));
+                    textFont(new String[]{"Roboto Regular", "Arial Unicode MS Regular"}),
+                    textOffset(new Float[]{0f, -1.25f}));
             iconGJSLongClick = style.getSourceAs(Constants.ICON_SOURCE_ID_LC);
             if (iconGJSLongClick != null) {
-                iconGJSLongClick.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
+                iconGJSLongClick.setGeoJson(FeatureCollection.fromFeatures(new Feature[]{
                         Feature.fromGeometry(clickedLoc)}));
             }
 
@@ -354,11 +353,11 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         mapboxMap.getStyle(style -> {
             Objects.requireNonNull(style.getLayer(symbolLayerId)).setProperties(
                     textField(clickedLocation.getLocationName()),
-                    textFont(new String[] {"Roboto Black","Arial Unicode MS Bold"}),
-                    textOffset(new Float[] {0f, -1.25f}));
+                    textFont(new String[]{"Roboto Black", "Arial Unicode MS Bold"}),
+                    textOffset(new Float[]{0f, -1.25f}));
             iconGJSLongClick = style.getSourceAs(Constants.ICON_SOURCE_ID_LC);
             if (iconGJSLongClick != null) {
-                iconGJSLongClick.setGeoJson(FeatureCollection.fromFeatures(new Feature[] {
+                iconGJSLongClick.setGeoJson(FeatureCollection.fromFeatures(new Feature[]{
                         Feature.fromGeometry(Point.fromLngLat(cLLng, cLLat))}));
             }
 
@@ -402,32 +401,59 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 iconSize((float) 0.25),
                 iconIgnorePlacement(true),
                 iconAllowOverlap(true),
-                iconOffset(new Float[] {0f, -9f}),
+                iconOffset(new Float[]{0f, -9f}),
                 textField("You are here"),
-                textFont(new String[] {"Roboto Regular","Arial Unicode MS Regular"}),
-                textOffset(new Float[] {0f, -1.25f})));
+                textFont(new String[]{"Roboto Regular", "Arial Unicode MS Regular"}),
+                textOffset(new Float[]{0f, -1.25f})));
 
         loadedMapStyle.addLayer(new SymbolLayer(Constants.ICON_LAYER_ID_D, Constants.ICON_SOURCE_ID_D).withProperties(
                 iconImage(Constants.RED_PIN_ICON_ID),
                 iconSize((float) 0.25),
                 iconIgnorePlacement(true),
                 iconAllowOverlap(true),
-                iconOffset(new Float[] {0f, -9f}),
+                iconOffset(new Float[]{0f, -9f}),
                 textField("Destination"),
-                textFont(new String[] {"Roboto Regular","Arial Unicode MS Regular"}),
-                textOffset(new Float[] {0f, -1.25f})));
+                textFont(new String[]{"Roboto Regular", "Arial Unicode MS Regular"}),
+                textOffset(new Float[]{0f, -1.25f})));
 
         SymbolLayer symbolLayer = new SymbolLayer(Constants.ICON_LAYER_ID_LC, Constants.ICON_SOURCE_ID_LC).withProperties(
                 iconImage(Constants.BLUE_PIN_ICON_ID),
                 iconSize((float) 0.2),
                 iconIgnorePlacement(true),
                 iconAllowOverlap(true),
-                iconOffset(new Float[] {0f, -9f}));
+                iconOffset(new Float[]{0f, -9f}));
         symbolLayerId = symbolLayer.getId();
         loadedMapStyle.addLayer(symbolLayer);
     }
 
-    // Display a dialog for generating path or submit a suggestion
+    // Display bottomsheet dialog to show information of the location
+    public void openBottomSheetDialog(LocationModel clickedLocation, Context context) {
+        handler.postDelayed((Runnable) () -> markMapboxMapOffset(getMapboxMap(), clickedLocation), 500);
+        bottomSheetDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+        bottomSheetDialog.setOnCancelListener(dialogInterface -> clearLayers());
+        View bottomSheetView = LayoutInflater.from(context)
+                .inflate(R.layout.layout_bottom_sheet, getMapFragView().findViewById(R.id.bottomSheetContainer));
+
+        // OnClickListener for Directions Button
+        bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
+            Log.d(TAG, "initViews: Directions started");
+            bottomSheetDialog.dismiss();
+
+            // Popup dialog when pressing directions/starting navigation
+            initDirectionDialog(clickedLocation);
+        });
+        TextView btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
+        btsTxtLocation.setText(clickedLocation.getLocationName());
+        if (MainActivity.isLocationEnabled(context)) {
+            Toast.makeText(context, "To start at your current location " +
+                    "you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
+        }
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
+    }
+
+    // Display dialog for generating path or submit a suggestion
     private void openLongClickedDialog(LatLng point) {
         longClickDialog.setOnCancelListener(dialogInterface -> iconGJSLongClick.setGeoJson(FeatureCollection.fromJson("")));
         longClickDialog.setContentView(R.layout.layout_dialog_longclick);
@@ -456,7 +482,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             clearLayers();
             longClickDialog.dismiss();
             int counter = SharedPrefManager.getInstance(mapFragmentContext).getContributionCounter();
-            if(counter < 5) {
+            if (counter < 5) {
                 SharedPrefManager.getInstance(mapFragmentContext).incrementContribution();
                 String toastMsg = String.format("You have %s suggestion query left.", (5 - counter));
                 Toast.makeText(mapFragmentContext, toastMsg, Toast.LENGTH_SHORT).show();
@@ -471,6 +497,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
     }
 
+    // Display dialog for sending suggestions
     private void openSuggestionDialog(LatLng point) {
         suggestionDialog.setContentView(R.layout.layout_dialog_suggestion);
         suggestionDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -495,14 +522,20 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         suggestionDialog.show();
     }
 
-    // Display a Dialog for a current location and destination
+    // Display dialog for a current location and destination
     public void initDirectionDialog(LocationModel destinationLM) {
+        handler.postDelayed(() -> {
+            if (mapfragmentFab != null)
+                mapfragmentFab.hide();
+        }, 500);
         Dialog directionsDialog = new Dialog(getActivity());
         directionsDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_BACK) {
                 directionsDialog.dismiss();
                 clearLayers();
                 Log.d(TAG, "initDirectionDialog: directDialog " + directionsDialog.isShowing());
+                if (mapfragmentFab != null)
+                    mapfragmentFab.show();
             }
             return true;
         });
@@ -517,7 +550,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
         WindowManager.LayoutParams wlp = window.getAttributes();
-        wlp.y = 50;
+        wlp.y = 30;
         window.setAttributes(wlp);
 
         TextView directionsStartLoc = directionsDialog.findViewById(R.id.directionsStartLoc);
@@ -539,16 +572,18 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         directionsImgBtnClose.setOnClickListener(view -> {
             clearLayers();
             directionsDialog.dismiss();
+            if (mapfragmentFab != null)
+                mapfragmentFab.show();
         });
 
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if(getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         Log.d(TAG, "initDirectionDialog: directDialog " + directionsDialog.isShowing());
-                        if(directionsDialog.isShowing()) {
+                        if (directionsDialog.isShowing()) {
                             Log.d(TAG, "initViews: 15 secs passed executing reroute");
                             LocationModel currentLM = getDevCurrentLocation();
                             origin = Point.fromLngLat(currentLM.getLocationLng(),
@@ -563,6 +598,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }, 10000, 10000);
     }
 
+    // Display dialog for list of locations
     private void openLocationsDialog() {
         locationsDialog.setContentView(R.layout.layout_dialog_locations);
         locationsDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
@@ -572,17 +608,28 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
             return true;
         });
-        locationsDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Window window = locationsDialog.getWindow();
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.setGravity(Gravity.BOTTOM);
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.y = 30;
+        window.setAttributes(wlp);
 
         locations = new ArrayList<>();
         Bundle bundle = getArguments();
-        if(bundle != null) {
+        if (bundle != null) {
             locations = getArguments().getParcelableArrayList("Locations");
             locations.sort(Comparator.comparing(LocationModel::getLocationName));
         } else {
             locations.add(new LocationModel("Unable to retrieve data", (float) 0.0, (float) 0.0));
         }
 
+        ImageButton recvImgBtnClose = locationsDialog.findViewById(R.id.recvImgBtnClose);
         RecyclerView mRecyclerView = locationsDialog.findViewById(R.id.recvLocations);
         mRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mapFragmentContext);
@@ -591,12 +638,15 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
-        mAdapter.setOnItemClickListener(new LocationAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                String clckdLoc = locations.get(position).getLocationName();
-                Toast.makeText(mapFragmentContext, "Clicked location: " + clckdLoc, Toast.LENGTH_SHORT).show();
-            }
+        mAdapter.setOnItemClickListener(position -> {
+            mapfragmentFab.show();
+
+            openBottomSheetDialog(locations.get(position), requireContext());
+            locationsDialog.dismiss();
+        });
+        recvImgBtnClose.setOnClickListener(view -> {
+            locationsDialog.dismiss();
+            mapfragmentFab.show();
         });
 
         locationsDialog.show();
@@ -615,8 +665,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 iconGJSDestination.setGeoJson(FeatureCollection.fromJson(""));
                 handler.postDelayed(() -> enableLocationComponent(style), 500);
             }
-            if(iconGJSLongClick != null) {
+            if (iconGJSLongClick != null) {
                 iconGJSLongClick.setGeoJson(FeatureCollection.fromJson(""));
+                handler.postDelayed(() -> enableLocationComponent(style), 500);
             }
         });
     }
@@ -693,23 +744,43 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     @Override
-    public void setMapboxMap(MapboxMap mapboxMap) { MapFragment.this.mapboxMap = mapboxMap; }
+    public void setMapboxMap(MapboxMap mapboxMap) {
+        MapFragment.this.mapboxMap = mapboxMap;
+    }
 
     @Override
-    public void setMapFragView(View v) { MapFragment.this.view = v; }
+    public void setMapFragView(View v) {
+        MapFragment.this.view = v;
+    }
 
     @Override
-    public void setClickedLocation(LatLng clickedLocation) { MapFragment.this.latLng = clickedLocation; }
+    public void setClickedLocation(LatLng clickedLocation) {
+        MapFragment.this.latLng = clickedLocation;
+    }
 
     @Override
-    public MapboxMap getMapboxMap() { return MapFragment.this.mapboxMap; }
+    public MapboxMap getMapboxMap() {
+        return MapFragment.this.mapboxMap;
+    }
 
     @Override
-    public View getMapFragView() { return MapFragment.this.view; }
+    public View getMapFragView() {
+        return MapFragment.this.view;
+    }
 
     @Override
     public Point getClickedLocation() {
         return Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude());
+    }
+
+    // Return LocationModel object with locationName loc
+    public LocationModel getLocationObj(String loc) {
+        for (LocationModel locationModel : locations) {
+            if (locationModel.getLocationName().equals(loc)) {
+                return locationModel;
+            }
+        }
+        return null;
     }
 
     @Override

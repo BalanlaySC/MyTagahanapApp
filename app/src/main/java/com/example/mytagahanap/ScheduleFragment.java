@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ScheduleFragment extends Fragment {
     private static final String TAG = "ScheduleFragment";
@@ -38,7 +39,6 @@ public class ScheduleFragment extends Fragment {
 
         initAccess(view);
         buildRecyclerView(view);
-
         return view;
     }
 
@@ -81,7 +81,8 @@ public class ScheduleFragment extends Fragment {
                     mapFragment).commit();
             setMapInterface(mapFragment);
 
-            handler.postDelayed(() -> mapInterface.initDirectionDialog(destinationLM), 1000);
+            handler.postDelayed(() -> mapInterface.openBottomSheetDialog(destinationLM,
+                    mapInterface.getMapFragView().getContext()), 1000);
         });
     }
 

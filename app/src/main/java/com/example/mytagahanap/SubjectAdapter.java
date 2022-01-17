@@ -60,7 +60,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
     @NonNull
     @Override
     public SubjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.subject_cardview, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_subject, parent, false);
         SubjectViewHolder svh = new SubjectViewHolder(v, mListener);
         return svh;
     }

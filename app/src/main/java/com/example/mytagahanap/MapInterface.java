@@ -14,6 +14,7 @@ public interface MapInterface {
     void setMapboxMap(MapboxMap mbM);
     void setMapFragView(View v);
     void initDirectionDialog(LocationModel lm1);
+    void openBottomSheetDialog(LocationModel lm1, Context context);
     void setClickedLocation(LatLng p);
     MapboxMap getMapboxMap();
     void getRoute(MapboxMap mbM, Point p1, Point p2);

@@ -33,6 +33,8 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
@@ -44,7 +46,6 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONArray;
@@ -64,8 +65,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private BottomSheetDialog bottomSheetDialog;
-    private TextView btsTxtLocation;
     private ProgressBar pbMainActivity;
 
     private MapFragment mapFragment;
@@ -177,22 +176,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext())
-                .inflate(R.layout.layout_bottom_sheet, findViewById(R.id.bottomSheetContainer));
-
-        // OnClickListener for Directions Button
-        bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
-            Log.d(TAG, "initViews: Directions started");
-            bottomSheetDialog.dismiss();
-            LocationModel clickedLocation = getLocationObj((String) btsTxtLocation.getText());
-
-            // Popup dialog when pressing directions/starting navigation
-            mapInterface.initDirectionDialog(clickedLocation);
-        });
-        bottomSheetDialog.setContentView(bottomSheetView);
-        btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
     }
 
     // Initializing the option menu, also the search function
@@ -223,8 +206,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             searchView.clearFocus();
             LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
             searchAutoComplete.setText(clickedLocation.getLocationName());
-            initBottomSheet(clickedLocation.getLocationName());
-            mapInterface.markMapboxMapOffset(mapInterface.getMapboxMap(), clickedLocation);
+            mapInterface.openBottomSheetDialog(clickedLocation, MainActivity.this);
             if (mapMenuItem != currentMenuItem) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         mapFragment).commit();
@@ -239,8 +221,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 searchView.clearFocus();
                 if (containsLocation(query)) {
                     LocationModel clickedLocation = getLocationObj(query);
-                    initBottomSheet(query);
-                    mapInterface.markMapboxMapOffset(mapInterface.getMapboxMap(), clickedLocation);
+                    mapInterface.openBottomSheetDialog(clickedLocation, MainActivity.this);
                     if (mapMenuItem != currentMenuItem) {
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 mapFragment).commit();
@@ -409,17 +390,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (locationModel.getLocationName().equals(loc)) { return locationModel; }
         }
         return null;
-    }
-
-    // Initialize bottom sheet
-    public void initBottomSheet(String query) {
-        bottomSheetDialog.show();
-        btsTxtLocation.setText(query);
-        if (isLocationEnabled(MainActivity.this)) {
-            Toast.makeText(MainActivity.this, "To start at your current location " +
-                    "you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
-        }
-        bottomSheetDialog.setOnCancelListener(dialogInterface -> mapInterface.clearLayers());
     }
 
     // Parse the class schedule of the current user
