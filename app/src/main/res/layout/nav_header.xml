@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navheaderLayout"
     android:layout_width="match_parent"
-    android:layout_height="176dp"
+    android:layout_height="160dp"
     android:background="@color/UEP_blue"
     android:gravity="bottom"
     android:orientation="vertical"

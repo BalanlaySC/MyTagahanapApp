@@ -90,17 +90,66 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/forgot_password"
-        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="@+id/textInputLayout2"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout2"
         tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="@string/sample_text"
+        android:textColor="#ff8080"
+        android:textSize="16sp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
 
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:backgroundTint="@color/go_button"
         android:text="@string/login"
+        android:textColor="@color/UEP_blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkboxKMSI" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
+
+    <LinearLayout
+        android:id="@+id/tokenLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin">
+
+        <EditText
+            android:id="@+id/editTxtToken"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Enter token" />
+
+        <Button
+            android:id="@+id/buttonTokenSend"
+            android:layout_width="175dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/go_button"
+            android:drawableEnd="@drawable/ic_send"
+            android:minWidth="50dip"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="Send"
+            android:textAllCaps="false"
+            android:textColor="@color/UEP_blue" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,6 +10,8 @@ public class Constants {
     public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php?idnumber=";
     public static final String URL_LOGIN = ROOT_URL + "userLogin.php";
     public static final String URL_SUBMIT_SUGGESTION = ROOT_URL + "submitSuggestion.php";
+    public static final String URL_CHANGE_PASSWORD = ROOT_URL + "changePassword.php";
+    public static final String URL_RESET_PASSWORD = ROOT_URL + "resetPassword.php";
 
     public static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
     public static final String ROUTE_LAYER_ID = "route-layer-id";

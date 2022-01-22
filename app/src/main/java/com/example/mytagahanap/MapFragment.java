@@ -1,8 +1,6 @@
 package com.example.mytagahanap;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.backgroundColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.backgroundOpacity;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
@@ -39,6 +37,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -109,7 +108,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
     private BottomSheetDialog bottomSheetDialog;
-    private Dialog longClickDialog, suggestionDialog, locationsDialog;
+    private Dialog suggestionDialog, locationsDialog;
     private ExtendedFloatingActionButton mapfragmentFab;
 
     private Context mapFragmentContext;
@@ -136,9 +135,12 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 enableLocationComponent(style);
                 initLayers(style);
                 mapboxMap.addOnMapLongClickListener(point -> {
-                    setClickedLocation(point);
-                    markMapboxMap(mapboxMap, getClickedLocation());
-                    openLongClickedDialog(point);
+//                    setClickedLocation(point);
+//                    markMapboxMap(mapboxMap, getClickedLocation());
+                    @SuppressLint("DefaultLocale") String pointName = String.format("%1$.7f, %2$.7f", point.getLongitude(), point.getLatitude());
+                    openBottomSheetDialog(new LocationModel(pointName, (float) point.getLatitude(), (float) point.getLongitude()),
+                            requireContext());
+//                    openLongClickedDialog(point);
                     return false;
                 });
             });
@@ -158,10 +160,17 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
             return true;
         });
-
-        longClickDialog = new Dialog(getActivity());
         suggestionDialog = new Dialog(getActivity());
         locationsDialog = new Dialog(getActivity());
+
+        locations = new ArrayList<>();
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            locations = getArguments().getParcelableArrayList("Locations");
+            locations.sort(Comparator.comparing(LocationModel::getLocationName));
+        } else {
+            locations.add(new LocationModel("Unable to retrieve data", (float) 0.0, (float) 0.0));
+        }
         return view;
     }
 
@@ -205,39 +214,35 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         LocationManager lm = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         String defaultLocation = SharedPrefManager.getInstance(mapFragmentContext).getDefLoc();
-        LocationModel currentLM = new LocationModel(null, 0, 0);
+        Log.d(TAG, "getDevCurrentLocation: defaultlocation " + defaultLocation);
+        LocationModel currentLM = getLocationObj(defaultLocation);
         LocationModel origin;
 
-        for (LocationModel locationModel : DatabaseAccess.getInstance(mapFragmentContext).getAllLocations()) {
-            if (locationModel.getLocationName().equals(defaultLocation)) {
-                currentLM = locationModel;
-            }
-        }
         Polygon polygon = Polygon.fromLngLats(com.example.mytagahanap.Constants.POINTS);
 
         boolean isLocEnabled = !MainActivity.isLocationEnabled(mapFragmentContext);
         if (isLocEnabled) {
-            Log.d(TAG, "getDevCurrentLocation: L410-User location is on " + true);
+            Log.d(TAG, "getDevCurrentLocation: L218-User location is on " + true);
             if (location != null) {
                 LocationModel point = new LocationModel("Current Location",
                         (float) location.getLatitude(), (float) location.getLongitude());
                 boolean isLocInsideUEP = TurfJoins.inside(
                         Point.fromLngLat(point.getLocationLng(), point.getLocationLat()), polygon);
                 if (isLocInsideUEP) {
-                    Log.d(TAG, "getDevCurrentLocation: L415-Inside UEP " + true);
+                    Log.d(TAG, "getDevCurrentLocation: L225-Inside UEP " + true);
                     origin = point;
                 } else {
-                    Log.d(TAG, "getDevCurrentLocation: L418-Inside UEP " + false);
+                    Log.d(TAG, "getDevCurrentLocation: L228-Inside UEP " + false);
                     Toast.makeText(mapFragmentContext, "Currently outside of UEP\n" +
                             "Generating path from " + currentLM.getLocationName(), Toast.LENGTH_LONG).show();
                     origin = currentLM;
                 }
             } else {
-                Log.d(TAG, "getDevCurrentLocation: L422-Location is null");
+                Log.d(TAG, "getDevCurrentLocation: L234-Location is null");
                 origin = currentLM;
             }
         } else {
-            Log.d(TAG, "getDevCurrentLocation: L426-User location is on " + false);
+            Log.d(TAG, "getDevCurrentLocation: L348-User location is on " + false);
             origin = currentLM;
         }
 
@@ -428,73 +433,37 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
     // Display bottomsheet dialog to show information of the location
     public void openBottomSheetDialog(LocationModel clickedLocation, Context context) {
-        handler.postDelayed((Runnable) () -> markMapboxMapOffset(getMapboxMap(), clickedLocation), 500);
+        handler.postDelayed(() -> markMapboxMapOffset(getMapboxMap(), clickedLocation), 250);
         bottomSheetDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
         bottomSheetDialog.setOnCancelListener(dialogInterface -> clearLayers());
-        View bottomSheetView = LayoutInflater.from(context)
-                .inflate(R.layout.layout_bottom_sheet, getMapFragView().findViewById(R.id.bottomSheetContainer));
+        bottomSheetDialog.setContentView(R.layout.layout_bottom_sheet);
 
         // OnClickListener for Directions Button
-        bottomSheetView.findViewById(R.id.btnDirections).setOnClickListener(view -> {
-            Log.d(TAG, "initViews: Directions started");
-            bottomSheetDialog.dismiss();
+        TextView btnDirections = bottomSheetDialog.findViewById(R.id.btnDirections);
+        if (btnDirections != null) {
+            btnDirections.setOnClickListener(view -> {
+                Log.d(TAG, "initViews: Directions started");
+                bottomSheetDialog.dismiss();
 
-            // Popup dialog when pressing directions/starting navigation
-            initDirectionDialog(clickedLocation);
-        });
-        TextView btsTxtLocation = bottomSheetView.findViewById(R.id.btsTxtLocation);
-        btsTxtLocation.setText(clickedLocation.getLocationName());
+                // Popup dialog when pressing directions/starting navigation
+                initDirectionDialog(clickedLocation);
+            });
+        }
+        TextView btsTxtLocation = bottomSheetDialog.findViewById(R.id.btsTxtLocation);
+        if (btsTxtLocation != null) {
+            btsTxtLocation.setText(clickedLocation.getLocationName());
+        }
+        LinearLayout bsInnerLayout = bottomSheetDialog.findViewById(R.id.bsInnerLayout);
+        if (bsInnerLayout != null) {
+            if (containsLocation(clickedLocation.getLocationName())) {
+                bsInnerLayout.setVisibility(View.VISIBLE);
+            }
+        }
         if (MainActivity.isLocationEnabled(context)) {
             Toast.makeText(context, "To start at your current location " +
                     "you must enable GPS/Location Access", Toast.LENGTH_SHORT).show();
         }
-
-        bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
-    }
-
-    // Display dialog for generating path or submit a suggestion
-    private void openLongClickedDialog(LatLng point) {
-        longClickDialog.setOnCancelListener(dialogInterface -> iconGJSLongClick.setGeoJson(FeatureCollection.fromJson("")));
-        longClickDialog.setContentView(R.layout.layout_dialog_longclick);
-        longClickDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        Window window = longClickDialog.getWindow();
-        WindowManager.LayoutParams wlp = window.getAttributes();
-
-        wlp.gravity = Gravity.BOTTOM;
-        wlp.y = 300;
-        wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-        window.setAttributes(wlp);
-
-        // todo add direction and suggestion
-        Button longClickBtnPath = longClickDialog.findViewById(R.id.longClickBtnPath);
-        Button longClickBtnSuggest = longClickDialog.findViewById(R.id.longClickBtnSuggest);
-        ImageButton longClickImgBtnClose = longClickDialog.findViewById(R.id.longClickImgBtnClose);
-        longClickDialog.show();
-
-        longClickBtnPath.setOnClickListener(view -> {
-            String pointName = String.format("%1$.7f, %2$.7f", point.getLatitude(), point.getLongitude());
-            initDirectionDialog(new LocationModel(pointName,
-                    (float) point.getLatitude(), (float) point.getLongitude()));
-            longClickDialog.dismiss();
-        });
-        longClickBtnSuggest.setOnClickListener(view -> {
-            clearLayers();
-            longClickDialog.dismiss();
-            int counter = SharedPrefManager.getInstance(mapFragmentContext).getContributionCounter();
-            if (counter < 5) {
-                SharedPrefManager.getInstance(mapFragmentContext).incrementContribution();
-                String toastMsg = String.format("You have %s suggestion query left.", (5 - counter));
-                Toast.makeText(mapFragmentContext, toastMsg, Toast.LENGTH_SHORT).show();
-                handler.postDelayed(() -> openSuggestionDialog(point), 250);
-            } else {
-                Toast.makeText(mapFragmentContext, "You have run out of suggestion query", Toast.LENGTH_SHORT).show();
-            }
-        });
-        longClickImgBtnClose.setOnClickListener(view -> {
-            clearLayers();
-            longClickDialog.dismiss();
-        });
     }
 
     // Display dialog for sending suggestions
@@ -620,15 +589,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         wlp.y = 30;
         window.setAttributes(wlp);
 
-        locations = new ArrayList<>();
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            locations = getArguments().getParcelableArrayList("Locations");
-            locations.sort(Comparator.comparing(LocationModel::getLocationName));
-        } else {
-            locations.add(new LocationModel("Unable to retrieve data", (float) 0.0, (float) 0.0));
-        }
-
         ImageButton recvImgBtnClose = locationsDialog.findViewById(R.id.recvImgBtnClose);
         RecyclerView mRecyclerView = locationsDialog.findViewById(R.id.recvLocations);
         mRecyclerView.setHasFixedSize(true);
@@ -744,14 +704,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     @Override
-    public void setMapboxMap(MapboxMap mapboxMap) {
-        MapFragment.this.mapboxMap = mapboxMap;
-    }
+    public void setMapboxMap(MapboxMap mapboxMap) { MapFragment.this.mapboxMap = mapboxMap; }
 
     @Override
-    public void setMapFragView(View v) {
-        MapFragment.this.view = v;
-    }
+    public void setMapFragView(View v) { MapFragment.this.view = v; }
 
     @Override
     public void setClickedLocation(LatLng clickedLocation) {
@@ -759,14 +715,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     @Override
-    public MapboxMap getMapboxMap() {
-        return MapFragment.this.mapboxMap;
-    }
+    public MapboxMap getMapboxMap() { return MapFragment.this.mapboxMap; }
 
     @Override
-    public View getMapFragView() {
-        return MapFragment.this.view;
-    }
+    public View getMapFragView() { return MapFragment.this.view; }
 
     @Override
     public Point getClickedLocation() {
@@ -781,6 +733,16 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
         }
         return null;
+    }
+
+    // Check if the string loc is in the Arraylist location
+    public boolean containsLocation(String loc) {
+        for (LocationModel locationModel : locations) {
+            if (locationModel.getLocationName().equals(loc)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

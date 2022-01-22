@@ -4,14 +4,16 @@
     android:id="@+id/bottomSheetContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:theme="@style/Theme.MyTagahanap">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/btsTxtLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="10dp"
         android:text="Insert Location"
         android:textColor="@color/black"
         android:textSize="20sp"
@@ -20,15 +22,16 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
-        android:background="@color/divider" />
+        android:background="@color/light_gray_25darker" />
 
     <LinearLayout
+        android:id="@+id/bsInnerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:visibility="gone">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:layout_width="150dp"
@@ -37,8 +40,8 @@
             android:scaleType="centerCrop"
             android:src="@mipmap/ic_launcher"
             app:shapeAppearanceOverlay="@style/RoundedSquare"
-            app:strokeWidth="5dp"
-            app:strokeColor="@color/divider"/>
+            app:strokeColor="@color/divider"
+            app:strokeWidth="5dp" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:layout_width="150dp"
@@ -47,15 +50,14 @@
             android:scaleType="centerCrop"
             android:src="@mipmap/ic_launcher"
             app:shapeAppearanceOverlay="@style/RoundedSquare"
-            app:strokeWidth="5dp"
-            app:strokeColor="@color/divider"/>
+            app:strokeColor="@color/divider"
+            app:strokeWidth="5dp" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
-        android:background="@color/divider" />
+        android:background="@color/light_gray_25darker" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -71,9 +73,10 @@
             android:layout_marginEnd="10dp"
             android:layout_weight="5"
             android:background="@drawable/roundcorner_lightblue"
+            android:backgroundTint="@color/go_button"
             android:gravity="center"
             android:text="Directions"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -82,7 +85,8 @@
             android:layout_width="100dp"
             android:layout_height="50dp"
             android:layout_weight="5"
-            android:background="@drawable/roundcorner_grayish"
+            android:background="@drawable/roundcorner_lightblue"
+            android:contentDescription="More option"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_show_more" />
     </LinearLayout>

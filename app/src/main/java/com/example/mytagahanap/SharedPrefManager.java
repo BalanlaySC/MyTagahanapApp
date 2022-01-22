@@ -9,6 +9,7 @@ public class SharedPrefManager {
 
     private static final String PREFERENCES = "preferences";
     private static final String KEY_ID_NUMBER = "userIdnumber";
+    private static final String KEY_PASSWORD = "userPassword";
     private static final String KEY_USER_FNAME = "userfName";
     private static final String KEY_USER_LNAME = "userlName";
     private static final String KEY_DEF_LOC = "userDefLoc";
@@ -34,6 +35,7 @@ public class SharedPrefManager {
 
     public boolean userLogin(
             int idnumber,
+            String password,
             String fName,
             String lName,
             String defloc,
@@ -44,6 +46,7 @@ public class SharedPrefManager {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putInt(KEY_ID_NUMBER, idnumber);
+        editor.putString(KEY_PASSWORD, password);
         editor.putString(KEY_USER_FNAME, fName);
         editor.putString(KEY_USER_LNAME, lName);
         editor.putString(KEY_DEF_LOC, defloc);
@@ -72,6 +75,14 @@ public class SharedPrefManager {
         if(getContributionCounter() < 5) {
             editor.putInt(KEY_CONT_COUNTER, getContributionCounter() + 1);
         }
+        editor.apply();
+    }
+
+    public void updatePassword(String newPass) {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString(KEY_PASSWORD, newPass);
         editor.apply();
     }
 
@@ -117,6 +128,11 @@ public class SharedPrefManager {
     public long getTimeOutSession() {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getLong(KEY_TIME_OUT_SESSION, 0);
+    }
+
+    public String getPassword() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(KEY_PASSWORD, "");
     }
 
     public String getFullName() {

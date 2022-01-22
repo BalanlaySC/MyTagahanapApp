@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:background="@drawable/roundcorner_lightblue"
+        android:backgroundTint="#ece1cb"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/profileimgView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:src="@mipmap/ic_launcher_round"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/Circular" />
+
+        <TextView
+            android:id="@+id/profileDialogTxtView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileimgView"
+            android:layout_centerHorizontal="true"
+            android:text="User Profile"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <View
+            android:id="@+id/profileDivider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_below="@+id/profileDialogTxtView"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/light_gray_25darker" />
+
+        <TextView
+            android:id="@+id/profileNameIdentifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileDivider"
+            android:layout_alignStart="@+id/profileDivider"
+            android:text="Name" />
+
+        <TextView
+            android:id="@+id/profileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileNameIdentifier"
+            android:layout_alignStart="@+id/profileNameIdentifier"
+            android:layout_marginBottom="10dp"
+            android:text="@string/sample_text"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Full Name" />
+
+        <TextView
+            android:id="@+id/profileIdnumberIdentifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileName"
+            android:layout_alignStart="@+id/profileDivider"
+            android:layout_marginEnd="25dp"
+            android:text="ID Number" />
+
+        <TextView
+            android:id="@+id/profileIdnumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileIdnumberIdentifier"
+            android:layout_alignStart="@+id/profileIdnumberIdentifier"
+            android:layout_marginBottom="10dp"
+            android:text="@string/sample_text"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="xxxxxx" />
+
+        <TextView
+            android:id="@+id/profileTokenIdentifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/profileIdnumberIdentifier"
+            android:layout_toEndOf="@id/profileIdnumberIdentifier"
+            android:text="Token" />
+
+        <TextView
+            android:id="@+id/profileToken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileTokenIdentifier"
+            android:layout_alignStart="@+id/profileTokenIdentifier"
+            android:layout_alignEnd="@+id/profileDivider"
+            android:layout_marginBottom="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/sample_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="1w2x3x4x5x6x7x8x9x0" />
+
+        <TextView
+            android:id="@+id/profileDefLocIdentifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileIdnumber"
+            android:layout_alignStart="@+id/profileIdnumber"
+            android:text="Default Location" />
+
+        <TextView
+            android:id="@+id/profileDefaultLoc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileDefLocIdentifier"
+            android:layout_alignStart="@+id/profileDefLocIdentifier"
+            android:layout_marginBottom="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/sample_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="DEFAULT LOCATION" />
+
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:id="@+id/profilePasswordLayout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@+id/profileDefaultLoc"-->
+<!--            android:layout_alignStart="@+id/profileDefaultLoc"-->
+<!--            android:layout_toStartOf="@id/profileEditBtn"-->
+<!--            app:passwordToggleEnabled="true"-->
+<!--            tools:ignore="RtlSymmetry">-->
+
+<!--            <com.google.android.material.textfield.TextInputEditText-->
+<!--                android:id="@+id/profilePassword"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:backgroundTint="#ece1cb"-->
+<!--                android:hint="Password"-->
+<!--                android:inputType="textPassword|none"-->
+<!--                android:paddingStart="0dp"-->
+<!--                android:text="@string/sample_text"-->
+<!--                android:textSize="20sp"-->
+<!--                android:textStyle="bold" />-->
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+        <TextView
+            android:id="@+id/profilePasswordIdentifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profileDefaultLoc"
+            android:layout_alignStart="@+id/profileDefaultLoc"
+            android:text="Password" />
+
+        <EditText
+            android:id="@+id/profilePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profilePasswordIdentifier"
+            android:layout_alignStart="@+id/profilePasswordIdentifier"
+            android:layout_toStartOf="@id/profileEditBtn"
+            android:ellipsize="end"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:maxLines="1"
+            android:text="@string/sample_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="DEFAULT LOCATION" />
+
+        <ImageButton
+            android:id="@+id/profileEditBtn"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profilePasswordIdentifier"
+            android:layout_alignEnd="@+id/profileDivider"
+            android:layout_alignBottom="@+id/profilePassword"
+            android:background="#ece1cb"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:src="@drawable/ic_edit" />
+
+        <TextView
+            android:id="@+id/profileSaveBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profilePassword"
+            android:layout_alignStart="@+id/profileIdnumber"
+            android:textColor="#ff8080"
+            android:text="Save password?"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/profileLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profilePassword"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="10dp"
+            android:backgroundTint="@color/UEP_blue"
+            android:paddingLeft="8dp"
+            android:paddingTop="0dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="0dp"
+            android:text="Log out" />
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/profileImgBtnClose"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|right"
+        android:layout_margin="4dp"
+        android:background="@drawable/circle_grayish"
+        android:contentDescription="Close custom dialog"
+        android:elevation="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_close"
+        tools:ignore="TouchTargetSizeCheck|RtlHardcoded" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
