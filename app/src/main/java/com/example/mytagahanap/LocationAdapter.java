@@ -16,9 +16,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     private ArrayList<LocationModel> mLocations;
     private OnItemClickListener mListener;
 
-    public interface OnItemClickListener {
-        void onItemClick(int position);
-    }
+    public interface OnItemClickListener { void onItemClick(int position);  }
 
     public void setOnItemClickListener(OnItemClickListener listener) { mListener = listener; }
 
@@ -33,14 +31,11 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
             cvtxtLocationName = itemView.findViewById(R.id.cvtxtLocationName);
             cvrlLocations = itemView.findViewById(R.id.cvrlLocations);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(listener != null) {
-                        int position = getBindingAdapterPosition();
-                        if(position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
+            itemView.setOnClickListener(view -> {
+                if(listener != null) {
+                    int position = getBindingAdapterPosition();
+                    if(position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
                     }
                 }
             });
@@ -51,8 +46,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     @Override
     public LocationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_location, parent, false);
-        LocationViewHolder lvh = new LocationViewHolder(v, mListener);
-        return lvh;
+        return new LocationViewHolder(v, mListener);
     }
 
     @Override
@@ -68,7 +62,5 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     }
 
     @Override
-    public int getItemCount() {
-        return mLocations.size();
-    }
+    public int getItemCount() { return mLocations.size(); }
 }

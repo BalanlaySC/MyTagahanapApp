@@ -4,12 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -17,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class ScheduleFragment extends Fragment {
     private static final String TAG = "ScheduleFragment";
@@ -37,12 +33,12 @@ public class ScheduleFragment extends Fragment {
         scheduleFragmentContext = requireContext().getApplicationContext();
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
 
-        initAccess(view);
+        initAccess();
         buildRecyclerView(view);
         return view;
     }
 
-    public void initAccess(View view) {
+    public void initAccess() {
         mapFragment = new MapFragment();
         setMapInterface(mapFragment);
 

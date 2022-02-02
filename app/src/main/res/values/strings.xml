@@ -13,5 +13,12 @@
     <string name="keep_me_signed_in">Keep me Signed in</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="destination">Destination</string>
+    <string name="schoolInfoText">
+        Welcome to the University of Eastern Philippines.
+        The first state universiy in Visayas where students are develop into academically competitive individuals prepared to take over the reigns of leadership. UEP warmly welcomes you to its campus.
+        \nWe congratulate you for your decision to proceed to college and secure your future.
+        We assure you that you had your best choice of a school which you would expect to mold you and your character to become not only the best individuals in your future careers,
+        but life winners who will be assets in making the society a better place to live in.
+    </string>
     <integer name="TEXT_NO_SUGGESTIONS">524288</integer>
 </resources>

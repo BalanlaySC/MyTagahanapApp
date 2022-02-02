@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:layout_gravity="center_horizontal"
+    app:cardCornerRadius="4dp">
+
+    <RelativeLayout
+        android:id="@+id/cvrlProponents"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="8dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/cvimgPicture"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_centerHorizontal="true"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/cvPropDisplayName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cvimgPicture"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_centerHorizontal="true"
+            android:text="@string/sample_text"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textStyle="bold"
+            android:visibility="visible"
+            tools:text="Balanlay, Samuel C." />
+
+        <RelativeLayout
+            android:id="@+id/cvrlPropInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/cvimgPicture"
+            android:layout_toEndOf="@+id/cvimgPicture"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/cvPropNameIdentifier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name"/>
+
+            <TextView
+                android:id="@+id/cvPropName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropNameIdentifier"
+                android:layout_alignStart="@+id/cvPropNameIdentifier"
+                android:text="@string/sample_text"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Samuel C. Balanlay" />
+
+            <TextView
+                android:id="@+id/cvPropAgeIdentifier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropName"
+                android:layout_alignStart="@+id/cvPropName"
+                android:text="Age"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/cvPropAge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropAgeIdentifier"
+                android:layout_alignStart="@+id/cvPropAgeIdentifier"
+                android:text="@string/sample_text"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="22" />
+
+            <TextView
+                android:id="@+id/cvPropCYSIdentifier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropName"
+                android:layout_toEndOf="@+id/cvPropAgeIdentifier"
+                android:layout_marginStart="50dp"
+                android:text="Course-Year Section"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/cvPropCYS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropCYSIdentifier"
+                android:layout_alignStart="@+id/cvPropCYSIdentifier"
+                android:text="@string/sample_text"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="BSIT-4A" />
+
+            <TextView
+                android:id="@+id/cvPropAdrsIdentifier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropCYS"
+                android:layout_alignStart="@+id/cvPropAge"
+                android:layout_marginTop="10dp"
+                android:text="Address" />
+
+            <TextView
+                android:id="@+id/cvPropAdrs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/cvPropAdrsIdentifier"
+                android:layout_alignStart="@+id/cvPropAdrsIdentifier"
+                android:text="@string/sample_text"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp"
+                tools:text="UEP, Catarman N. Samar" />
+        </RelativeLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

@@ -39,23 +39,18 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
             cvtxtDay = itemView.findViewById(R.id.cvtxtDay);
             cvimgDirections = itemView.findViewById(R.id.cvimgDirections);
 
-            cvimgDirections.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (listener != null) {
-                        int position = getBindingAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
+            cvimgDirections.setOnClickListener(view -> {
+                if (listener != null) {
+                    int position = getBindingAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
                     }
                 }
             });
         }
     }
 
-    public SubjectAdapter(ArrayList<SubjectModel> classSched) {
-        mClassSched = classSched;
-    }
+    public SubjectAdapter(ArrayList<SubjectModel> classSched) { mClassSched = classSched; }
 
     @NonNull
     @Override
@@ -86,7 +81,5 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
     }
 
     @Override
-    public int getItemCount() {
-        return mClassSched.size();
-    }
+    public int getItemCount() { return mClassSched.size(); }
 }
