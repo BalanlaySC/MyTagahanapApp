@@ -20,5 +20,46 @@
         We assure you that you had your best choice of a school which you would expect to mold you and your character to become not only the best individuals in your future careers,
         but life winners who will be assets in making the society a better place to live in.
     </string>
+    <string name="uepSealText">The official seal of the University was registered with the Intellectual Property Office of the Philippines on August 1, 2013 with Registration No. 4/2013/00002186. The seal\'s design is show below.
+        \nBlue and Gold colors - the University colors symbolize the lofty ideals of the institution and the golden dreams of the youth.
+        \nWheel - symbolizes the unending search for knowledge.
+        \nLamp - symbolic of the light that education brings.
+        \nSun\'s Eight Rays - indicate Region 8 (Eastern Visayas), the immediate service area of the University.
+        \nThe words Instruction, Research, Extension, Production - refer to the quadruple functions of the University.
+        \nThe year 1918 - the establishment of the institution as the Catarman Farm School which later became the Catarman National Agricultural High School (CANHS).
+        \nThe year 1956 - the establishment of the Samar Institute of Technology (SIT) and the abolition of CANHS on Jne 14, 1956 by virtue of Republic Act 1434.
+        \nThe year 1964 - the conversion of SIT into the University of Eastern Philippines (UEP) on June 20, 1964 by virtue of Republic Act 4126.</string>
+    <string name="uepVisionText">Academically competitive, research and development-focuesd, public-service driven, and economically sustainable state higher education institution.</string>
+    <string name="uepMissionText">To offer academic programs and services that will effectively transform individuals into productive citizens of the country and accelerate the development of high-level professionals who will provide leadership in meeting the demands of sustainable development and challenges of diverse and globalized society.</string>
+    <string name="coreValuesText">R Relevance. All our plans and actions must be relevant to UEP\'s vision and mission.
+        \nI Integrity. Honest beyond reproach, respected, trustworthy, and admired. Public officers and employees must at all times be accountable to te people, serve them with utmost responsibility, integrity, loyalty, and efficiency, act with patriotism and justice, and lead modest lives.
+        \nP Productivity. Our output must always be equal to if not greater than the investment of the National Government.
+        \nE Excellence. Our work must always wield beyond the average. It is the result of the right mix of knowledge, skills, and attitude.</string>
+    <string name="uepHymnText">
+        Let us sing to you, oh UEP
+        \nSing the blue of your sea
+        \nThe green of your mountains
+        \nThe grain in your fields
+        \nThe harvest in your groves
+        \n\nLet us sing to you, dear UEP
+        \nSing of your children fair
+        \nThe knowledge you share
+        \nThe values you instill
+        \nThe service you render
+        \n\nOnward, forevermore, UEP
+        \nGod\'s grace be upon you
+        \nHis mighty hands protect and guide you
+        \nAs you face challenges
+        \nTurn them \'to opportunities
+        \nAnd your founders\' dream pursue
+        \n\nSo we sing this hymn to you
+        \nOf praise and gratitude
+        \nBeloved Alma Mater
+        \nKeep your blue and gold soaring
+        \nOur found of wisdom, joy and hope
+        \nUnsullied loyalty we do pledge
+        \nUnsullied loyalty we do pledge
+        \n\nMusic by Rev. Fr. Eleno A. Delizon
+        \nLyrics by Dr. Lydia P.E. dela Rosa</string>
     <integer name="TEXT_NO_SUGGESTIONS">524288</integer>
 </resources>

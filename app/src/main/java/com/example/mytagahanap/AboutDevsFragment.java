@@ -30,9 +30,9 @@ public class AboutDevsFragment extends Fragment {
 
         ArrayList<ProponentModel> proponents = new ArrayList<>();
         proponents.add(new ProponentModel("Samuel", "C.", "Balanlay",
-                "UEP, Catarman N. Samar", "BSIT-4A", 22, 0));
+                "UEP, Catarman N. Samar", "BSIT-4A", 22, R.drawable.prop1));
         proponents.add(new ProponentModel("Joyce", "M.", "DeGuzman",
-                "Cawayan, Catarman N. Samar", "BSIT-4A", 21, 0));
+                "Cawayan, Catarman N. Samar", "BSIT-4A", 21, R.drawable.prop2));
 
         RecyclerView proponentsRecView = view.findViewById(R.id.recvProponents);
         proponentsRecView.setHasFixedSize(true);

@@ -201,9 +201,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Get SearchView autocomplete object.
         final SearchView.SearchAutoComplete searchAutoComplete = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         searchAutoComplete.setDropDownBackgroundResource(R.color.divider);
+        searchAutoComplete.setThreshold(1);
 
         // Create a new ArrayAdapter and add data (locations) to search auto complete object.
-        ArrayAdapter<LocationModel> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, locations);
+        ArrayAdapter<LocationModel> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, locations);
         searchAutoComplete.setAdapter(arrayAdapter);
 
         // Listen to search view item on click event.
@@ -239,9 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
+            public boolean onQueryTextChange(String newText) { return false; }
         });
         return true;
     }

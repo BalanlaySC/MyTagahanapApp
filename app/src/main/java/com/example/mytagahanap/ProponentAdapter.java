@@ -73,6 +73,10 @@ public class ProponentAdapter extends RecyclerView.Adapter<ProponentAdapter.Prop
         params.height = 300;
         params.width = 300;
 
+        if (currentProponent.getImgId() > 0) {
+            holder.cvimgPicture.setImageResource(currentProponent.getImgId());
+        }
+
         if(currentProponent.isExpanded()) {
             holder.cvrlPropInfo.setVisibility(View.VISIBLE);
             holder.cvPropDisplayName.setVisibility(View.GONE);

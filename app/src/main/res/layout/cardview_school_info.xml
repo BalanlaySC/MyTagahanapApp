@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="4dp">
+
+    <RelativeLayout
+        android:id="@+id/cvrlUEPAddInfo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="8dp">
+
+        <TextView
+            android:id="@+id/cvAddInfoTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:paddingHorizontal="5dp"
+            android:text="@string/sample_text"
+            android:textAllCaps="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            tools:text="The UEP Seal" />
+
+        <ImageView
+            android:id="@+id/ivAddInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cvAddInfoTitle"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_launcher"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvAddInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ivAddInfo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:paddingHorizontal="20dp"
+            android:text="@string/sample_text"
+            android:textColor="@color/light_gray_75darker"
+            android:textSize="17sp" />
+
+        <ImageButton
+            android:id="@+id/imgBtnExpand"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/cvAddInfoTitle"
+            android:layout_alignBottom="@+id/cvAddInfoTitle"
+            android:layout_alignParentEnd="true"
+            android:background="?android:selectableItemBackground"
+            android:clickable="false"
+            android:contentDescription="Expand button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_arrow_down"
+            tools:ignore="TouchTargetSizeCheck" />
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
