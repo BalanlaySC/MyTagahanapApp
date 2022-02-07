@@ -125,8 +125,7 @@ public class Login extends AppCompatActivity {
                             JSONObject obj = new JSONObject(response);
                             if (!obj.getBoolean("error")) {
                                 SharedPrefManager.getInstance(loginContext)
-                                        .userLogin(
-                                                obj.getInt("idnumber"),
+                                        .userLogin(obj.getInt("idnumber"),
                                                 password,
                                                 obj.getString("f_name"),
                                                 obj.getString("l_name"),
@@ -151,10 +150,10 @@ public class Login extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }, error -> {
-                    progressBar.setVisibility(View.GONE);
-                    tietPassword.setText("");
-                    Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show();
-                }
+            progressBar.setVisibility(View.GONE);
+            tietPassword.setText("");
+            Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show();
+        }
         ) {
             @NonNull
             @Override

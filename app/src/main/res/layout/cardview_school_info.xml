@@ -32,10 +32,10 @@
 
         <ImageView
             android:id="@+id/ivAddInfo"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/cvAddInfoTitle"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:src="@mipmap/ic_launcher"
             android:visibility="gone" />
 

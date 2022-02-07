@@ -17,6 +17,7 @@ public class SharedPrefManager {
     private static final String KEY_USER_TOKEN = "userToken";
     private static final String KEY_CONT_COUNTER = "contributionCounter";
     private static final String KEY_TIME_OUT_SESSION = "timeOutSession";
+    private static final String FETCHED_DATA = "fetchedData";
 
     private SharedPrefManager(Context context) {
         mCtx = context;
@@ -54,6 +55,7 @@ public class SharedPrefManager {
         editor.putString(KEY_USER_TOKEN, token);
         editor.putInt(KEY_CONT_COUNTER, 0);
         editor.putLong(KEY_TIME_OUT_SESSION, timeOutSession);
+        editor.putBoolean(FETCHED_DATA, false);
         editor.apply();
 
         return true;
@@ -135,6 +137,19 @@ public class SharedPrefManager {
         return sharedPreferences.getString(KEY_PASSWORD, "");
     }
 
+    public void setFetchedData(boolean b) {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putBoolean(FETCHED_DATA, b);
+        editor.apply();
+    }
+
+    public boolean isFetchedData() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(FETCHED_DATA, false);
+    }
+
     public String getFullName() {
         return getlName() + ", " + getfName();
     }
@@ -148,6 +163,4 @@ public class SharedPrefManager {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getInt(KEY_CONT_COUNTER, 0);
     }
-
-//    public long getExpiryDate() { }
 }

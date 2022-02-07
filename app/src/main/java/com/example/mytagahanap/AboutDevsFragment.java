@@ -35,7 +35,7 @@ public class AboutDevsFragment extends Fragment {
                 "Cawayan, Catarman N. Samar", "BSIT-4A", 21, R.drawable.prop2));
 
         RecyclerView proponentsRecView = view.findViewById(R.id.recvProponents);
-        proponentsRecView.setHasFixedSize(true);
+        proponentsRecView.setHasFixedSize(false);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(abtdevsFragmentContext);
         ProponentAdapter mAdapter = new ProponentAdapter(proponents);
 

@@ -70,8 +70,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public final Handler handler = new Handler(Looper.getMainLooper());
 
     private DrawerLayout drawer;
+    private LinearLayout layoutFetchData;
     private NavigationView navigationView;
-    private ProgressBar pbMainActivity;
+    private MenuItem mapMenuItem;
+    private MenuItem currentMenuItem;
     private Dialog profileDialog;
 
     private MapFragment mapFragment;
@@ -83,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String fullName, token, defaultLocation;
     private int idnumber;
 
-    public MainActivity() {}
+    public MainActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +95,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         loadSharedPreference();
 
-          // check if token is still valid
-        if(isSessionTimedOut(SharedPrefManager.getInstance(this).getTimeOutSession()) < 0) {
+        // check if token is still valid
+        if (isSessionTimedOut(SharedPrefManager.getInstance(this).getTimeOutSession()) < 0) {
             logoutUser("Your session has timed out.\nPlease log in again.", Toast.LENGTH_LONG);
             return;
         }
@@ -121,7 +124,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        handler.postDelayed(this::parseUserClassSchedule, 500);
+        Log.d(TAG, "onCreate: isFetchedData " + SharedPrefManager.getInstance(this).isFetchedData());
+        if (!SharedPrefManager.getInstance(this).isFetchedData()) {
+            handler.postDelayed(() -> {
+                layoutFetchData = mapInterface.getMapFragView().findViewById(R.id.layoutFetchData);
+                layoutFetchData.setVisibility(View.VISIBLE);
+                fetchUserClassSchedule();
+            }, 260);
+        } else {
+            handler.postDelayed(() -> {
+                if (layoutFetchData != null) {
+                    layoutFetchData = mapInterface.getMapFragView().findViewById(R.id.layoutFetchData);
+                    Log.d(TAG, "onCreate: layoutFetchData " + layoutFetchData);
+                    layoutFetchData.setVisibility(View.GONE);
+                }
+            }, 250);
+        }
         profileDialog = new Dialog(this);
     }
 
@@ -130,13 +148,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Calendar cal = Calendar.getInstance();              // creates calendar
         cal.setTime(new Date(System.currentTimeMillis()));  // sets calendar time/date
         int result = compareDates(userDate, cal.getTime());
-        if(result > 0) {
+        if (result > 0) {
             Log.d(TAG, "isSessionTimedOut: Session is active " + userDate);
-        }
-        else if (result < 0) {
+        } else if (result < 0) {
             Log.d(TAG, "isSessionTimedOut: Session invalid " + userDate);
-        }
-        else {
+        } else {
             Log.d(TAG, "isSessionTimedOut: Date is equal" + userDate);
         }
         return result;
@@ -189,8 +205,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Inflate the search menu action bar.
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.other_menu, menu);
-        MenuItem currentMenuItem = navigationView.getCheckedItem();
-        MenuItem mapMenuItem = menu.findItem(R.id.nav_map);
+        mapMenuItem = menu.findItem(R.id.nav_map);
+        currentMenuItem = navigationView.getCheckedItem();
 
         // Get the search menu.
         MenuItem searchMenu = menu.findItem(R.id.actionSearch);
@@ -240,7 +256,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) { return false; }
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
         });
         return true;
     }
@@ -283,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void openProfileDialog()  {
+    private void openProfileDialog() {
         drawer.closeDrawer(GravityCompat.START);
         profileDialog.setContentView(R.layout.layout_dialog_profile);
         Window window = profileDialog.getWindow();
@@ -321,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         profileEditBtn.setOnClickListener(view -> {
-            if(profileSaveBtn.getVisibility() == View.GONE) {
+            if (profileSaveBtn.getVisibility() == View.GONE) {
                 profilePassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                 profilePassword.setClickable(true);
                 profilePassword.setFocusable(true);
@@ -452,7 +470,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Check if the string loc is in the Arraylist location
     public boolean containsLocation(String loc) {
         for (LocationModel locationModel : locations) {
-            if (locationModel.getLocationName().equals(loc)) { return true; }
+            if (locationModel.getLocationName().equals(loc)) {
+                return true;
+            }
         }
         return false;
     }
@@ -460,24 +480,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Return LocationModel object with locationName loc
     public LocationModel getLocationObj(String loc) {
         for (LocationModel locationModel : locations) {
-            if (locationModel.getLocationName().equals(loc)) { return locationModel; }
+            if (locationModel.getLocationName().equals(loc)) {
+                return locationModel;
+            }
         }
         return null;
     }
 
     // Parse the class schedule of the current user
-    public void parseUserClassSchedule() {
-        Log.d(TAG, "parseUserClassSchedule: Parsing data");
+    public void fetchUserClassSchedule() {
+        Log.d(TAG, "fetchUserClassSchedule: Fetching data");
         classSchedule = new ArrayList<>();
-        pbMainActivity = mapInterface.getMapFragView().findViewById(R.id.pbMapFragment);
-        pbMainActivity.setVisibility(View.VISIBLE);
         StringRequest stringRequest = new StringRequest(Request.Method.GET,
                 Constants.URL_CLASS_SCHED + idnumber,
                 response -> {
                     try {
                         JSONObject obj = new JSONObject(response);
                         if (!obj.getBoolean("error")) {
-                            pbMainActivity.setVisibility(View.GONE);
                             JSONArray allSubj = obj.getJSONArray("class_schedule");
                             for (int i = 0; i < allSubj.length(); i++) {
                                 JSONObject arrayJObj = allSubj.getJSONObject(i);
@@ -488,18 +507,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         arrayJObj.getString("day"),
                                         arrayJObj.getString("room")));
                             }
+                            SharedPrefManager.getInstance(this).setFetchedData(true);
+                            if (layoutFetchData != null) {
+                                layoutFetchData.setVisibility(View.GONE);
+                            }
                             classSchedule.sort(Comparator.comparing(SubjectModel::getmDescription));
                         } else {
                             Toast.makeText(this, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                            ProgressBar pbFetchData = mapInterface.getMapFragView().findViewById(R.id.pbFetchData);
+                            TextView tvFetchData = mapInterface.getMapFragView().findViewById(R.id.tvFetchData);
+                            ImageButton btnFetchData = mapInterface.getMapFragView().findViewById(R.id.btnFetchData);
+                            if (pbFetchData != null) {
+                                pbFetchData.setVisibility(View.GONE);
+                                tvFetchData.setText("Please try again");
+                                btnFetchData.setVisibility(View.VISIBLE);
+                                btnFetchData.setOnClickListener(view -> {
+                                    fetchUserClassSchedule();
+                                    btnFetchData.setVisibility(View.GONE);
+                                });
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }, error -> {
-            pbMainActivity.setVisibility(View.GONE);
-            classSchedule.add(new SubjectModel("", "", "Unable to get subjects",
+            classSchedule.add(new SubjectModel("", "", "Unable to get subjects. Server is down.",
                     "", "", ""));
             Toast.makeText(this, "Server is down.", Toast.LENGTH_SHORT).show();
+            if (layoutFetchData != null) {
+                layoutFetchData.setVisibility(View.GONE);
+            }
         }) {
             @NonNull
             @Override
@@ -513,11 +550,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    public void setMapInterface(MapInterface mapInterface) { this.mapInterface = mapInterface; }
-    
+    public void setMapInterface(MapInterface mapInterface) {
+        this.mapInterface = mapInterface;
+    }
+
     /*  Compare two Date objects
         -1 is past, 0 is equal, 1 is future */
-    public int compareDates(Date date1, Date date2) { return date1.compareTo(date2); }
+    public int compareDates(Date date1, Date date2) {
+        return date1.compareTo(date2);
+    }
 
     private void changePassword(String userIdNumber, String password) {
         Log.d(TAG, "changePassword: " + userIdNumber + ", " + password);

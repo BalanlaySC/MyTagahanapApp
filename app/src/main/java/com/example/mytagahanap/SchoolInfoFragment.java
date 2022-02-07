@@ -28,7 +28,6 @@ public class SchoolInfoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Context schInfoFragmentContext = requireContext().getApplicationContext();
         View view = inflater.inflate(R.layout.fragment_school_info, container, false);
-        View view1 = inflater.inflate(R.layout.cardview_school_info, container, false);
 
         TextView tvSchoolInfo = view.findViewById(R.id.tvSchoolInfo);
         tvSchoolInfo.setText(createIndentedText((String) tvSchoolInfo.getText(), 100, 0));

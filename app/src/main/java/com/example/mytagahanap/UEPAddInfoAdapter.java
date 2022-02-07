@@ -89,6 +89,7 @@ public class UEPAddInfoAdapter extends RecyclerView.Adapter<UEPAddInfoAdapter.UE
             holder.imgBtnExpand.setRotation(180F);
         } else {
             holder.tvAddInfo.setVisibility(View.GONE);
+            holder.ivAddInfo.setVisibility(View.GONE);
             holder.imgBtnExpand.setRotation(0F);
         }
     }

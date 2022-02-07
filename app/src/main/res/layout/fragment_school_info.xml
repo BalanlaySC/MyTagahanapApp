@@ -33,7 +33,6 @@
             android:textColor="@color/light_gray_90darker"
             android:textSize="20sp" />
 
-        <!-- TODO set as not scrollable -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recvSchoolInfo"
             android:layout_width="match_parent"
