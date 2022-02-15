@@ -84,7 +84,15 @@ public class SharedPrefManager {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString(KEY_PASSWORD, newPass);
+        editor.putString(KEY_DEF_LOC, newPass);
+        editor.apply();
+    }
+
+    public void updateDefLocation(String newLocation) {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString(KEY_DEF_LOC, newLocation);
         editor.apply();
     }
 

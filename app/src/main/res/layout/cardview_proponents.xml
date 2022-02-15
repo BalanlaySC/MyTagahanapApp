@@ -24,7 +24,7 @@
             android:layout_centerHorizontal="true"
             android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/RoundedSquare"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@drawable/ic_anonymous" />
 
         <TextView
             android:id="@+id/cvPropDisplayName"

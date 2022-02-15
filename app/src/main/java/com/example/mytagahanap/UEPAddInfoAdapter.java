@@ -2,14 +2,11 @@ package com.example.mytagahanap;
 
 import android.annotation.SuppressLint;
 import android.graphics.text.LineBreaker;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;

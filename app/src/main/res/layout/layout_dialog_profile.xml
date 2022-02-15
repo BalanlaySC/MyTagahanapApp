@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="16dp"
-        android:background="@drawable/roundcorner_lightblue"
+        android:background="@drawable/shape_roundcorner_lightblue"
         android:backgroundTint="@color/light_brown"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,13 +20,14 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profileimgView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
-            android:src="@mipmap/ic_launcher_round"
+            android:elevation="2dp"
+            android:src="@drawable/ic_anonymous"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/Circular" />
 
@@ -159,8 +160,8 @@
             android:layout_below="@+id/profilePasswordIdentifier"
             android:layout_alignStart="@+id/profilePasswordIdentifier"
             android:layout_toStartOf="@id/profileEditBtn"
-            android:ellipsize="end"
             android:clickable="false"
+            android:ellipsize="end"
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:maxLines="1"
@@ -188,8 +189,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/profilePassword"
             android:layout_alignStart="@+id/profileIdnumber"
-            android:textColor="#ff8080"
             android:text="Save password?"
+            android:textColor="#ff8080"
             android:visibility="gone" />
 
         <Button
@@ -210,11 +211,11 @@
 
     <ImageButton
         android:id="@+id/profileImgBtnClose"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="top|right"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="top|end"
         android:layout_margin="4dp"
-        android:background="@drawable/circle_grayish"
+        android:background="@drawable/shape_circle_grayish"
         android:contentDescription="Close custom dialog"
         android:elevation="12dp"
         app:layout_constraintEnd_toEndOf="parent"

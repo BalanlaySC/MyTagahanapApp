@@ -12,12 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectViewHolder> {
+    public static final int SUBJECT = 1;
+    public static final int SUGGESTION = 2;
     private ArrayList<SubjectModel> mClassSched;
+    private int mAdapterType;
     private OnItemClickListener mListener;
 
-    public interface OnItemClickListener {
-        void onItemClick(int position);
-    }
+    public interface OnItemClickListener { void onItemClick(int position); }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         mListener = listener;
@@ -50,14 +51,16 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         }
     }
 
-    public SubjectAdapter(ArrayList<SubjectModel> classSched) { mClassSched = classSched; }
+    public SubjectAdapter(ArrayList<SubjectModel> classSched, int adapterType) {
+        mClassSched = classSched;
+        mAdapterType = adapterType;
+    }
 
     @NonNull
     @Override
     public SubjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_subject, parent, false);
-        SubjectViewHolder svh = new SubjectViewHolder(v, mListener);
-        return svh;
+        return new SubjectViewHolder(v, mListener);
     }
 
     @Override
@@ -65,7 +68,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         SubjectModel currentSubject = mClassSched.get(position);
 
         holder.cvtxtDescription.setText(currentSubject.getmDescription());
-        if(holder.cvtxtDescription.getText().toString().compareTo("Unable to get subjects") == 0) {
+        if(holder.cvtxtDescription.getText().toString().contains("Unable")) {
             holder.cvtxtSubjectCode.setVisibility(View.GONE);
             holder.cvtxtClassID.setVisibility(View.GONE);
             holder.cvtxtRoom.setVisibility(View.GONE);

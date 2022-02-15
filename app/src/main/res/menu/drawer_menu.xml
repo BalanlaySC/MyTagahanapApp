@@ -11,14 +11,18 @@
         <item
             android:id="@+id/nav_subjects"
             android:icon="@drawable/ic_subject_list"
-            android:title="Schedule" />
+            android:title="Class Schedule" />
         <item
             android:id="@+id/nav_bldginfo"
             android:icon="@drawable/ic_info"
             android:title="School Information" />
         <item
-            android:id="@+id/nav_aboutdevs"
+            android:id="@+id/nav_aboutapp"
             android:icon="@drawable/ic_aboutdevs"
-            android:title="About Us" />
+            android:title="About App" />
+        <item
+            android:id="@+id/nav_submitted_spots"
+            android:icon="@drawable/ic_added_location"
+            android:title="List of Submitted Spots" />
     </group>
 </menu>

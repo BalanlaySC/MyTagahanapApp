@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mapboxGrayLight">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:descendantFocusability="blocksDescendants">
+
+        <ImageView
+            android:id="@+id/aboutappLogo"
+            android:layout_centerHorizontal="true"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/image_logo_app"
+            android:contentDescription="App logo" />
+
+        <TextView
+            android:id="@+id/aboutappIntro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/aboutappLogo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:paddingHorizontal="20dp"
+            android:text="@string/aboutappIntroText"
+            android:textColor="@color/light_gray_90darker"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/aboutappTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/aboutappIntro"
+            android:layout_centerHorizontal="true"
+            android:text="Meet the Proponents for\nthis Capstone Project"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recvProponents"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/aboutappTitle"
+            android:layout_margin="10dp"/>
+    </RelativeLayout>
+</ScrollView>

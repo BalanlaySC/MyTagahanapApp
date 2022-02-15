@@ -1,8 +1,8 @@
 package com.example.mytagahanap;
 
 import android.content.Context;
+import android.graphics.text.LineBreaker;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,25 +14,26 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.imageview.ShapeableImageView;
-
 import java.util.ArrayList;
 
-public class AboutDevsFragment extends Fragment {
-    private static final String TAG = "AboutDevsFragment";
+public class AboutAppFragment extends Fragment {
+    private static final String TAG = "AboutAppFragment";
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Context abtdevsFragmentContext = requireContext().getApplicationContext();
-        View view = inflater.inflate(R.layout.fragment_aboutdevs, container, false);
+        View view = inflater.inflate(R.layout.fragment_aboutapp, container, false);
         View view1 = inflater.inflate(R.layout.cardview_proponents, container, false);
 
+        TextView aboutappIntro = view.findViewById(R.id.aboutappIntro);
+        aboutappIntro.setText(SchoolInfoFragment.createIndentedText((String) aboutappIntro.getText(), 100, 0));
+        aboutappIntro.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
+
+
         ArrayList<ProponentModel> proponents = new ArrayList<>();
-        proponents.add(new ProponentModel("Samuel", "C.", "Balanlay",
-                "UEP, Catarman N. Samar", "BSIT-4A", 22, R.drawable.prop1));
-        proponents.add(new ProponentModel("Joyce", "M.", "DeGuzman",
-                "Cawayan, Catarman N. Samar", "BSIT-4A", 21, R.drawable.prop2));
+        proponents.add(Constants.proponent1);
+        proponents.add(Constants.proponent2);
 
         RecyclerView proponentsRecView = view.findViewById(R.id.recvProponents);
         proponentsRecView.setHasFixedSize(false);

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cvrlLocations"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="40dp"
     android:background="@color/divider"
     tools:ignore="RtlSymmetry">
 
@@ -11,9 +11,10 @@
         android:id="@+id/cvtxtLocationName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="4dp"
+        android:layout_centerVertical="true"
         android:ellipsize="end"
         android:maxLines="1"
+        android:paddingStart="8dp"
         android:text="(Location Name)"
         android:textColor="@color/light_gray_75darker"
         android:textSize="20sp"

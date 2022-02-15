@@ -3,14 +3,12 @@ package com.example.mytagahanap;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.text.LineBreaker;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.LeadingMarginSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -35,7 +33,7 @@ public class SchoolInfoFragment extends Fragment {
 
 
         ArrayList<UEPAddInfoModel> addInfos = new ArrayList<>();
-        addInfos.add(new UEPAddInfoModel("The UEP Seal", getString(R.string.uepSealText), R.drawable.ueplogo));
+        addInfos.add(new UEPAddInfoModel("The UEP Seal", getString(R.string.uepSealText), R.drawable.image_logo_uep));
         addInfos.add(new UEPAddInfoModel("UEP's Vision", getString(R.string.uepVisionText), 0));
         addInfos.add(new UEPAddInfoModel("UEP's Mission", getString(R.string.uepMissionText), 0));
         addInfos.add(new UEPAddInfoModel("Core Values", getString(R.string.coreValuesText), 0));

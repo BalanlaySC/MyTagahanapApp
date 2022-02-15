@@ -1,7 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">My Tagahanap</string>
 
-    <string name="mapbox_access_token">sk.eyJ1IjoiYmFsYW5sYXlzYyIsImEiOiJja3R1NWM4MmsxeGRkMnBwbmx2dGVwM3RjIn0.tWNt1zv7GeE8YgJRXqsDQA</string>
+    <string name="mapbox_access_token" tools:ignore="Typos">sk.eyJ1IjoiYmFsYW5sYXlzYyIsImEiOiJja3R1NWM4MmsxeGRkMnBwbmx2dGVwM3RjIn0.tWNt1zv7GeE8YgJRXqsDQA</string>
 
     <string name="id_number">ID Number</string>
     <string name="password">Password</string>
@@ -62,4 +62,7 @@
         \n\nMusic by Rev. Fr. Eleno A. Delizon
         \nLyrics by Dr. Lydia P.E. dela Rosa</string>
     <integer name="TEXT_NO_SUGGESTIONS">524288</integer>
+    <string name="aboutappIntroText">
+        Hi there! This is the application that we developed specifically for the University of Eastern Philippines Main Campus to help the user (students/faculty/staff) find a specific area/building with an optimal path given by the software. This would lessen people asking for assistance to strangers when they need to find the location of their class, meeting or orientation that they are not familiar with. I hope you enjoy your stay here in the campus with your trusty app, My Tagahanap!
+    </string>
 </resources>

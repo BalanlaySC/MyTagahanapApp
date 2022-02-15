@@ -11,8 +11,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Parcelable;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -30,7 +29,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +39,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
@@ -54,23 +53,19 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "MainActivity";
-    public final Handler handler = new Handler(Looper.getMainLooper());
 
     private DrawerLayout drawer;
-    private LinearLayout layoutFetchData;
     private NavigationView navigationView;
     private MenuItem mapMenuItem;
     private MenuItem currentMenuItem;
@@ -81,8 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapInterface mapInterface;
 
     private ArrayList<LocationModel> locations;
-    private ArrayList<SubjectModel> classSchedule;
-    private String fullName, token, defaultLocation;
+    private String fullName, token;
     private int idnumber;
 
     public MainActivity() {
@@ -105,41 +99,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DatabaseAccess databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
         locations = new ArrayList<>();
         locations = databaseAccess.getAllLocations();
+        String parcelableTag = "Locations";
 
         if (savedInstanceState == null) {
             mapFragment = new MapFragment();
             scheduleFragment = new ScheduleFragment();
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                    mapFragment).commit();
+            initFragment("Map", mapFragment);
             setMapInterface(mapFragment);
             navigationView.setCheckedItem(R.id.nav_map);
 
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList("Locations", locations);
-            mapFragment.setArguments(bundle);
+            parcelDataToFragment(parcelableTag, locations, mapFragment);
 
             // reversed so that when location is disabled (= false) turns to true
             if (isLocationEnabled(this)) {
                 enableLoc();
             }
         }
-
-        Log.d(TAG, "onCreate: isFetchedData " + SharedPrefManager.getInstance(this).isFetchedData());
-        if (!SharedPrefManager.getInstance(this).isFetchedData()) {
-            handler.postDelayed(() -> {
-                layoutFetchData = mapInterface.getMapFragView().findViewById(R.id.layoutFetchData);
-                layoutFetchData.setVisibility(View.VISIBLE);
-                fetchUserClassSchedule();
-            }, 260);
-        } else {
-            handler.postDelayed(() -> {
-                if (layoutFetchData != null) {
-                    layoutFetchData = mapInterface.getMapFragView().findViewById(R.id.layoutFetchData);
-                    Log.d(TAG, "onCreate: layoutFetchData " + layoutFetchData);
-                    layoutFetchData.setVisibility(View.GONE);
-                }
-            }, 250);
-        }
+        
         profileDialog = new Dialog(this);
     }
 
@@ -170,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void loadSharedPreference() {
         fullName = SharedPrefManager.getInstance(this).getFullName();
         idnumber = SharedPrefManager.getInstance(this).getIdnumber();
-        defaultLocation = SharedPrefManager.getInstance(this).getDefLoc();
         token = SharedPrefManager.getInstance(this).getToken();
     }
 
@@ -183,6 +158,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = findViewById(R.id.main_layout);
 
         navigationView = findViewById(R.id.nav_view);
+        if (idnumber != 1) {
+            Menu navMenu = navigationView.getMenu();
+            navMenu.findItem(R.id.nav_submitted_spots).setVisible(false);
+        }
         View headerView = navigationView.getHeaderView(0);
         TextView navheaderName = headerView.findViewById(R.id.navheaderName);
         TextView navheaderidNumber = headerView.findViewById(R.id.navheaderidNumber);
@@ -266,39 +245,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Selecting something on the menu will switch into that fragment
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        String[] actionBarTitle = {"Map", "Class Schedule", "School Information",
+                "About App", "List of Submitted Spots"};
         switch (item.getItemId()) {
             case R.id.nav_map:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        mapFragment).commit();
-
-                Bundle bundleLoc = new Bundle();
-                bundleLoc.putParcelableArrayList("Locations", locations);
-                mapFragment.setArguments(bundleLoc);
+                initFragment(actionBarTitle[0], mapFragment);
+                parcelDataToFragment("Locations", locations, mapFragment);
 
                 if (isLocationEnabled(MainActivity.this)) {
                     enableLoc();
                 }
                 break;
             case R.id.nav_subjects:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        scheduleFragment).commit();
-
-                Bundle bundleSched = new Bundle();
-                bundleSched.putParcelableArrayList("Class Schedule", classSchedule);
-                scheduleFragment.setArguments(bundleSched);
+                initFragment(actionBarTitle[1], scheduleFragment);
                 break;
             case R.id.nav_bldginfo:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new SchoolInfoFragment()).commit();
+                initFragment(actionBarTitle[2], new SchoolInfoFragment());
                 break;
-            case R.id.nav_aboutdevs:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new AboutDevsFragment()).commit();
+            case R.id.nav_aboutapp:
+                initFragment(actionBarTitle[3], new AboutAppFragment());
+                break;
+            case R.id.nav_submitted_spots:
+                initFragment(actionBarTitle[4], new SubmissionFragment());
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    private void initFragment(String actionBarTitle, Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                fragment).commit();
+        if (getSupportActionBar() != null){
+            getSupportActionBar().setTitle(actionBarTitle);
+        }
     }
 
     private void openProfileDialog() {
@@ -321,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileName.setText(fullName);
         profileIdnumber.setText(String.valueOf(idnumber));
         profileToken.setText(token);
-        profileDefaultLoc.setText(defaultLocation);
+        profileDefaultLoc.setText(SharedPrefManager.getInstance(this).getDefLoc());
         profilePassword.setText(SharedPrefManager.getInstance(this).getPassword());
 
         profileToken.setOnClickListener(view -> {
@@ -487,69 +468,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return null;
     }
 
-    // Parse the class schedule of the current user
-    public void fetchUserClassSchedule() {
-        Log.d(TAG, "fetchUserClassSchedule: Fetching data");
-        classSchedule = new ArrayList<>();
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,
-                Constants.URL_CLASS_SCHED + idnumber,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        if (!obj.getBoolean("error")) {
-                            JSONArray allSubj = obj.getJSONArray("class_schedule");
-                            for (int i = 0; i < allSubj.length(); i++) {
-                                JSONObject arrayJObj = allSubj.getJSONObject(i);
-                                classSchedule.add(new SubjectModel(arrayJObj.getString("class_id"),
-                                        arrayJObj.getString("subj_code"),
-                                        arrayJObj.getString("description"),
-                                        arrayJObj.getString("time"),
-                                        arrayJObj.getString("day"),
-                                        arrayJObj.getString("room")));
-                            }
-                            SharedPrefManager.getInstance(this).setFetchedData(true);
-                            if (layoutFetchData != null) {
-                                layoutFetchData.setVisibility(View.GONE);
-                            }
-                            classSchedule.sort(Comparator.comparing(SubjectModel::getmDescription));
-                        } else {
-                            Toast.makeText(this, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                            ProgressBar pbFetchData = mapInterface.getMapFragView().findViewById(R.id.pbFetchData);
-                            TextView tvFetchData = mapInterface.getMapFragView().findViewById(R.id.tvFetchData);
-                            ImageButton btnFetchData = mapInterface.getMapFragView().findViewById(R.id.btnFetchData);
-                            if (pbFetchData != null) {
-                                pbFetchData.setVisibility(View.GONE);
-                                tvFetchData.setText("Please try again");
-                                btnFetchData.setVisibility(View.VISIBLE);
-                                btnFetchData.setOnClickListener(view -> {
-                                    fetchUserClassSchedule();
-                                    btnFetchData.setVisibility(View.GONE);
-                                });
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> {
-            classSchedule.add(new SubjectModel("", "", "Unable to get subjects. Server is down.",
-                    "", "", ""));
-            Toast.makeText(this, "Server is down.", Toast.LENGTH_SHORT).show();
-            if (layoutFetchData != null) {
-                layoutFetchData.setVisibility(View.GONE);
-            }
-        }) {
-            @NonNull
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("idnumber", String.valueOf(SharedPrefManager.getInstance(getApplicationContext()).getIdnumber()));
-                return params;
-            }
-        };
-
-        RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
-    }
-
     public void setMapInterface(MapInterface mapInterface) {
         this.mapInterface = mapInterface;
     }
@@ -584,5 +502,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         };
 
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    private void parcelDataToFragment(String parcelableTag, ArrayList<? extends Parcelable> arrayList, Fragment fragment) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(parcelableTag, arrayList);
+        fragment.setArguments(bundle);
     }
 }

@@ -61,7 +61,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/cvtxtClassID"
-            android:layout_marginStart="20dp"
+            android:layout_alignStart="@id/cvtxtClassID"
+            android:layout_toStartOf="@+id/cvimgDirections"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
             android:text="Time"
@@ -82,13 +83,15 @@
             android:id="@+id/cvimgDirections"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:layout_alignTop="@+id/cvtxtRoom"
-            android:layout_alignBottom="@+id/cvtxtDay"
             android:layout_alignParentEnd="true"
-            android:layout_marginRight="5dp"
-            android:background="@drawable/circle_holo_blue"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/shape_circle_holo_blue"
+            android:contentDescription="Provide direction to the room of your subject"
             android:elevation="8dp"
-            android:src="@drawable/ic_direction"
-            android:contentDescription="Provide direction to the room of your subject" />
+            android:maxWidth="45dp"
+            android:maxHeight="45dp"
+            android:src="@drawable/ic_direction" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

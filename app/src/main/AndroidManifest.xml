@@ -3,31 +3,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.mytagahanap">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_mytagahanap"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_mytagahanap_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyTagahanap"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Login"
+        <activity
+            android:name=".EnlargeImageActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
-            android:exported="true">
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".Login"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+        <activity
+            android:name=".MainActivity"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity">
-        </activity>
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
     </application>
 
 </manifest>

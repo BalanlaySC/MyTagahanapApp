@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Constants {
-    public static final String ROOT_URL = "http://192.168.1.222/mytagahanap/v1/";
+//    public static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/";
+    public static final String ROOT_URL = "http://mytagahanap.000webhostapp.com/mytagahanap/v1/";
     public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php?idnumber=";
     public static final String URL_LOGIN = ROOT_URL + "userLogin.php";
     public static final String URL_SUBMIT_SUGGESTION = ROOT_URL + "submitSuggestion.php";
     public static final String URL_CHANGE_PASSWORD = ROOT_URL + "changePassword.php";
+    public static final String URL_CHANGE_DEF_LOC = ROOT_URL + "changeDefLoc.php";
     public static final String URL_RESET_PASSWORD = ROOT_URL + "resetPassword.php";
+    public static final String URL_SUBMITTED_LOC = ROOT_URL + "submittedLocations.php?idnumber=";
 
     public static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
     public static final String ROUTE_LAYER_ID = "route-layer-id";
@@ -59,4 +62,9 @@ public class Constants {
         OUTER_POINTS.add(Point.fromLngLat(124.65854,12.512988));
         POINTS.add(OUTER_POINTS);
     }
+
+    public static final ProponentModel proponent1 = new ProponentModel("Samuel", "C.",
+            "Balanlay", "UEP, Catarman N. Samar", "BSIT-4A", 22, R.drawable.image_prop1);
+    public static final ProponentModel proponent2 = new ProponentModel("Joyce", "M.", "DeGuzman",
+            "Cawayan, Catarman N. Samar", "BSIT-4A", 21, R.drawable.image_prop2);
 }

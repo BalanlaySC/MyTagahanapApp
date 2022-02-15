@@ -16,7 +16,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     private ArrayList<LocationModel> mLocations;
     private OnItemClickListener mListener;
 
-    public interface OnItemClickListener { void onItemClick(int position);  }
+    public interface OnItemClickListener { void onItemClick(int position); }
 
     public void setOnItemClickListener(OnItemClickListener listener) { mListener = listener; }
 

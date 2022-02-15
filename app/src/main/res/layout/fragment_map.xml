@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/roundcorner_grayish"
+    android:background="@drawable/shape_roundcorner_grayish"
     android:elevation="20dp">
 
     <com.mapbox.mapboxsdk.maps.MapView
@@ -46,7 +46,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/roundcorner_grayish"
+        android:background="@drawable/shape_roundcorner_grayish"
         android:backgroundTint="@color/light_brown"
         android:elevation="8dp"
         android:orientation="vertical"
@@ -75,11 +75,10 @@
             android:id="@+id/btnFetchData"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:layout_below="@+id/tvFetchData"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="259dp"
             android:layout_marginBottom="5dp"
-            android:background="@drawable/circle_grayish"
+            android:background="@drawable/shape_circle_grayish"
             android:src="@drawable/ic_refresh"
             android:visibility="gone" />
     </LinearLayout>

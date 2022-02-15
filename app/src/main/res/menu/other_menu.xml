@@ -10,9 +10,9 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
     <!--TODO for first-time user guide  -->
-    <item
-        android:id="@+id/actionHelp"
-        android:title="Help"
-        android:icon="@drawable/ic_help"
-        app:showAsAction="ifRoom|collapseActionView"/>
+<!--    <item-->
+<!--        android:id="@+id/actionHelp"-->
+<!--        android:title="Help"-->
+<!--        android:icon="@drawable/ic_help"-->
+<!--        app:showAsAction="ifRoom|collapseActionView"/>-->
 </menu>

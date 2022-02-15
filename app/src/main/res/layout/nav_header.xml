@@ -13,9 +13,9 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/navheaderimgView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/ic_anonymous"
         app:shapeAppearanceOverlay="@style/Circular" />
 
     <TextView
@@ -35,6 +35,4 @@
         android:layout_height="wrap_content"
         android:text="@string/sample_text"
         tools:text="@string/id_number" />
-
-
 </LinearLayout>
