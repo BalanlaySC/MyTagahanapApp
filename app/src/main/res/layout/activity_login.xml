@@ -6,16 +6,27 @@
     android:layout_height="match_parent"
     tools:context=".Login">
 
+    <CheckBox
+        android:id="@+id/checkboxKMSI"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/go_button"
+        android:minHeight="36dp"
+        android:text="@string/keep_me_signed_in"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout2"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
+
     <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:contentDescription="App logo"
         android:gravity="center"
         android:src="@drawable/image_logo_app"
         app:layout_constraintBottom_toTopOf="@+id/guideline1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="App logo" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
@@ -40,7 +51,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableEnd="@drawable/ic_anonymous"
-            android:fontFamily="@font/nexa_light"
             android:inputType="number" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -61,7 +71,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawableEnd="@drawable/ic_pass"
-            android:fontFamily="@font/nexa_light"
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -69,30 +78,42 @@
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:indeterminateTint="@color/go_button"
-        app:layout_constraintBottom_toTopOf="@id/btnLogin"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline1" />
 
     <CheckBox
-        android:id="@+id/checkboxKMSI"
+        android:id="@+id/checkboxShowPass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/keep_me_signed_in"
-        android:textSize="14sp"
         android:buttonTint="@color/go_button"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout2"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
+        android:minHeight="36dp"
+        android:text="Show password"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/checkboxKMSI"
+        app:layout_constraintTop_toBottomOf="@+id/checkboxKMSI" />
 
     <TextView
         android:id="@+id/tvForgotPass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="8dp"
         android:text="@string/forgot_password"
         app:layout_constraintEnd_toEndOf="@+id/textInputLayout2"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout2"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/tvUserGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="View first-time user guide"
+        app:layout_constraintEnd_toEndOf="@+id/tvForgotPass"
+        app:layout_constraintTop_toBottomOf="@+id/tvForgotPass"
         tools:ignore="MissingConstraints" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -110,19 +131,19 @@
         android:textColor="#ff8080"
         android:textSize="16sp"
         android:visibility="gone"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/guideline2" />
+        app:layout_constraintTop_toBottomOf="@id/btnLogin" />
 
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
+        android:layout_marginTop="40dp"
         android:backgroundTint="@color/go_button"
         android:text="@string/login"
         android:textColor="@color/UEP_blue"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideline2" />

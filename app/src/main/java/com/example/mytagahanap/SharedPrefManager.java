@@ -2,6 +2,7 @@ package com.example.mytagahanap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 public class SharedPrefManager {
     private static volatile SharedPrefManager mInstance;
@@ -17,6 +18,7 @@ public class SharedPrefManager {
     private static final String KEY_USER_TOKEN = "userToken";
     private static final String KEY_CONT_COUNTER = "contributionCounter";
     private static final String KEY_TIME_OUT_SESSION = "timeOutSession";
+    private static final String CURRENT_STYLE_URL = "currentStyleUrl";
     private static final String FETCHED_DATA = "fetchedData";
 
     private SharedPrefManager(Context context) {
@@ -56,6 +58,7 @@ public class SharedPrefManager {
         editor.putInt(KEY_CONT_COUNTER, 0);
         editor.putLong(KEY_TIME_OUT_SESSION, timeOutSession);
         editor.putBoolean(FETCHED_DATA, false);
+        editor.putString(CURRENT_STYLE_URL, Constants.STYLE_URL);
         editor.apply();
 
         return true;
@@ -115,6 +118,11 @@ public class SharedPrefManager {
         return sharedPreferences.getString(KEY_USER_FNAME, "");
     }
 
+    public String getCurrentStyleUrl() {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(CURRENT_STYLE_URL, Constants.STYLE_URL);
+    }
+
     public String getlName() {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getString(KEY_USER_LNAME, "");
@@ -150,6 +158,22 @@ public class SharedPrefManager {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putBoolean(FETCHED_DATA, b);
+        editor.apply();
+    }
+
+    public void setKeepMeSignedIn(boolean kmsi) {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putBoolean(KEEP_ME_SIGNED_IN, kmsi);
+        editor.apply();
+    }
+
+    public void setMapboxStyleUrl(String url) {
+        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString(CURRENT_STYLE_URL, url);
         editor.apply();
     }
 

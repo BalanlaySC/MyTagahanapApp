@@ -133,7 +133,7 @@ public class ScheduleFragment extends Fragment {
             bundle.putParcelableArrayList("Locations", locations);
             mapFragment.setArguments(bundle);
 
-            handler.postDelayed(() -> mapInterface.openBottomSheetDialog(destinationLM,
+            handler.postDelayed(() -> mapInterface.openBottomSheetDialog(destinationLM, currentRoom,
                     mapInterface.getMapFragView().getContext()), 1000);
         });
     }

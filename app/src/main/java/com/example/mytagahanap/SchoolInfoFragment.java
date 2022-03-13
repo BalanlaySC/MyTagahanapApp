@@ -2,7 +2,9 @@ package com.example.mytagahanap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.text.LineBreaker;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.LeadingMarginSpan;
@@ -31,8 +33,8 @@ public class SchoolInfoFragment extends Fragment {
         tvSchoolInfo.setText(createIndentedText((String) tvSchoolInfo.getText(), 100, 0));
         tvSchoolInfo.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
 
-
         ArrayList<UEPAddInfoModel> addInfos = new ArrayList<>();
+        addInfos.add(new UEPAddInfoModel("Organizational Chart", "", R.drawable.image_uep_organizationalchart));
         addInfos.add(new UEPAddInfoModel("The UEP Seal", getString(R.string.uepSealText), R.drawable.image_logo_uep));
         addInfos.add(new UEPAddInfoModel("UEP's Vision", getString(R.string.uepVisionText), 0));
         addInfos.add(new UEPAddInfoModel("UEP's Mission", getString(R.string.uepMissionText), 0));
@@ -55,6 +57,10 @@ public class SchoolInfoFragment extends Fragment {
         mAdapter.setOnItemClickListener(position -> {
             addInfos.get(position).setExpanded(!addInfos.get(position).isExpanded());
             mAdapter.notifyItemChanged(position);
+        });
+
+
+        mAdapter.setOnItemClickListener(position -> {
         });
         return view;
     }

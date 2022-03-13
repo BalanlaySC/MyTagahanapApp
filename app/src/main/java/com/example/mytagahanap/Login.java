@@ -2,12 +2,16 @@ package com.example.mytagahanap;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -40,6 +44,7 @@ public class Login extends AppCompatActivity {
     private CheckBox checkboxKMSI;
     private ProgressBar progressBar;
     private LinearLayout tokenLayout;
+    private String curVersion;
 
     Context loginContext;
 
@@ -48,6 +53,12 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         loginContext = getApplicationContext();
+        try {
+            curVersion = loginContext.getPackageManager().getPackageInfo(BuildConfig.APPLICATION_ID, 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "current version " + curVersion);
 
         // check if user enabled keep me signed in
         // if not then log out and clear shared pref
@@ -70,10 +81,16 @@ public class Login extends AppCompatActivity {
 
     private void initViews() {
         tietIDNumber = findViewById(R.id.tietIDNumber);
+        tietIDNumber.setInputType(InputType.TYPE_CLASS_TEXT);
         tietPassword = findViewById(R.id.tietPassword);
+        tietPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         checkboxKMSI = findViewById(R.id.checkboxKMSI);
+        CheckBox checkboxShowPass = findViewById(R.id.checkboxShowPass);
         progressBar = findViewById(R.id.progress);
         TextView tvForgotPass = findViewById(R.id.tvForgotPass);
+        tvForgotPass.setPaintFlags(tvForgotPass.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        TextView tvUserGuide = findViewById(R.id.tvUserGuide);
+        tvUserGuide.setPaintFlags(tvForgotPass.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvMessage = findViewById(R.id.tvMessage);
         Button buttonLogin = findViewById(R.id.btnLogin);
         tokenLayout = findViewById(R.id.tokenLayout);
@@ -85,20 +102,20 @@ public class Login extends AppCompatActivity {
         if (userIdnumber != 0)
             tietIDNumber.setText(String.valueOf(userIdnumber));
 
-        // todo utilize the new textview to display messages, substitute toasts
-        tvForgotPass.setPaintFlags(tvForgotPass.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvForgotPass.setOnClickListener(view -> {
             tokenLayout.setVisibility(View.VISIBLE);
             Toast.makeText(loginContext, "Enter token and send to " +
                     "reset to default password", Toast.LENGTH_LONG).show();
         });
-        buttonTokenSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                resetPassword(String.valueOf(tietIDNumber.getText()).trim(),
-                        String.valueOf(editTxtToken.getText()).trim());
-            }
+
+        tvUserGuide.setOnClickListener(view -> {
+            Uri uri = Uri.parse("http://mytagahanap.000webhostapp.com/First-time%20user%20guide.pdf");
+            Intent intent1 = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent1);
         });
+
+        buttonTokenSend.setOnClickListener(view -> resetPassword(String.valueOf(tietIDNumber.getText()).trim(),
+                String.valueOf(editTxtToken.getText()).trim()));
 
         buttonLogin.setOnClickListener(view -> {
             if (!String.valueOf(tietIDNumber.getText()).equals("")
@@ -111,6 +128,14 @@ public class Login extends AppCompatActivity {
                 tvMessage.setVisibility(View.VISIBLE);
             }
         });
+
+        checkboxShowPass.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (b) {
+                tietPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            } else {
+                tietPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            }
+        });
     }
 
     private void logIn(String idnumber, String password) {
@@ -121,30 +146,31 @@ public class Login extends AppCompatActivity {
                 response -> {
                     progressBar.setVisibility(View.GONE);
                     try {
-                        if (checkboxKMSI.isChecked()) {
-                            JSONObject obj = new JSONObject(response);
-                            if (!obj.getBoolean("error")) {
-                                SharedPrefManager.getInstance(loginContext)
-                                        .userLogin(obj.getInt("idnumber"),
-                                                password,
-                                                obj.getString("f_name"),
-                                                obj.getString("l_name"),
-                                                obj.getString("def_loc"),
-                                                checkboxKMSI.isChecked(),
-                                                obj.getString("token"),
-                                                initTimeSession());
-                                // uncomment if need to view user info
-                                // Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
-                                Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(loginContext, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                tvMessage.setText(obj.getString("message"));
-                                tvMessage.setVisibility(View.VISIBLE);
-                                tietIDNumber.setText("");
-                                tietPassword.setText("");
-                            }
+                        JSONObject obj = new JSONObject(response);
+                        if (!obj.getBoolean("error")) {
+                            SharedPrefManager.getInstance(loginContext)
+                                    .userLogin(obj.getInt("idnumber"),
+                                            password,
+                                            obj.getString("f_name"),
+                                            obj.getString("l_name"),
+                                            obj.getString("def_loc"),
+                                            true,
+                                            obj.getString("token"),
+                                            initTimeSession());
+                            // uncomment if need to view user info
+                            // Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
+                            Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(loginContext, MainActivity.class);
+                            Bundle mBundle = new Bundle();
+                            mBundle.putBoolean("KeepMeSignedIn", checkboxKMSI.isChecked());
+                            intent.putExtras(mBundle);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            tvMessage.setText(obj.getString("message"));
+                            tvMessage.setVisibility(View.VISIBLE);
+                            tietIDNumber.setText("");
+                            tietPassword.setText("");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -161,6 +187,7 @@ public class Login extends AppCompatActivity {
                 Map<String, String> params = new HashMap<>();
                 params.put("idnumber", idnumber);
                 params.put("password", password);
+                params.put("appver", curVersion);
                 return params;
             }
         };

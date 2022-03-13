@@ -9,6 +9,7 @@ import android.content.IntentSender;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -29,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private MenuItem mapMenuItem;
     private MenuItem currentMenuItem;
-    private Dialog profileDialog;
+    private Dialog profileDialog, feedbackDialog;
 
     private MapFragment mapFragment;
     private ScheduleFragment scheduleFragment;
@@ -90,8 +92,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         loadSharedPreference();
 
         // check if token is still valid
-        if (isSessionTimedOut(SharedPrefManager.getInstance(this).getTimeOutSession()) < 0) {
-            logoutUser("Your session has timed out.\nPlease log in again.", Toast.LENGTH_LONG);
+        Log.d(TAG, "getdatatype " + SharedPrefManager.getInstance(this).getTimeOutSession());
+        if(SharedPrefManager.getInstance(this).getKeepMeSignedIn()) {
+            if (isSessionTimedOut(SharedPrefManager.getInstance(this).getTimeOutSession()) < 0) {
+                logoutUser("Your session has timed out.\nPlease log in again.", Toast.LENGTH_LONG);
+                return;
+            }
+            try {
+                SharedPrefManager.getInstance(this).setKeepMeSignedIn(getIntent().getExtras().getBoolean("KeepMeSignedIn"));
+            } catch (NullPointerException ignored) {}
+        } else {
+            logoutUser("Logout on exit", -1);
             return;
         }
         initViews();
@@ -115,8 +126,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 enableLoc();
             }
         }
-        
+
         profileDialog = new Dialog(this);
+        feedbackDialog = new Dialog(this);
     }
 
     private int isSessionTimedOut(long userTimeMillis) {
@@ -139,7 +151,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         intent.putExtra("previous User", SharedPrefManager.getInstance(this).getIdnumber());
         SharedPrefManager.getInstance(this).logOut();
         finish();
-        Toast.makeText(this, strToast, len).show();
+        if (len >= 0){
+            Toast.makeText(this, strToast, len).show();
+        } else {
+            Log.d(TAG, strToast);
+        }
         startActivity(intent);
     }
 
@@ -165,15 +181,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View headerView = navigationView.getHeaderView(0);
         TextView navheaderName = headerView.findViewById(R.id.navheaderName);
         TextView navheaderidNumber = headerView.findViewById(R.id.navheaderidNumber);
-        LinearLayout navheaderLayout = headerView.findViewById(R.id.navheaderLayout);
+        RelativeLayout navheaderLayout = headerView.findViewById(R.id.navheaderLayout);
+        LinearLayout navLogout = headerView.findViewById(R.id.navLogout);
 
         navheaderName.setText(fullName);
         navheaderidNumber.setText(String.valueOf(idnumber));
         navigationView.setNavigationItemSelectedListener(this);
         navheaderLayout.setOnClickListener(view -> openProfileDialog());
+        navLogout.setOnClickListener(view -> logoutUser("Logout Successfully", Toast.LENGTH_SHORT));
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                if (mapFragment.getDirectionsDialog() != null) {
+                    if (mapFragment.getDirectionsDialog().isShowing()) {
+                        mapFragment.getDirectionsDialog().dismiss();
+                    }
+                }
+                if (mapFragment.getLocationsDialog() != null) {
+                    if (mapFragment.getLocationsDialog().isShowing()) {
+                        mapFragment.getLocationsDialog().dismiss();
+                    }
+                }
+                super.onDrawerOpened(drawerView);
+            }
+        };
         drawer.addDrawerListener(toggle);
         toggle.syncState();
     }
@@ -207,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             searchView.clearFocus();
             LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
             searchAutoComplete.setText(clickedLocation.getLocationName());
-            mapInterface.openBottomSheetDialog(clickedLocation, MainActivity.this);
+            mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this);
             if (mapMenuItem != currentMenuItem) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                         mapFragment).commit();
@@ -222,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 searchView.clearFocus();
                 if (containsLocation(query)) {
                     LocationModel clickedLocation = getLocationObj(query);
-                    mapInterface.openBottomSheetDialog(clickedLocation, MainActivity.this);
+                    mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this);
                     if (mapMenuItem != currentMenuItem) {
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 mapFragment).commit();
@@ -239,6 +272,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return false;
             }
         });
+
+        // User guide inside the app
+        MenuItem actionHelp = menu.findItem(R.id.actionHelp);
+        actionHelp.setOnMenuItemClickListener(menuItem -> {
+            Uri uri = Uri.parse("http://mytagahanap.000webhostapp.com/First-time%20user%20guide.pdf");
+            Intent intent1 = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent1);
+            return false;
+        });
+
         return true;
     }
 
@@ -246,8 +289,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         String[] actionBarTitle = {"Map", "Class Schedule", "School Information",
-                "About App", "List of Submitted Spots"};
+                "College Information", "About App", "List of Submitted Spots"};
         switch (item.getItemId()) {
+            case R.id.nav_profile:
+                openProfileDialog();
+                break;
             case R.id.nav_map:
                 initFragment(actionBarTitle[0], mapFragment);
                 parcelDataToFragment("Locations", locations, mapFragment);
@@ -259,14 +305,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_subjects:
                 initFragment(actionBarTitle[1], scheduleFragment);
                 break;
-            case R.id.nav_bldginfo:
+            case R.id.nav_schoolinfo:
                 initFragment(actionBarTitle[2], new SchoolInfoFragment());
                 break;
+            case R.id.nav_collegeinfo:
+                initFragment(actionBarTitle[3], new CollegeInfoFragment());
+                break;
             case R.id.nav_aboutapp:
-                initFragment(actionBarTitle[3], new AboutAppFragment());
+                initFragment(actionBarTitle[4], new AboutAppFragment());
                 break;
             case R.id.nav_submitted_spots:
-                initFragment(actionBarTitle[4], new SubmissionFragment());
+                initFragment(actionBarTitle[5], new SubmissionFragment());
+                break;
+            case R.id.nav_feedback:
+                openFeedbackDialog();
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
@@ -351,9 +403,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileDialog.show();
     }
 
+    private void openFeedbackDialog() {
+        drawer.closeDrawer(GravityCompat.START);
+        feedbackDialog.setContentView(R.layout.layout_dialog_react);
+        Window window = feedbackDialog.getWindow();
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        TextView reactGreat = feedbackDialog.findViewById(R.id.reactGreat);
+        TextView reactHappy = feedbackDialog.findViewById(R.id.reactHappy);
+        TextView reactWow = feedbackDialog.findViewById(R.id.reactWow);
+        TextView reactSad = feedbackDialog.findViewById(R.id.reactSad);
+        TextView reactAngry = feedbackDialog.findViewById(R.id.reactAngry);
+        ImageButton reactImgBtnClose = feedbackDialog.findViewById(R.id.reactImgBtnClose);
+
+        sendFeedback(reactGreat, String.valueOf(idnumber));
+        sendFeedback(reactHappy, String.valueOf(idnumber));
+        sendFeedback(reactWow, String.valueOf(idnumber));
+        sendFeedback(reactSad, String.valueOf(idnumber));
+        sendFeedback(reactAngry, String.valueOf(idnumber));
+
+        reactImgBtnClose.setOnClickListener(view -> feedbackDialog.dismiss());
+        feedbackDialog.show();
+    }
+
     // This will minimize the drawer instead of closing the app
     @Override
     public void onBackPressed() {
+        if (mapFragment.getLocationsDialog() != null) {
+            if (mapFragment.getLocationsDialog().isShowing()) {
+                mapFragment.getLocationsDialog().dismiss();
+            }
+        }
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -502,6 +583,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         };
 
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    private void sendFeedback(TextView tv, String userIdNumber) {
+        tv.setOnClickListener(view -> {
+            Log.d(TAG, "userIdNumber: " + userIdNumber + ", " + (String) tv.getText());
+            StringRequest stringRequest = new StringRequest(
+                    Request.Method.POST, Constants.URL_SEND_FEEDBACK,
+                    response -> {
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            Toast.makeText(MainActivity.this, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }, error -> Toast.makeText(MainActivity.this, "No connection to server.", Toast.LENGTH_SHORT).show()
+            ) {
+                @NonNull
+                @Override
+                protected Map<String, String> getParams() {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("user_idnumber", userIdNumber);
+                    params.put("reaction", (String) tv.getText());
+                    return params;
+                }
+            };
+
+            RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+            feedbackDialog.dismiss();
+        });
     }
 
     private void parcelDataToFragment(String parcelableTag, ArrayList<? extends Parcelable> arrayList, Fragment fragment) {

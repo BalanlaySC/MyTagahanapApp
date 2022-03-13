@@ -10,13 +10,16 @@ public class Constants {
     public static final String ROOT_URL = "http://mytagahanap.000webhostapp.com/mytagahanap/v1/";
     public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php?idnumber=";
     public static final String URL_LOGIN = ROOT_URL + "userLogin.php";
+    public static final String URL_SEARCH_LOG = ROOT_URL + "recordAccessedLocation.php";
     public static final String URL_SUBMIT_SUGGESTION = ROOT_URL + "submitSuggestion.php";
+    public static final String URL_SEND_FEEDBACK = ROOT_URL + "sendFeedback.php";
     public static final String URL_CHANGE_PASSWORD = ROOT_URL + "changePassword.php";
     public static final String URL_CHANGE_DEF_LOC = ROOT_URL + "changeDefLoc.php";
     public static final String URL_RESET_PASSWORD = ROOT_URL + "resetPassword.php";
     public static final String URL_SUBMITTED_LOC = ROOT_URL + "submittedLocations.php?idnumber=";
 
     public static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
+    public static final String STREET_STYLE_URL = "mapbox://styles/balanlaysc/ckztgctxd00m914nybcatj974";
     public static final String ROUTE_LAYER_ID = "route-layer-id";
     public static final String ROUTE_SOURCE_ID = "route-source-id";
     public static final String ICON_LAYER_ID_O = "icon-layer-id-origin";

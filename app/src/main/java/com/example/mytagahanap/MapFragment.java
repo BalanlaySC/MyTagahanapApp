@@ -51,11 +51,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
@@ -97,6 +97,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -114,8 +116,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
     private BottomSheetDialog bottomSheetDialog;
-    private Dialog suggestionDialog, locationsDialog;
+    private Dialog directDialog, suggestionDialog, locationsDialog;
     private ExtendedFloatingActionButton mapfragmentFab;
+    private FloatingActionButton mapfragFabStyle;
 
     private Context mapFragmentContext;
 
@@ -132,18 +135,19 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         Mapbox.getInstance(mapFragmentContext, getString(R.string.mapbox_access_token));
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         setMapFragView(view);
+        String styleUrl = SharedPrefManager.getInstance(mapFragmentContext).getCurrentStyleUrl();
 
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> {
             setMapboxMap(mapboxMap);
-            mapboxMap.setStyle(Constants.STYLE_URL, style -> {
+            mapboxMap.setStyle(styleUrl, style -> {
                 enableLocationComponent(style);
                 initLayers(style);
 
                 mapboxMap.addOnMapLongClickListener(point -> {
                     @SuppressLint("DefaultLocale") String pointName = String.format("%1$.7f, %2$.7f", point.getLongitude(), point.getLatitude());
-                    openBottomSheetDialog(new LocationModel(pointName, (float) point.getLatitude(), (float) point.getLongitude()),
+                    openBottomSheetDialog(new LocationModel(pointName, (float) point.getLatitude(), (float) point.getLongitude()), "",
                             requireContext());
                     return false;
                 });
@@ -163,6 +167,19 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 mapfragmentFab.shrink();
             }
             return true;
+        });
+
+        mapfragFabStyle = view.findViewById(R.id.mapfragFabStyle);
+        mapfragFabStyle.setOnClickListener(view13 -> {
+            if (SharedPrefManager.getInstance(mapFragmentContext).getCurrentStyleUrl().equals(Constants.STYLE_URL)) {
+                SharedPrefManager.getInstance(mapFragmentContext).setMapboxStyleUrl(Constants.STREET_STYLE_URL);
+            } else {
+                SharedPrefManager.getInstance(mapFragmentContext).setMapboxStyleUrl(Constants.STYLE_URL);
+            }
+
+            MapFragment mapfrag = new MapFragment();
+            getParentFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    mapfrag).commit();
         });
 
         suggestionDialog = new Dialog(getActivity());
@@ -201,7 +218,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
             // Set the component's camera mode
             locationComponent.setMaxAnimationFps(30);
-            Log.d(TAG, "enableLocationComponent: getcameraposition" + mapboxMap.getCameraPosition());
             locationComponent.setCameraMode(CameraMode.TRACKING);
 
             // Set the component's render mode
@@ -226,8 +242,14 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     @SuppressLint("MissingPermission")
     public LocationModel getDevCurrentLocation() {
         String defaultLocation = SharedPrefManager.getInstance(mapFragmentContext).getDefLoc();
-        Log.d(TAG, "getDevCurrentLocation: defaultlocation " + defaultLocation);
-        LocationModel currentLM = getLocationObj(defaultLocation);
+        LocationModel currentLM;
+        if (defaultLocation.contains(", ")){
+            String[] parts = defaultLocation.split(", ");
+            currentLM = new LocationModel(defaultLocation, Float.parseFloat(parts[1]), Float.parseFloat(parts[0]));
+        } else {
+            currentLM = getLocationObj(defaultLocation);
+        }
+        Log.d(TAG, "getDevCurrentLocation: currentLM " + currentLM.toString());
         LocationModel origin;
 
         if (ActivityCompat.checkSelfPermission(mapFragmentContext, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -261,7 +283,14 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
      * @param destination the desired finish point of the route
      */
     public void getRoute(MapboxMap mapboxMap, Point origin, Point destination) {
-        LocationModel currentLM = getLocationObj(SharedPrefManager.getInstance(mapFragmentContext).getDefLoc());
+        String defaultLocation = SharedPrefManager.getInstance(mapFragmentContext).getDefLoc();
+        LocationModel currentLM;
+        if (defaultLocation.contains(", ")){
+            String[] parts = defaultLocation.split(", ");
+            currentLM = new LocationModel(defaultLocation, Float.parseFloat(parts[1]), Float.parseFloat(parts[0]));
+        } else {
+            currentLM = getLocationObj(defaultLocation);
+        }
         Log.d(TAG, "getRoute: currentLM " + SharedPrefManager.getInstance(mapFragmentContext).getDefLoc());
         Point currentLMPoint = Point.fromLngLat(currentLM.getLocationLng(), currentLM.getLocationLat());
         Polygon polygon = Polygon.fromLngLats(com.example.mytagahanap.Constants.POINTS);
@@ -466,13 +495,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     // Display bottomsheet dialog to show information of the location
-    public void openBottomSheetDialog(LocationModel clickedLocation, Context context) {
+    public void openBottomSheetDialog(LocationModel clickedLocation, String room, Context context) {
         handler.postDelayed(() -> markMapboxMapOffset(getMapboxMap(), clickedLocation), 250);
         bottomSheetDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
         bottomSheetDialog.setOnCancelListener(dialogInterface -> clearLayers());
         bottomSheetDialog.setContentView(R.layout.layout_bottom_sheet);
 
-        // Display clicked location
+        // Set bottomsheet title to clicked location
         TextView btsTxtLocation = bottomSheetDialog.findViewById(R.id.btsTxtLocation);
         if (btsTxtLocation != null) {
             btsTxtLocation.setText(clickedLocation.getLocationName());
@@ -493,7 +522,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         // Display images of a known location
         LinearLayout bsImageLayout = bottomSheetDialog.findViewById(R.id.bsImageLayout);
         if (bsImageLayout != null) {
-            initImageLayout(clickedLocation, bsImageLayout);
+            initImageLayout(clickedLocation, room, bsImageLayout);
         }
 
         // More option menu
@@ -516,11 +545,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }
         if (smbtnSetDefault != null) {
             // set def location feature is only available for existing locations
-            if (containsLocation(clickedLocation.getLocationName())) {
-                smbtnSetDefault.setVisibility(View.VISIBLE);
-            } else {
-                smbtnSetDefault.setVisibility(View.GONE);
-            }
+            smbtnSetDefault.setVisibility(View.VISIBLE);
 
             // change def location
             smbtnSetDefault.setOnClickListener(view -> {
@@ -531,20 +556,32 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             });
         }
         if (smbtnViewRooms != null) {
+            if (getStreamRM(clickedLocation)){
+                smbtnViewRooms.setVisibility(View.VISIBLE);
+            } else {
+                smbtnViewRooms.setVisibility(View.GONE);
+            }
             String imgUrl = (Constants.ROOT_URL + "img/" +
                     clickedLocation.getLocationName() + "/" + clickedLocation.getLocationName())
                     .replace(" ", "%20");
             // check if location is college building, else feature disabled
-            if (clickedLocation.getLocationName().startsWith("College")) {
-                smbtnViewRooms.setVisibility(View.VISIBLE);
-                smbtnViewRooms.setOnClickListener(view -> {
-                    ArrayList<SliderItem> sliderItems = new ArrayList<>();
-                    sliderItems.add(new SliderItem(imgUrl + "FloorPlan.jpg"));
-                    Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
-                    intent.putParcelableArrayListExtra("enlargedImage", sliderItems);
-                    startActivity(intent);
-                });
+            // .filter(o -> o.getName().equals(name)).findFirst().isPresent()
+            Stream<RoomModel> stream =  DatabaseAccess.getInstance(mapFragmentContext)
+                    .getAllRooms()
+                    .stream()
+                    .filter(o -> o.getLocationName().equals(clickedLocation.getLocationName()));
+            List<RoomModel> clickedLocationRooms = stream.collect(Collectors.toList());
+            ArrayList<EnlargedImageModel> imageSet = new ArrayList<>();
+            for (RoomModel roomModel : clickedLocationRooms) {
+                imageSet.add(new EnlargedImageModel(imgUrl +
+                        roomModel.getRoomName().replace(" ", "%20") + "Room.jpg", ""));
             }
+
+            smbtnViewRooms.setOnClickListener(view -> {
+                Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
+                intent.putParcelableArrayListExtra("enlargedImage", imageSet);
+                startActivity(intent);
+            });
         }
         if (smbtnSuggestLocation != null) {
             // feature viable/Visible if clickedLocation is unique, else feature disabled/Gone
@@ -576,51 +613,73 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         bottomSheetDialog.show();
     }
 
+    private boolean getStreamRM(LocationModel clickedLocation) {
+        return DatabaseAccess.getInstance(mapFragmentContext)
+                .getAllRooms()
+                .stream()
+                .anyMatch(o -> o.getLocationName().equals(clickedLocation.getLocationName()));
+    }
+
     // Displays images for a clicked location in bottom sheet
-    private void initImageLayout(LocationModel clickedLocation, LinearLayout bsImageLayout) {
+    private void initImageLayout(LocationModel clickedLocation, String room, LinearLayout bsImageLayout) {
         String holder = (Constants.ROOT_URL + "img/" +
                 clickedLocation.getLocationName().replace(".", "")
                 + "/" + clickedLocation.getLocationName())
                 .replace(" ", "%20");
-
-        bsImageLayout.setOnClickListener(view -> {
-            ArrayList<SliderItem> sliderItems = new ArrayList<>();
-            sliderItems.add(new SliderItem(holder + "Preview1.jpg"));
-            sliderItems.add(new SliderItem(holder + "Preview2.jpg"));
-            Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
-            intent.putParcelableArrayListExtra("enlargedImage", sliderItems);
-            startActivity(intent);
-        });
+        String roomPreviewUrl = holder + room.replace(" ", "%20") + ".jpg";
+        String roomUrl = holder + room.replace(" ", "%20") + "Room.jpg";
+        String roomThumbnailUrl = holder +  room.replace(" ", "%20")  + "Thumb.jpg";
 
         ShapeableImageView locationimg1 = bottomSheetDialog.findViewById(R.id.locationimg1);
         ShapeableImageView locationimg2 = bottomSheetDialog.findViewById(R.id.locationimg2);
-        // glide allows us to display images from the internet, via url/uri
+
+        // thumbnails in bottomsheet
         if (containsLocation(clickedLocation.getLocationName())) {
             bsImageLayout.setVisibility(View.VISIBLE);
             if (locationimg1 != null && locationimg2 != null) {
                 Glide.with(mapFragmentContext)
                         .asBitmap()
-                        .placeholder(R.drawable.image_placeholder)
-                        .load(Uri.parse(holder + "Thumb1.jpg"))
+                        .load(Uri.parse(holder + "Preview.jpg"))
+                        .thumbnail(Glide.with(mapFragmentContext)
+                                .asBitmap()
+                                .load(Uri.parse(holder + "Thumb.jpg")))
                         .into(locationimg1);
-                Glide.with(mapFragmentContext)
-                        .asBitmap()
-                        .placeholder(R.drawable.image_placeholder)
-                        .load(Uri.parse(holder + "Thumb2.jpg"))
-                        .into(locationimg2);
-                handler.postDelayed(() -> {
+                if (!room.equals("")) {
+                    locationimg2.setVisibility(View.VISIBLE);
                     Glide.with(mapFragmentContext)
                             .asBitmap()
-                            .placeholder(R.drawable.image_placeholder)
-                            .load(Uri.parse(holder + "Thumb1.jpg"))
-                            .into(locationimg1);
-                    Glide.with(mapFragmentContext)
-                            .asBitmap()
-                            .placeholder(R.drawable.image_placeholder)
-                            .load(Uri.parse(holder + "Thumb2.jpg"))
+                            .load(Uri.parse(roomPreviewUrl))
+                            .thumbnail(Glide.with(mapFragmentContext)
+                                    .asBitmap()
+                                    .load(Uri.parse(roomThumbnailUrl)))
                             .into(locationimg2);
-                }, 5000);
+                } else {
+                    locationimg2.setVisibility(View.GONE);
+                }
             }
+        }
+
+        // listener for preview image
+        if (locationimg1 != null) {
+            locationimg1.setOnClickListener(view -> {
+                Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
+                intent.putExtra("enLargedImage",
+                        new EnlargedImageModel(holder + "Preview.jpg", holder + "Thumb.jpg"));
+                startActivity(intent);
+
+            });
+        }
+        if (locationimg2 != null) {
+            locationimg2.setOnClickListener(view -> {
+                Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
+                ArrayList<EnlargedImageModel> imageSet = new ArrayList<>();
+                imageSet.add(new EnlargedImageModel(roomPreviewUrl, roomThumbnailUrl));
+                imageSet.add(new EnlargedImageModel(roomUrl, ""));
+                Log.d(TAG, "roomUrl sample" + roomUrl);
+                intent.putParcelableArrayListExtra("enlargedImage", imageSet);
+                startActivity(intent);
+
+            });
         }
     }
 
@@ -676,6 +735,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             return true;
         });
         directionsDialog.setContentView(R.layout.layout_dialog_directions);
+        setDirectionsDialog(directionsDialog);
 
         Window window = directionsDialog.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -696,8 +756,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         LocationModel originLM = getDevCurrentLocation();
         origin = Point.fromLngLat(originLM.getLocationLng(),
                 originLM.getLocationLat());
+        float areaConstant = 0.00015F;
         float destLng = destinationLM.getLocationLng();
+        float lngIncrease = destLng + areaConstant;
+        float lngDecrease = destLng - areaConstant;
         float destLat = destinationLM.getLocationLat();
+        float latIncrease = destLat + areaConstant;
+        float latDecrease = destLat - areaConstant;
         destination = Point.fromLngLat(destLng, destLat);
         getRoute(getMapboxMap(), origin, destination);
 
@@ -715,15 +780,23 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         List<List<Point>> area = new ArrayList<>();
         List<Point> points = new ArrayList<>();
 
-        points.add(Point.fromLngLat(destLng - 0.00015,destLat + 0.00015));
-        points.add(Point.fromLngLat(destLng - 0.00015,destLat - 0.00015));
-        points.add(Point.fromLngLat(destLng + 0.00015,destLat - 0.00015));
-        points.add(Point.fromLngLat(destLng + 0.00015,destLat + 0.00015));
-        points.add(Point.fromLngLat(destLng - 0.00015,destLat + 0.00015));
+        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left
+        points.add(Point.fromLngLat(lngDecrease,latDecrease)); //top-right
+        points.add(Point.fromLngLat(lngIncrease,latDecrease)); //bottom-right
+        points.add(Point.fromLngLat(lngIncrease,latIncrease)); //bottom-left
+        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left & meeting pt
         area.add(points);
 
         Polygon polygon = Polygon.fromLngLats(area);
 
+        searchLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+                originLM.getLocationName(), destinationLM.getLocationName());
+
+        handler.postDelayed(() -> {
+            if (!directionsDialog.isShowing()){
+                clearLayers();
+            }
+        }, 2500);
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -752,6 +825,33 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 }
             }
         }, 10000, 10000);
+    }
+
+    private void searchLog(String userIdNumber, String origin, String destination) {
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.URL_SEARCH_LOG,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        Log.d(TAG, "searchLog request" + obj.getString("message"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> Log.d(TAG, "searchLog request No connection to server ")
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_idnumber", userIdNumber);
+                params.put("origin", origin);
+                params.put("destination", destination);
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+
     }
 
     // Display dialog for list of locations
@@ -788,7 +888,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         mAdapter.setOnItemClickListener(position -> {
             mapfragmentFab.show();
 
-            openBottomSheetDialog(locations.get(position), requireContext());
+            openBottomSheetDialog(locations.get(position), "", requireContext());
             locationsDialog.dismiss();
         });
         recvImgBtnClose.setOnClickListener(view -> {
@@ -921,6 +1021,22 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     public void setMapboxMap(MapboxMap mapboxMap) {
         MapFragment.this.mapboxMap = mapboxMap;
     }
+
+    @Override
+    public void setDirectionsDialog(Dialog d) {
+        MapFragment.this.directDialog = d;
+    }
+
+    @Override
+    public Dialog getLocationsDialog() {
+        return MapFragment.this.locationsDialog;
+    }
+
+    @Override
+    public Dialog getDirectionsDialog() {
+        return MapFragment.this.directDialog;
+    }
+
 
     @Override
     public void setMapFragView(View v) {

@@ -1,5 +1,6 @@
 package com.example.mytagahanap;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
 
@@ -12,9 +13,12 @@ public interface MapInterface {
     void markMapboxMap(MapboxMap mbM, Point p1);
     void markMapboxMapOffset(MapboxMap mbM, LocationModel locationModel);
     void setMapboxMap(MapboxMap mbM);
+    void setDirectionsDialog(Dialog d);
+    Dialog getLocationsDialog();
+    Dialog getDirectionsDialog();
     void setMapFragView(View v);
     void initDirectionDialog(LocationModel lm1);
-    void openBottomSheetDialog(LocationModel lm1, Context context);
+    void openBottomSheetDialog(LocationModel lm1, String r, Context context);
     void setClickedLocation(LatLng p);
     MapboxMap getMapboxMap();
     void getRoute(MapboxMap mbM, Point p1, Point p2);

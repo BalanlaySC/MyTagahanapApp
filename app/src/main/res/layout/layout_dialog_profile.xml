@@ -104,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/profileIdnumberIdentifier"
             android:layout_toEndOf="@id/profileIdnumberIdentifier"
-            android:text="Token" />
+            android:text="@string/tokenTitle" />
 
         <TextView
             android:id="@+id/profileToken"
@@ -126,7 +126,7 @@
             android:id="@+id/profileDefLocIdentifier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/profileIdnumber"
+            android:layout_below="@+id/profileToken"
             android:layout_alignStart="@+id/profileIdnumber"
             android:text="Default Location" />
 
@@ -169,7 +169,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="20sp"
             android:textStyle="bold"
-            tools:text="DEFAULT LOCATION" />
+            tools:text="SECRET" />
 
         <ImageButton
             android:id="@+id/profileEditBtn"

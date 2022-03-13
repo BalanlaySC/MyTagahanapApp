@@ -37,6 +37,22 @@
         app:strokeWidth="4dp"
         tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/mapfragFabStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/mapfragmentFab"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="12dp"
+        android:src="@drawable/ic_satellite"
+        app:tint="@color/white"
+        app:backgroundTint="@color/UEP_blue"
+        app:fabSize="mini"
+        android:clickable="true"
+        android:focusable="true"
+        tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
     <LinearLayout
         android:id="@+id/layoutFetchData"
         android:layout_width="200dp"

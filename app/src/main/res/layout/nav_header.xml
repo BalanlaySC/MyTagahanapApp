@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navheaderLayout"
     android:layout_width="match_parent"
-    android:layout_height="160dp"
+    android:layout_height="175dp"
     android:background="@color/UEP_blue"
-    android:gravity="bottom"
-    android:orientation="vertical"
     android:padding="16dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
@@ -15,24 +13,57 @@
         android:id="@+id/navheaderimgView"
         android:layout_width="70dp"
         android:layout_height="70dp"
+        android:layout_above="@+id/navProfileFullName"
         android:src="@drawable/ic_anonymous"
         app:shapeAppearanceOverlay="@style/Circular" />
 
-    <TextView
-        android:id="@+id/navheaderName"
+    <LinearLayout
+        android:id="@+id/navProfileFullName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:text="@string/sample_text"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        tools:text="Full Name" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_toStartOf="@+id/navLogout"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/navheaderidNumber"
+        <TextView
+            android:id="@+id/navheaderName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="@string/sample_text"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Full Name" />
+
+        <TextView
+            android:id="@+id/navheaderidNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sample_text"
+            tools:text="@string/id_number" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sample_text"
-        tools:text="@string/id_number" />
-</LinearLayout>
+        android:layout_alignBottom="@id/navProfileFullName"
+        android:layout_alignParentEnd="true"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_logout" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Logout" />
+    </LinearLayout>
+</RelativeLayout>

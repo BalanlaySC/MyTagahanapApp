@@ -29,8 +29,8 @@
         \nThe year 1918 - the establishment of the institution as the Catarman Farm School which later became the Catarman National Agricultural High School (CANHS).
         \nThe year 1956 - the establishment of the Samar Institute of Technology (SIT) and the abolition of CANHS on Jne 14, 1956 by virtue of Republic Act 1434.
         \nThe year 1964 - the conversion of SIT into the University of Eastern Philippines (UEP) on June 20, 1964 by virtue of Republic Act 4126.</string>
-    <string name="uepVisionText">Academically competitive, research and development-focuesd, public-service driven, and economically sustainable state higher education institution.</string>
-    <string name="uepMissionText">To offer academic programs and services that will effectively transform individuals into productive citizens of the country and accelerate the development of high-level professionals who will provide leadership in meeting the demands of sustainable development and challenges of diverse and globalized society.</string>
+    <string name="uepVisionText">A globally competitive university producing graduates in pursuit of higher economic welfare of the people and the community through inclusion and cooperation from the stakeholders.</string>
+    <string name="uepMissionText">Provide technical and professional training, advanced instruction in literature, arts, philosophy, the sciences and promotion of innovation, scientific and technological researches.</string>
     <string name="coreValuesText">R Relevance. All our plans and actions must be relevant to UEP\'s vision and mission.
         \nI Integrity. Honest beyond reproach, respected, trustworthy, and admired. Public officers and employees must at all times be accountable to te people, serve them with utmost responsibility, integrity, loyalty, and efficiency, act with patriotism and justice, and lead modest lives.
         \nP Productivity. Our output must always be equal to if not greater than the investment of the National Government.
@@ -61,8 +61,94 @@
         \nUnsullied loyalty we do pledge
         \n\nMusic by Rev. Fr. Eleno A. Delizon
         \nLyrics by Dr. Lydia P.E. dela Rosa</string>
+    <string name="organizationalChart">
+        University President
+        \n\t\tDr. Cherry I. Ultra
+        \nVP for Academic Affairs
+        \n\t\tDr. Abel Alejandro U. Flores
+        \nVP for Administration \&amp; Finance
+        \n\t\tMr. Bryan V. Navaroza
+        \nVP for Research Development \&amp; Extension
+        \n\t\tDr. Karina Milagros C. Lim
+        \nVP for External Affairs
+        \n\t\tDr. Nelia M. Adora
+        \nBoard Secretary
+        \n\t\tDr. Nelia M. Adora
+        \nFinancial Management Officer
+        \n\t\tMr. Ferdinand Reyes
+        \nChief Administrative Officer
+        \n\t\tDr. Abel Alejandro U. Flores
+        \nFaculty Regent
+        \n\t\tAtty. Bernabe L.Figueroa
+        \nAlumni Regent
+        \n\t\tAtty. Albert Yruma
+        \nStudent Regent
+        \n\t\tMs. Sherry Anne Ballicud
+        \nNTSA President
+        \n\t\tMr. James J. Bianes
+        \nDean, Student Affairs
+        \n\t\tDr. Josephine Tan
+        \nDirector, UEP– Laoang Campus
+        \n\t\tDr. Ronato Ballado
+        \nCollege Administrator, UEP–PRMC
+        \n\t\tDr. Rico De Asis
+        \nDirector, Graduate Studies
+        \n\t\tDr. Virginia G. Valanon
+        \nUniversity Registrar
+        \n\t\tMr. Arnold Rapsing</string>
+    <string name="collegeInfoCS">
+        College Dean
+        \n\t\tDr. Celeste J. Chan
+        \n
+        \nCollege Secretary
+        \n\t\tMs. Riva A. Gatongay
+        \n
+        \nChair, Department of Biological Sciences
+        \nProgram Chair, BS Biology
+        \n\t\tProf. Manuela Cecille G. Vicencio
+        \nProgram Chair, BS Chemistry
+        \n\t\tDr. Karina Milagros C. Lim
+        \nChair, Department of Environmental Science
+        \n\t\tProf. Anelita M. Obrar
+        \nProgram Chair, Information Technology
+        \n\t\tDr. Jose P. Ching, Jr.
+        \nProgram Chair, Marine Biology
+        \n\t\tProf. Florencio P. Mahinay
+        \nChair, Department ofMathematics
+        \nCollege Students Affairs and Services Coordinator
+        \n\t\tMs. Mary Jane B. Calpa
+        \nChair, Department of Physical Sciences
+        \n\t\tDr. Ma. Lourdes C. Alvarez
+        \n
+        \nCollege Extension Coordinator
+        \n\t\tProf. Romula A. Obleopas
+        \nCollege Research Coordinator
+        \n\t\tProf. Franklin E. Cortez
+        \nCollege Instruction Coordinator
+        \nCollege Guidance Coordinator
+        \n\t\tEngr. Olga DG. Unay
+        \nCollege External Affairs Coordinator
+        \n\t\tMs Regina O. Belga
+        \nCollege GAD Coordinator
+        \n\t\tProf. Ma. Leovilla D. Santos
+        \nCollege Biosafety Officer
+        \n\t\tDr. Abel Alejandro U. Flores, Jr.
+        \n
+        \nCollege of Science Academic Offerings
+        \n\t\tMaster of Science in Biological Science
+        \n\t\tMaster of Science in Environmental Studies
+        \n\t\tMaster of Science in Chemistry
+        \n\t\tBachelor of Science in Biolgyy
+        \n\t\tBachelor of Science in Chemistry
+        \n\t\tBachelor of Science in Environmental Science
+        \n\t\tBachelor of Science in Information Technology
+        \n\t\tBachelor of Science in Marine Biology
+        \n\t\tBachelor of Science in Mathematics
+    </string>
     <integer name="TEXT_NO_SUGGESTIONS">524288</integer>
     <string name="aboutappIntroText">
-        Hi there! This is the application that we developed specifically for the University of Eastern Philippines Main Campus to help the user (students/faculty/staff) find a specific area/building with an optimal path given by the software. This would lessen people asking for assistance to strangers when they need to find the location of their class, meeting or orientation that they are not familiar with. I hope you enjoy your stay here in the campus with your trusty app, My Tagahanap!
+        Hi there! "My Tagahanap" is a mobile application that we developed specifically for the University of Eastern Philippines Main Campus to help the user (students/faculty/staff) find a specific area/building by providing an optimal path that is displayed on map. This would lessen people asking for assistance to strangers when they need to find the room of their class, location of their meeting or orientation which they are not familiar with. I hope you enjoy your stay here in the campus with your trusty app, My Tagahanap!
     </string>
+    <string name="tokenTitle">Token</string>
+    <string name="tokenInstruction">Long click the text below and save it somewhere safe. It will be used for resetting password.</string>
 </resources>

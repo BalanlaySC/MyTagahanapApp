@@ -91,7 +91,7 @@ public class SubmissionFragment extends Fragment {
             bundle.putParcelableArrayList("Locations", locations);
             mapFragment.setArguments(bundle);
 
-            handler.postDelayed(() -> mapInterface.openBottomSheetDialog(destinationLM,
+            handler.postDelayed(() -> mapInterface.openBottomSheetDialog(destinationLM, "",
                     mapInterface.getMapFragView().getContext()), 1000);
         });
     }

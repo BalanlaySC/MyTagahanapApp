@@ -9,10 +9,10 @@
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
-    <!--TODO for first-time user guide  -->
-<!--    <item-->
-<!--        android:id="@+id/actionHelp"-->
-<!--        android:title="Help"-->
-<!--        android:icon="@drawable/ic_help"-->
-<!--        app:showAsAction="ifRoom|collapseActionView"/>-->
+    <!--TODO for first-time user guide instructional overlay  -->
+    <item
+        android:id="@+id/actionHelp"
+        android:title="Help"
+        android:icon="@drawable/ic_help"
+        app:showAsAction="ifRoom|collapseActionView"/>
 </menu>
