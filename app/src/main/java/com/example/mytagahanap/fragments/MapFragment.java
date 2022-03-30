@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.fragments;
 
 import static com.mapbox.core.constants.Constants.PRECISION_6;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -40,6 +41,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,9 +52,23 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
+import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.DatabaseAccess;
+import com.example.mytagahanap.activities.EnlargeImageActivity;
+import com.example.mytagahanap.models.EnlargedImageModel;
+import com.example.mytagahanap.activities.MainActivity;
+import com.example.mytagahanap.interfaces.MapInterface;
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.network.RequestHandler;
+import com.example.mytagahanap.SharedPrefManager;
+import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
+import com.example.mytagahanap.adapters.LocationAdapter;
+import com.example.mytagahanap.models.LocationModel;
+import com.example.mytagahanap.models.RoomModel;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -72,6 +88,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.geometry.LatLngQuad;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -81,19 +98,25 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
+import com.mapbox.mapboxsdk.style.layers.RasterLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.style.sources.ImageSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.turf.TurfJoins;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -104,7 +127,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapFragment extends Fragment implements PermissionsListener, MapInterface {
+public class MapFragment extends Fragment implements PermissionsListener, MapInterface, VolleyCallbackInterface {
     private static final String TAG = "MapFragment";
     final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -116,7 +139,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
     private BottomSheetDialog bottomSheetDialog;
-    private Dialog directDialog, suggestionDialog, locationsDialog;
+    private Dialog directionsDialog, suggestionDialog, locationsDialog,
+            pathToRoomDialog, bldgLvlDialog;
     private ExtendedFloatingActionButton mapfragmentFab;
     private FloatingActionButton mapfragFabStyle;
 
@@ -124,6 +148,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
     private String symbolLayerId;
     private ArrayList<LocationModel> locations;
+    private List<String> imageURLList;
+    private List<RasterLayer> rasterLayerList;
+    private RasterLayer currentRasterLayer;
+    private float mapRotation;
 
     public MapFragment() {
     }
@@ -159,6 +187,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         mapfragmentFab.setOnClickListener(view1 -> {
             openLocationsDialog();
             mapfragmentFab.hide();
+            mapfragFabStyle.hide();
         });
         mapfragmentFab.setOnLongClickListener(view12 -> {
             if (!mapfragmentFab.isExtended()) {
@@ -183,7 +212,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
 
         suggestionDialog = new Dialog(getActivity());
+        directionsDialog = new Dialog(getActivity());
         locationsDialog = new Dialog(getActivity());
+        pathToRoomDialog = new Dialog(getActivity());
+        bldgLvlDialog = new Dialog(getActivity());
 
         locations = new ArrayList<>();
         Bundle bundle = getArguments();
@@ -393,6 +425,171 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
     }
 
+    // Immediately called from
+    public void requestPathToRoom(String building_name, String room_name) {
+        Log.d(TAG, "requestPathToRoom: " + building_name + room_name);
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.ROOT_API_URL,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        List<LatLng> building_boundary = new ArrayList<>();
+                        List<String> imageURLs = new ArrayList<>();
+                        for (int i = 0; i < obj.getJSONArray("building_boundary").length(); i++) {
+                            JSONArray currentJSONArray = obj.getJSONArray("building_boundary").getJSONArray(i);
+                            building_boundary.add(new LatLng((double) currentJSONArray.get(0), (double) currentJSONArray.get(1)));
+                        }
+                        LatLngQuad quad = new LatLngQuad(
+                                building_boundary.get(0), building_boundary.get(1),
+                                building_boundary.get(2), building_boundary.get(3)
+                        );
+                        for (int n = 0; n < obj.getInt("floors"); n++) {
+                            String img_url = Constants.ROOT_API_URL +
+                                    obj.getString("image_url" + (n + 1)).replace(" ", "%20");
+                            imageURLs.add(img_url);
+                            String id_source = Constants.ID_IMAGE_SOURCE + (n + 1);
+                            String id_layer = Constants.ID_IMAGE_LAYER + (n + 1);
+                            getMapboxMap().getStyle(style -> {
+                                try {
+                                    style.addSource(new ImageSource(id_source, quad, new URI(img_url)));
+                                } catch (URISyntaxException e) {
+                                    e.printStackTrace();
+                                }
+
+                            });
+                        }
+                        onSuccessRequest(imageURLs, (float) obj.getDouble("building_rotation"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> {
+            Log.d(TAG, "requestPathToRoom: No connection to server ");
+            Toast.makeText(mapFragmentContext, error.toString(), Toast.LENGTH_SHORT).show();
+        }
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("building", building_name);
+                params.put("room", room_name);
+                params.put("dpi", String.valueOf(300));
+                return params;
+            }
+        };
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+    }
+
+    @Override
+    public void onSuccessRequest(List<String> imageURLs, float rotation) {
+        mapRotation = rotation;
+        imageURLList = imageURLs;
+        if (rasterLayerList == null) {
+            rasterLayerList = new ArrayList<>();
+        } else {
+            rasterLayerList.clear();
+        }
+        for (int x = 0; x < imageURLList.size(); x++) {
+            String id_source = Constants.ID_IMAGE_SOURCE + (x + 1);
+            String id_layer = Constants.ID_IMAGE_LAYER + (x + 1);
+            rasterLayerList.add(new RasterLayer(id_layer, id_source));
+        }
+        initPathToRoomDialog();
+    }
+
+    public void initPathToRoomDialog() {
+        pathToRoomDialog.setContentView(R.layout.layout_dialog_pathtoroom);
+        Window window = pathToRoomDialog.getWindow();
+        window.setGravity(Gravity.CENTER_VERTICAL);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+        // todo add direction and suggestion
+        Button btnPathRoomMap = pathToRoomDialog.findViewById(R.id.ptrbtnPathInTheMap);
+        Button btnPathRoomImage = pathToRoomDialog.findViewById(R.id.ptrbtnPathAsImages);
+        btnPathRoomMap.setOnClickListener(view -> {
+            pathToRoomDialog.dismiss();
+            initBldgLvlDialog();
+            currentRasterLayer = rasterLayerList.get(0);
+            getMapboxMap().getStyle(style -> style.addLayer(currentRasterLayer));
+            getMapboxMap().easeCamera(CameraUpdateFactory.bearingTo(mapRotation));
+            getMapboxMap().easeCamera(CameraUpdateFactory.zoomTo(18.0));
+        });
+        btnPathRoomImage.setOnClickListener(view -> {
+            try {
+                pathToRoomDialog.dismiss();
+                Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
+                ArrayList<EnlargedImageModel> imageSet = new ArrayList<>();
+                for (String url : imageURLList) {
+                    imageSet.add(new EnlargedImageModel(url, ""));
+                }
+                intent.putParcelableArrayListExtra("enlargedImage", imageSet);
+                startActivity(intent);
+            } catch (NullPointerException e) {
+                Toast.makeText(mapFragmentContext, "Try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        ImageButton btnPathRoomClose = pathToRoomDialog.findViewById(R.id.ptrbtnClose);
+        pathToRoomDialog.show();
+        btnPathRoomClose.setOnClickListener(view -> {
+            clearLayers();
+            pathToRoomDialog.dismiss();
+        });
+    }
+
+    public void initBldgLvlDialog() {
+        bldgLvlDialog.setContentView(R.layout.layout_dialog_buildinglevel);
+        Window window = bldgLvlDialog.getWindow();
+        window.setGravity(Gravity.BOTTOM);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        mapFragmentContext.getDisplay().getMetrics(displayMetrics);
+        Button exitBtn = bldgLvlDialog.findViewById(R.id.bldgLvlExitBtn);
+        exitBtn.setOnClickListener(view -> {
+            bldgLvlDialog.dismiss();
+            Objects.requireNonNull(getMapboxMap().getStyle()).removeLayer(currentRasterLayer);
+        });
+        Button bldgLvl1Btn = bldgLvlDialog.findViewById(R.id.bldgLvl1Btn);
+        Button bldgLvl2Btn = bldgLvlDialog.findViewById(R.id.bldgLvl2Btn);
+        Button bldgLvl3Btn = bldgLvlDialog.findViewById(R.id.bldgLvl3Btn);
+        bldgLvl1Btn.setMinimumWidth(displayMetrics.widthPixels / 8);
+        bldgLvl1Btn.setOnClickListener(view -> {
+            Objects.requireNonNull(getMapboxMap().getStyle()).removeLayer(currentRasterLayer);
+            currentRasterLayer = rasterLayerList.get(0);
+            getMapboxMap().getStyle(style -> style.addLayer(currentRasterLayer));
+            getMapboxMap().easeCamera(CameraUpdateFactory.bearingTo(mapRotation));
+        });
+        bldgLvl2Btn.setVisibility(View.GONE);
+        bldgLvl3Btn.setVisibility(View.GONE);
+        if (imageURLList.size() > 1) {
+            bldgLvl2Btn.setVisibility(View.VISIBLE);
+            bldgLvl2Btn.setOnClickListener(view -> {
+                Objects.requireNonNull(getMapboxMap().getStyle()).removeLayer(currentRasterLayer);
+                currentRasterLayer = rasterLayerList.get(1);
+                getMapboxMap().getStyle(style -> style.addLayer(currentRasterLayer));
+                getMapboxMap().easeCamera(CameraUpdateFactory.bearingTo(mapRotation));
+            });
+            if (imageURLList.size() > 2) {
+                bldgLvl3Btn.setVisibility(View.VISIBLE);
+                bldgLvl3Btn.setOnClickListener(view -> {
+                    Objects.requireNonNull(getMapboxMap().getStyle()).removeLayer(currentRasterLayer);
+                    currentRasterLayer = rasterLayerList.get(2);
+                    getMapboxMap().getStyle(style -> style.addLayer(currentRasterLayer));
+                    getMapboxMap().easeCamera(CameraUpdateFactory.bearingTo(mapRotation));
+                });
+            }
+        }
+        bldgLvlDialog.show();
+    }
+
     // Marks the map on the clicked location
     public void markMapboxMap(MapboxMap mapboxMap, Point clickedLoc) {
         mapboxMap.getStyle(style -> {
@@ -504,6 +701,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         // Set bottomsheet title to clicked location
         TextView btsTxtLocation = bottomSheetDialog.findViewById(R.id.btsTxtLocation);
         if (btsTxtLocation != null) {
+            if (!room.equals("")) {
+                btsTxtLocation.setText(clickedLocation.getLocationName() + " -> " + room);
+            }
             btsTxtLocation.setText(clickedLocation.getLocationName());
         }
 
@@ -515,7 +715,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 bottomSheetDialog.dismiss();
 
                 // Popup dialog when pressing directions/starting navigation
-                initDirectionDialog(clickedLocation);
+                initDirectionDialog(clickedLocation, room);
             });
         }
 
@@ -678,7 +878,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 Log.d(TAG, "roomUrl sample" + roomUrl);
                 intent.putParcelableArrayListExtra("enlargedImage", imageSet);
                 startActivity(intent);
-
             });
         }
     }
@@ -718,12 +917,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     // Display dialog for a current location and destination
-    public void initDirectionDialog(LocationModel destinationLM) {
+    public void initDirectionDialog(LocationModel destinationLM, String room) {
         handler.postDelayed(() -> {
             if (mapfragmentFab != null)
                 mapfragmentFab.hide();
+            if (mapfragFabStyle != null)
+                mapfragFabStyle.hide();
         }, 250);
-        Dialog directionsDialog = new Dialog(getActivity());
         directionsDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_BACK) {
                 directionsDialog.dismiss();
@@ -735,7 +935,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             return true;
         });
         directionsDialog.setContentView(R.layout.layout_dialog_directions);
-        setDirectionsDialog(directionsDialog);
 
         Window window = directionsDialog.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -775,6 +974,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             directionsDialog.dismiss();
             if (mapfragmentFab != null)
                 mapfragmentFab.show();
+            if (mapfragFabStyle != null)
+                mapfragFabStyle.show();
         });
 
         List<List<Point>> area = new ArrayList<>();
@@ -797,6 +998,15 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 clearLayers();
             }
         }, 2500);
+        if (directionsDialog.isShowing()) {
+            if (TurfJoins.inside(origin, polygon)) {
+                Toast.makeText(mapFragmentContext, "You are already here!", Toast.LENGTH_LONG).show();
+                clearLayers();
+                requestPathToRoom(destinationLM.getLocationName(), room);
+                directionsDialog.dismiss();
+                return;
+            }
+        }
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -809,6 +1019,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                                 Toast.makeText(mapFragmentContext, "You have arrived!", Toast.LENGTH_LONG).show();
                                 timer.cancel();
                                 clearLayers();
+                                requestPathToRoom(destinationLM.getLocationName(), room);
                                 directionsDialog.dismiss();
                                 return;
                             }
@@ -851,7 +1062,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         };
 
         RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
-
     }
 
     // Display dialog for list of locations
@@ -861,6 +1071,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             if (i == KeyEvent.KEYCODE_BACK) {
                 locationsDialog.dismiss();
                 mapfragmentFab.show();
+                mapfragFabStyle.show();
             }
             return true;
         });
@@ -905,6 +1116,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         // Where LAYER_ID is a valid id of a layer that already
         // exists in the style
         getMapboxMap().getStyle(style -> {
+//            if (!rasterLayerList.isEmpty() || !imageURLList.isEmpty()) {
+//                style.removeLayer(rasterLayerList.get(0));
+//                imageURLList.clear();
+//            }
             // If a route layer exists in the style, remove the layer
             if (routeGJS != null) {
                 routeGJS.setGeoJson(FeatureCollection.fromJson(""));
@@ -917,6 +1132,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 handler.postDelayed(() -> enableLocationComponent(style), 500);
             }
         });
+        getMapboxMap().easeCamera(CameraUpdateFactory.zoomTo(16.0));
     }
 
     private void sendSuggestion(String userIdNumber, String locName,
@@ -1023,20 +1239,24 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     }
 
     @Override
-    public void setDirectionsDialog(Dialog d) {
-        MapFragment.this.directDialog = d;
-    }
-
-    @Override
     public Dialog getLocationsDialog() {
         return MapFragment.this.locationsDialog;
     }
 
     @Override
     public Dialog getDirectionsDialog() {
-        return MapFragment.this.directDialog;
+        return MapFragment.this.directionsDialog;
     }
 
+    @Override
+    public Dialog getPathToRoomDialog() {
+        return MapFragment.this.pathToRoomDialog;
+    }
+
+    @Override
+    public Dialog getBldgLvlDialog() {
+        return MapFragment.this.bldgLvlDialog;
+    }
 
     @Override
     public void setMapFragView(View v) {

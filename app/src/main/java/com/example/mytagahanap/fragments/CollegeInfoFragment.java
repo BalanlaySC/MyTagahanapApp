@@ -1,20 +1,20 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.text.LineBreaker;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.style.LeadingMarginSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.adapters.UEPAddInfoAdapter;
+import com.example.mytagahanap.models.UEPAddInfoModel;
 
 import java.util.ArrayList;
 

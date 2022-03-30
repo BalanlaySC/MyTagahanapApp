@@ -1,7 +1,6 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.network;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;

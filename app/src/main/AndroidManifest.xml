@@ -15,18 +15,18 @@
         android:theme="@style/Theme.MyTagahanap"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".EnlargeImageActivity"
+            android:name=".activities.EnlargeImageActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             tools:ignore="LockedOrientationActivity" />
         <activity
-            android:name=".Login"
+            android:name=".activities.LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"

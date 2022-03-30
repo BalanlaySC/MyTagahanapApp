@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -23,6 +22,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.example.mytagahanap.BuildConfig;
+import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.network.RequestHandler;
+import com.example.mytagahanap.SharedPrefManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;
@@ -33,7 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Login extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "Login";
 
     private String idnumber, password;

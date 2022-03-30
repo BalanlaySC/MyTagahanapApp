@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

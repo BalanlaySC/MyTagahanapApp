@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -19,6 +19,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.DatabaseAccess;
+import com.example.mytagahanap.interfaces.MapInterface;
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.network.RequestHandler;
+import com.example.mytagahanap.SharedPrefManager;
+import com.example.mytagahanap.adapters.SubjectAdapter;
+import com.example.mytagahanap.models.LocationModel;
+import com.example.mytagahanap.models.RoomModel;
+import com.example.mytagahanap.models.SubjectModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;

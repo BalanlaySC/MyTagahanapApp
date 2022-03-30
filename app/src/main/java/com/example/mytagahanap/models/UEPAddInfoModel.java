@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.models;
 
 public class UEPAddInfoModel {
     private String titleInfo, expandedText;

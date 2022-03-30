@@ -1,12 +1,13 @@
 package com.example.mytagahanap;
 
+import com.example.mytagahanap.models.ProponentModel;
 import com.mapbox.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Constants {
-//    public static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/";
+//    public static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/"; // local server
     public static final String ROOT_URL = "http://mytagahanap.000webhostapp.com/mytagahanap/v1/";
     public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php?idnumber=";
     public static final String URL_LOGIN = ROOT_URL + "userLogin.php";
@@ -17,6 +18,8 @@ public class Constants {
     public static final String URL_CHANGE_DEF_LOC = ROOT_URL + "changeDefLoc.php";
     public static final String URL_RESET_PASSWORD = ROOT_URL + "resetPassword.php";
     public static final String URL_SUBMITTED_LOC = ROOT_URL + "submittedLocations.php?idnumber=";
+    public static final String ROOT_API_URL = "http://mytagahanap.pythonanywhere.com/";
+//    public static final String ROOT_API_URL = "http://192.168.1.195:5000/"; // local server
 
     public static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
     public static final String STREET_STYLE_URL = "mapbox://styles/balanlaysc/ckztgctxd00m914nybcatj974";
@@ -31,6 +34,8 @@ public class Constants {
     public static final String RED_PIN_ICON_ID = "red-pin-icon-id";
     public static final String GREEN_PIN_ICON_ID = "green-pin-icon-id";
     public static final String BLUE_PIN_ICON_ID = "blue-pin-icon-id";
+    public static final String ID_IMAGE_SOURCE = "image_source-id";
+    public static final String ID_IMAGE_LAYER = "image_layer-id";
 
     public static final List<List<Point>> POINTS = new ArrayList<>();
     private static final List<Point> OUTER_POINTS = new ArrayList<>();

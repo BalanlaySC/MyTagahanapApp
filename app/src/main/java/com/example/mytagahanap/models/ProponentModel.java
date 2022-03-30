@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.models;
 
 public class ProponentModel {
     private String firstName, middleInitial, lastName, address, courseYrSect;

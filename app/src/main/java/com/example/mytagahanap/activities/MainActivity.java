@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.activities;
 
 import android.app.Dialog;
 import android.content.ClipData;
@@ -45,6 +45,19 @@ import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
+import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.DatabaseAccess;
+import com.example.mytagahanap.interfaces.MapInterface;
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.network.RequestHandler;
+import com.example.mytagahanap.SharedPrefManager;
+import com.example.mytagahanap.fragments.AboutAppFragment;
+import com.example.mytagahanap.fragments.CollegeInfoFragment;
+import com.example.mytagahanap.fragments.MapFragment;
+import com.example.mytagahanap.fragments.ScheduleFragment;
+import com.example.mytagahanap.fragments.SchoolInfoFragment;
+import com.example.mytagahanap.fragments.SubmissionFragment;
+import com.example.mytagahanap.models.LocationModel;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -147,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void logoutUser(String strToast, int len) {
-        Intent intent = new Intent(getApplicationContext(), Login.class);
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         intent.putExtra("previous User", SharedPrefManager.getInstance(this).getIdnumber());
         SharedPrefManager.getInstance(this).logOut();
         finish();
@@ -194,13 +207,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
-                if (mapFragment.getDirectionsDialog() != null) {
+                if (mapFragment.getDirectionsDialog() != null || mapFragment.getLocationsDialog() != null
+                        || mapFragment.getPathToRoomDialog() != null) {
                     if (mapFragment.getDirectionsDialog().isShowing()) {
                         mapFragment.getDirectionsDialog().dismiss();
                     }
-                }
-                if (mapFragment.getLocationsDialog() != null) {
                     if (mapFragment.getLocationsDialog().isShowing()) {
+                        mapFragment.getLocationsDialog().dismiss();
+                    }
+                    if (mapFragment.getPathToRoomDialog().isShowing()) {
                         mapFragment.getLocationsDialog().dismiss();
                     }
                 }
@@ -430,8 +445,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // This will minimize the drawer instead of closing the app
     @Override
     public void onBackPressed() {
-        if (mapFragment.getLocationsDialog() != null) {
+        if (mapFragment.getDirectionsDialog() != null || mapFragment.getLocationsDialog() != null
+                || mapFragment.getPathToRoomDialog() != null) {
+            if (mapFragment.getDirectionsDialog().isShowing()) {
+                mapFragment.getDirectionsDialog().dismiss();
+            }
             if (mapFragment.getLocationsDialog().isShowing()) {
+                mapFragment.getLocationsDialog().dismiss();
+            }
+            if (mapFragment.getPathToRoomDialog().isShowing()) {
                 mapFragment.getLocationsDialog().dismiss();
             }
         }

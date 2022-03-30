@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.models.SubjectModel;
 
 import java.util.ArrayList;
 

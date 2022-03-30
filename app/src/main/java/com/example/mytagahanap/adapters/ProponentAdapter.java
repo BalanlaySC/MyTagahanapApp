@@ -1,6 +1,5 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.mytagahanap.models.ProponentModel;
+import com.example.mytagahanap.R;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.ArrayList;

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutBldgLevelBtns"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|bottom"
+    android:layoutDirection="ltr"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/bldgLvlExitBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:backgroundTint="@color/white"
+        android:text="Exit"
+        android:textColor="@color/black" />
+
+    <Button
+        android:id="@+id/bldgLvl1Btn"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:backgroundTint="@color/white"
+        android:text="1"
+        android:textColor="@color/black" />
+
+    <Button
+        android:id="@+id/bldgLvl2Btn"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:backgroundTint="@color/white"
+        android:text="2"
+        android:textColor="@color/black" />
+
+    <Button
+        android:id="@+id/bldgLvl3Btn"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:backgroundTint="@color/white"
+        android:text="3"
+        android:textColor="@color/black" />
+</LinearLayout>

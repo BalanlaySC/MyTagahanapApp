@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.fragments;
 
 import android.content.Context;
 import android.graphics.text.LineBreaker;
@@ -13,6 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.R;
+import com.example.mytagahanap.adapters.ProponentAdapter;
+import com.example.mytagahanap.models.ProponentModel;
 
 import java.util.ArrayList;
 
