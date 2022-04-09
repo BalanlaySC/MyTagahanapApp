@@ -3,10 +3,13 @@ package com.example.mytagahanap.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 public class LocationModel implements Parcelable {
     private final String locationName;
     private final float locationLat;
     private final float locationLng;
+    ArrayList<RoomModel> locationRooms;
 
     public LocationModel(String locationName, float locationLat, float locationLng) {
         this.locationName = locationName;
@@ -18,6 +21,7 @@ public class LocationModel implements Parcelable {
         locationName = in.readString();
         locationLat = in.readFloat();
         locationLng = in.readFloat();
+        locationRooms = in.readArrayList(null);
     }
 
     public static final Creator<LocationModel> CREATOR = new Creator<LocationModel>() {
@@ -59,5 +63,6 @@ public class LocationModel implements Parcelable {
         parcel.writeString(locationName);
         parcel.writeFloat(locationLat);
         parcel.writeFloat(locationLng);
+        parcel.writeList(locationRooms);
     }
 }

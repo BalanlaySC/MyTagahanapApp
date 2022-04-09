@@ -1,8 +1,7 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.globals;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 public class SharedPrefManager {
     private static volatile SharedPrefManager mInstance;

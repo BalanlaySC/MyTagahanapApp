@@ -32,11 +32,12 @@
 
         <ImageView
             android:id="@+id/ivAddInfo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
             android:layout_below="@+id/cvAddInfoTitle"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_help"
+            android:scaleType="centerInside"
+            android:src="@drawable/image_placeholder"
             android:visibility="visible" />
 
         <TextView

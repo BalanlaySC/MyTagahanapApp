@@ -1,7 +1,9 @@
 package com.example.mytagahanap.adapters;
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
 import android.graphics.text.LineBreaker;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +23,17 @@ import java.util.ArrayList;
 public class UEPAddInfoAdapter extends RecyclerView.Adapter<UEPAddInfoAdapter.UEPAddInfoViewHolder> {
     private static final String TAG = "UEPAddInfoAdapter";
     private ArrayList<UEPAddInfoModel> mUEPAddInfo;
+    private Resources mResources;
     private OnItemClickListener mListener;
 
     public interface OnItemClickListener { void onItemClick(int position); }
 
     public void setOnItemClickListener(OnItemClickListener listener) { mListener = listener; }
 
-    public UEPAddInfoAdapter(ArrayList<UEPAddInfoModel> uepAddInfo) { mUEPAddInfo = uepAddInfo; }
+    public UEPAddInfoAdapter(ArrayList<UEPAddInfoModel> uepAddInfo, Resources resources) {
+        mUEPAddInfo = uepAddInfo;
+        mResources = resources;
+    }
 
     public static class UEPAddInfoViewHolder extends RecyclerView.ViewHolder {
         public TextView cvAddInfoTitle, tvAddInfo;
@@ -76,11 +82,16 @@ public class UEPAddInfoAdapter extends RecyclerView.Adapter<UEPAddInfoAdapter.UE
             holder.tvAddInfo.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
         }
 
+        final DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
+        int metric = displayMetrics.widthPixels;
+
         boolean cardviewStatus = currentUEPAddInfo.isExpanded();
         if(cardviewStatus) {
             holder.tvAddInfo.setVisibility(View.VISIBLE);
             if (currentUEPAddInfo.getImgId() > 0) {
                 holder.ivAddInfo.setImageResource(currentUEPAddInfo.getImgId());
+//                holder.ivAddInfo.requestLayout();
+//                holder.ivAddInfo.getLayoutParams().height = metric;
                 holder.ivAddInfo.setVisibility(View.VISIBLE);
             } else {
                 holder.ivAddInfo.setVisibility(View.GONE);

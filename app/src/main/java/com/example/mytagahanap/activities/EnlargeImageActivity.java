@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -32,7 +33,7 @@ public class EnlargeImageActivity extends AppCompatActivity {
         Context enlargeImageContext = getApplicationContext();
 
         EnlargedImageModel s = this.getIntent().getParcelableExtra("enLargedImage");
-        ArrayList<EnlargedImageModel> imageset = this.getIntent().getParcelableArrayListExtra("enlargedImage");
+        ArrayList<EnlargedImageModel> imageset = this.getIntent().getParcelableArrayListExtra("enLargedImage");
         tivEnlarged = findViewById(R.id.tivEnlarged);
         ImageButton enlargedCloseBtn = findViewById(R.id.enlargedCloseBtn);
         final int[] currentPosition = {0};
@@ -53,9 +54,7 @@ public class EnlargeImageActivity extends AppCompatActivity {
                     .into(tivEnlarged);
         }
 
-        enlargedCloseBtn.setOnClickListener(view -> {
-            onBackPressed();
-        });
+        enlargedCloseBtn.setOnClickListener(view -> onBackPressed());
 
         Button enlargeNextBtn = findViewById(R.id.enlargeNextBtn);
         enlargeNextBtn.setOnClickListener(view -> {
@@ -63,7 +62,7 @@ public class EnlargeImageActivity extends AppCompatActivity {
             if (currentPosition[0] > (imageset.size() - 1)) {
                 currentPosition[0] = 0;
             }
-            Log.d(TAG, "currentPosition = " + String.valueOf(currentPosition[0]));
+            Log.d(TAG, "currentPosition = " + currentPosition[0]);
             try {
                 Glide.with(enlargeImageContext)
                         .asBitmap()
@@ -71,17 +70,24 @@ public class EnlargeImageActivity extends AppCompatActivity {
                         .load(Uri.parse(imageset.get(currentPosition[0]).getImgUrl()))
                         .into(tivEnlarged);
             } catch (IndexOutOfBoundsException ignored) {
-                Log.d(TAG, String.valueOf(currentPosition[0]) + " is out bounds");
+                Log.d(TAG, currentPosition[0] + " is out bounds");
             }
         });
 
         Button enlargePreviousBtn = findViewById(R.id.enlargePreviousBtn);
+        if (imageset != null) {
+            enlargePreviousBtn.setVisibility(View.VISIBLE);
+            enlargeNextBtn.setVisibility(View.VISIBLE);
+        } else {
+            enlargePreviousBtn.setVisibility(View.GONE);
+            enlargeNextBtn.setVisibility(View.GONE);
+        }
         enlargePreviousBtn.setOnClickListener(view -> {
             currentPosition[0] -= 1;
             if (currentPosition[0] < 0) {
                 currentPosition[0] = (imageset.size() - 1);
             }
-            Log.d(TAG, "currentPosition = " + String.valueOf(currentPosition[0]));
+            Log.d(TAG, "currentPosition = " + currentPosition[0]);
             try {
                 Glide.with(enlargeImageContext)
                         .asBitmap()
@@ -89,7 +95,7 @@ public class EnlargeImageActivity extends AppCompatActivity {
                         .load(Uri.parse(imageset.get(currentPosition[0]).getImgUrl()))
                         .into(tivEnlarged);
             } catch (IndexOutOfBoundsException ignored) {
-                Log.d(TAG, "currentPosition = " + String.valueOf(currentPosition[0]));
+                Log.d(TAG, "currentPosition = " + currentPosition[0]);
             }
         });
     }

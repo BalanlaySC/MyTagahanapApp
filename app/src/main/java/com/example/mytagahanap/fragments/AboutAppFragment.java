@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.R;
 import com.example.mytagahanap.adapters.ProponentAdapter;
 import com.example.mytagahanap.models.ProponentModel;
@@ -34,7 +34,6 @@ public class AboutAppFragment extends Fragment {
         TextView aboutappIntro = view.findViewById(R.id.aboutappIntro);
         aboutappIntro.setText(SchoolInfoFragment.createIndentedText((String) aboutappIntro.getText(), 100, 0));
         aboutappIntro.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
-
 
         ArrayList<ProponentModel> proponents = new ArrayList<>();
         proponents.add(Constants.proponent1);

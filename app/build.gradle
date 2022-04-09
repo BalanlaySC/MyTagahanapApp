@@ -11,7 +11,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 31
         versionCode 1
-        versionName "1.1"
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -68,4 +68,5 @@ dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.readystatesoftware.sqliteasset:sqliteassethelper:+'
     implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

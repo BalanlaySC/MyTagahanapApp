@@ -5,7 +5,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:descendantFocusability="blocksDescendants">
 
         <TextView
@@ -20,6 +20,12 @@
             android:textSize="30sp"
             android:textStyle="bold" />
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/schoolInfoTitle"
+            android:src="@drawable/background_image_with_alpha"/>
+
         <TextView
             android:id="@+id/tvSchoolInfo"
             android:layout_width="match_parent"
@@ -27,7 +33,6 @@
             android:layout_below="@+id/schoolInfoTitle"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="10dp"
-            android:background="@drawable/background_image_with_alpha"
             android:paddingHorizontal="20dp"
             android:text="@string/schoolInfoText"
             android:textColor="@color/light_gray_90darker"
@@ -38,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvSchoolInfo"
-            android:paddingHorizontal="20dp"/>
+            android:paddingHorizontal="20dp" />
 
     </RelativeLayout>
 

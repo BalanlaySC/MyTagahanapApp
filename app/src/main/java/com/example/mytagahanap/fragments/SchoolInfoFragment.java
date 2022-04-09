@@ -50,7 +50,7 @@ public class SchoolInfoFragment extends Fragment {
                 return false;
             }
         };
-        UEPAddInfoAdapter mAdapter = new UEPAddInfoAdapter(addInfos);
+        UEPAddInfoAdapter mAdapter = new UEPAddInfoAdapter(addInfos, getResources());
 
         uepaddInfoRecView.setLayoutManager(mLayoutManager);
         uepaddInfoRecView.setAdapter(mAdapter);
@@ -59,10 +59,6 @@ public class SchoolInfoFragment extends Fragment {
         mAdapter.setOnItemClickListener(position -> {
             addInfos.get(position).setExpanded(!addInfos.get(position).isExpanded());
             mAdapter.notifyItemChanged(position);
-        });
-
-
-        mAdapter.setOnItemClickListener(position -> {
         });
         return view;
     }

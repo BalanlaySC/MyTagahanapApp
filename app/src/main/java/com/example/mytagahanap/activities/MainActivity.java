@@ -12,8 +12,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
@@ -45,19 +48,20 @@ import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
-import com.example.mytagahanap.Constants;
 import com.example.mytagahanap.DatabaseAccess;
-import com.example.mytagahanap.interfaces.MapInterface;
 import com.example.mytagahanap.R;
-import com.example.mytagahanap.network.RequestHandler;
-import com.example.mytagahanap.SharedPrefManager;
 import com.example.mytagahanap.fragments.AboutAppFragment;
-import com.example.mytagahanap.fragments.CollegeInfoFragment;
+import com.example.mytagahanap.fragments.DashboardFragment;
 import com.example.mytagahanap.fragments.MapFragment;
 import com.example.mytagahanap.fragments.ScheduleFragment;
 import com.example.mytagahanap.fragments.SchoolInfoFragment;
 import com.example.mytagahanap.fragments.SubmissionFragment;
+import com.example.mytagahanap.globals.Constants;
+import com.example.mytagahanap.globals.SharedPrefManager;
+import com.example.mytagahanap.interfaces.MainActivityInterface;
+import com.example.mytagahanap.interfaces.MapInterface;
 import com.example.mytagahanap.models.LocationModel;
+import com.example.mytagahanap.network.RequestHandler;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationRequest;
@@ -77,17 +81,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainActivityInterface {
     private static final String TAG = "MainActivity";
+    final Handler handler = new Handler(Looper.getMainLooper());
 
     private DrawerLayout drawer;
     private NavigationView navigationView;
-    private MenuItem mapMenuItem;
-    private MenuItem currentMenuItem;
+    private Menu menu;
+    private MenuItem mapMenuItem, dashboardMenuItem, currentMenuItem;
     private Dialog profileDialog, feedbackDialog;
 
     private MapFragment mapFragment;
     private ScheduleFragment scheduleFragment;
+    private DashboardFragment dashboardFragment;
     private MapInterface mapInterface;
 
     private ArrayList<LocationModel> locations;
@@ -106,14 +112,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // check if token is still valid
         Log.d(TAG, "getdatatype " + SharedPrefManager.getInstance(this).getTimeOutSession());
-        if(SharedPrefManager.getInstance(this).getKeepMeSignedIn()) {
+        if (SharedPrefManager.getInstance(this).getKeepMeSignedIn()) {
             if (isSessionTimedOut(SharedPrefManager.getInstance(this).getTimeOutSession()) < 0) {
                 logoutUser("Your session has timed out.\nPlease log in again.", Toast.LENGTH_LONG);
                 return;
             }
             try {
                 SharedPrefManager.getInstance(this).setKeepMeSignedIn(getIntent().getExtras().getBoolean("KeepMeSignedIn"));
-            } catch (NullPointerException ignored) {}
+            } catch (NullPointerException ignored) {
+            }
         } else {
             logoutUser("Logout on exit", -1);
             return;
@@ -124,15 +131,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         locations = new ArrayList<>();
         locations = databaseAccess.getAllLocations();
         String parcelableTag = "Locations";
+        mapFragment = new MapFragment();
+        setMapInterface(mapFragment);
+        scheduleFragment = new ScheduleFragment();
+        dashboardFragment = new DashboardFragment();
 
         if (savedInstanceState == null) {
-            mapFragment = new MapFragment();
-            scheduleFragment = new ScheduleFragment();
-            initFragment("Map", mapFragment);
-            setMapInterface(mapFragment);
-            navigationView.setCheckedItem(R.id.nav_map);
+            initFragment("Dashboard", dashboardFragment);
+            String title = String.format("Hello, <b>%s</b>", SharedPrefManager.getInstance(this).getfName());
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(Html.fromHtml(title, Html.FROM_HTML_MODE_LEGACY));
+            }
+            navigationView.setCheckedItem(R.id.nav_dashboard);
 
-            parcelDataToFragment(parcelableTag, locations, mapFragment);
+            parcelDataToFragment(parcelableTag, locations, dashboardFragment);
 
             // reversed so that when location is disabled (= false) turns to true
             if (isLocationEnabled(this)) {
@@ -164,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         intent.putExtra("previous User", SharedPrefManager.getInstance(this).getIdnumber());
         SharedPrefManager.getInstance(this).logOut();
         finish();
-        if (len >= 0){
+        if (len >= 0) {
             Toast.makeText(this, strToast, len).show();
         } else {
             Log.d(TAG, strToast);
@@ -193,12 +205,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         View headerView = navigationView.getHeaderView(0);
         TextView navheaderName = headerView.findViewById(R.id.navheaderName);
-        TextView navheaderidNumber = headerView.findViewById(R.id.navheaderidNumber);
         RelativeLayout navheaderLayout = headerView.findViewById(R.id.navheaderLayout);
         LinearLayout navLogout = headerView.findViewById(R.id.navLogout);
 
         navheaderName.setText(fullName);
-        navheaderidNumber.setText(String.valueOf(idnumber));
         navigationView.setNavigationItemSelectedListener(this);
         navheaderLayout.setOnClickListener(view -> openProfileDialog());
         navLogout.setOnClickListener(view -> logoutUser("Logout Successfully", Toast.LENGTH_SHORT));
@@ -229,6 +239,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Initializing the option menu, also the search function
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MainActivity.this.menu = menu;
         // Inflate the search menu action bar.
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.other_menu, menu);
@@ -255,12 +266,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             searchView.clearFocus();
             LocationModel clickedLocation = (LocationModel) adapterView.getItemAtPosition(itemIndex);
             searchAutoComplete.setText(clickedLocation.getLocationName());
-            mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this);
             if (mapMenuItem != currentMenuItem) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        mapFragment).commit();
+                initFragment("Map", mapFragment);
+                parcelDataToFragment("Locations", locations, mapFragment);
                 navigationView.setCheckedItem(R.id.nav_map);
             }
+            handler.postDelayed(() -> {
+                mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this);
+            }, 500);
         });
 
         // Below event is triggered when submit search query.
@@ -270,12 +283,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 searchView.clearFocus();
                 if (containsLocation(query)) {
                     LocationModel clickedLocation = getLocationObj(query);
-                    mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this);
                     if (mapMenuItem != currentMenuItem) {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                mapFragment).commit();
+                        initFragment("Map", mapFragment);
+                        parcelDataToFragment("Locations", locations, mapFragment);
                         navigationView.setCheckedItem(R.id.nav_map);
                     }
+                    handler.postDelayed(() -> mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this), 500);
                 } else {
                     Toast.makeText(MainActivity.this, query + "\nnot found, please try again", Toast.LENGTH_LONG).show();
                 }
@@ -303,14 +316,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Selecting something on the menu will switch into that fragment
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        String[] actionBarTitle = {"Map", "Class Schedule", "School Information",
-                "College Information", "About App", "List of Submitted Spots"};
+        String[] actionBarTitle = {"Dashboard", "Map", "Class Schedule", "School Information",
+//                "College Information",
+                "About App", "List of Submitted Spots"};
         switch (item.getItemId()) {
-            case R.id.nav_profile:
-                openProfileDialog();
+            case R.id.nav_dashboard:
+                initFragment(actionBarTitle[0], dashboardFragment);
                 break;
             case R.id.nav_map:
-                initFragment(actionBarTitle[0], mapFragment);
+                initFragment(actionBarTitle[1], mapFragment);
                 parcelDataToFragment("Locations", locations, mapFragment);
 
                 if (isLocationEnabled(MainActivity.this)) {
@@ -318,14 +332,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
             case R.id.nav_subjects:
-                initFragment(actionBarTitle[1], scheduleFragment);
+                initFragment(actionBarTitle[2], scheduleFragment);
                 break;
             case R.id.nav_schoolinfo:
-                initFragment(actionBarTitle[2], new SchoolInfoFragment());
+                initFragment(actionBarTitle[3], new SchoolInfoFragment());
                 break;
-            case R.id.nav_collegeinfo:
-                initFragment(actionBarTitle[3], new CollegeInfoFragment());
-                break;
+//            case R.id.nav_collegeinfo:
+//                initFragment(actionBarTitle[4], new CollegeInfoFragment());
+//                break;
             case R.id.nav_aboutapp:
                 initFragment(actionBarTitle[4], new AboutAppFragment());
                 break;
@@ -344,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initFragment(String actionBarTitle, Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 fragment).commit();
-        if (getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(actionBarTitle);
         }
     }
@@ -457,8 +471,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mapFragment.getLocationsDialog().dismiss();
             }
         }
+        dashboardMenuItem = getMenu().findItem(R.id.nav_dashboard);
+        currentMenuItem = getNavigationView().getCheckedItem();
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (dashboardMenuItem != currentMenuItem) {
+            initFragment("Map", dashboardFragment);
+            parcelDataToFragment("Locations", locations, dashboardFragment);
+            navigationView.setCheckedItem(R.id.nav_map);
         } else {
             super.onBackPressed();
         }
@@ -640,5 +660,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(parcelableTag, arrayList);
         fragment.setArguments(bundle);
+    }
+
+    @Override
+    public NavigationView getNavigationView() {
+        return navigationView;
+    }
+
+    @Override
+    public Menu getMenu() {
+        return menu;
     }
 }

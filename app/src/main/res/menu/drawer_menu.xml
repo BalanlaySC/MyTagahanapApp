@@ -3,12 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <item
-        android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_anonymous"
-        android:title="Profile" />
-
     <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_dashboard"
+            android:title="Dashboard" />
         <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_map"
@@ -21,10 +20,10 @@
             android:id="@+id/nav_schoolinfo"
             android:icon="@drawable/ic_school"
             android:title="School Information" />
-        <item
-            android:id="@+id/nav_collegeinfo"
-            android:icon="@drawable/ic_info"
-            android:title="College Information" />
+<!--        <item-->
+<!--            android:id="@+id/nav_collegeinfo"-->
+<!--            android:icon="@drawable/ic_info"-->
+<!--            android:title="College Information" />-->
         <item
             android:id="@+id/nav_aboutapp"
             android:icon="@drawable/ic_aboutdevs"

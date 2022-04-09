@@ -1,0 +1,42 @@
+{
+    "All Rooms": [
+        {
+            "building": "Center for Computer Studies Building",
+            "rooms": [
+                "L1",
+                "L2",
+                "L3",
+                "CCS OFC"
+            ]
+        },
+        {
+            "building": "College of Science Building",
+            "rooms": [
+                "AVR",
+                "CS Biology Laboratory Rm.",
+                "CS Chemistry Laboratory Room",
+                "CS Chemistry Laboratory Room 2",
+                "CS Chemistry Laboratory Room 3",
+                "CS Dean and Faculty Office",
+                "CS CESA Room",
+                "CS Ext. Room",
+                "CS Guidance Office",
+                "CS Office of Director for Student Services",
+                "CS Physics Laboratory Room",
+                "CS Accreditation Extension Room",
+                "CS Accreditation Room",
+                "CS Research Room",
+                "CS Student Center",
+                "CS Student Lounge",
+                "CS VPRDE Extension Office / College Biosafety Office",
+                "CS100",
+                "CS101",
+                "CS102",
+                "CS201",
+                "CS202",
+                "CS203",
+                "CS204"
+            ]
+        }
+    ]
+}

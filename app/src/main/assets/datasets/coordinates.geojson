@@ -1,0 +1,1251 @@
+{
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Mechanical Eng'g Student Center"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663031,
+          12.509236
+        ],
+        "type": "Point"
+      },
+      "id": "0135ca064f494e3cec475f9ee8ac5ecd"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Tissue Culture / Plant Pest Clinic"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6657,
+          12.5082
+        ],
+        "type": "Point"
+      },
+      "id": "04f340ba0d98405b081b3d56bb0e3bd2"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Kapihan"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665931,
+          12.510539
+        ],
+        "type": "Point"
+      },
+      "id": "0af1b726be7de27c11f700847f87bba5"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ILWARM Annex"
+      },
+      "geometry": {
+        "coordinates": [
+          124.670266,
+          12.509023
+        ],
+        "type": "Point"
+      },
+      "id": "17f5bb81b809471540e7df2683bfc770"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Business Administration BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.664126,
+          12.510651
+        ],
+        "type": "Point"
+      },
+      "id": "18c95d08b72fd37ba8a3ef1ee94e6749"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Center for Computer Studies Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663985,
+          12.508794
+        ],
+        "type": "Point"
+      },
+      "id": "1b177bee5b475b8cbd553a5a294a47cd"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Law Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666236,
+          12.509692
+        ],
+        "type": "Point"
+      },
+      "id": "1c341330abe87282cf3b015b91934e99"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "R.A.B. Amphitheater"
+      },
+      "geometry": {
+        "coordinates": [
+          124.66444,
+          12.508228
+        ],
+        "type": "Point"
+      },
+      "id": "1cda6293d297e8b78c56264c59316273"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Medical & Dental Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664358,
+          12.51111
+        ],
+        "type": "Point"
+      },
+      "id": "1fc6942b48934055d36a6c576c391947"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Gramen Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.667678,
+          12.509531
+        ],
+        "type": "Point"
+      },
+      "id": "21aff19ed70a4092be7cfbfdc5346313"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Engineering Laboratory Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663217,
+          12.509019
+        ],
+        "type": "Point"
+      },
+      "id": "21c1d8686f4770b4ff698ac535aa8b86"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Climate Change Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.675289,
+          12.507956
+        ],
+        "type": "Point"
+      },
+      "id": "2222082044299be351ac2e63e2b936df"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP - Petron Gasoline Station"
+      },
+      "geometry": {
+        "coordinates": [
+          124.659293,
+          12.513156
+        ],
+        "type": "Point"
+      },
+      "id": "23bad2c9b4141e48b33999cc4b5d31a9"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Civil Service Commision"
+      },
+      "geometry": {
+        "coordinates": [
+          124.675575,
+          12.50791
+        ],
+        "type": "Point"
+      },
+      "id": "251982a6a928433aff7b4a3c1b94cbff"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "University Academic Library"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663931,
+          12.510012
+        ],
+        "type": "Point"
+      },
+      "id": "25ec43f01f7b8c30ae486ae1f73b72b6"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Education Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664487,
+          12.51047
+        ],
+        "type": "Point"
+      },
+      "id": "261428c78c899606a68e9bb8f8feadc6"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Gymnatorium"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665581,
+          12.508915
+        ],
+        "type": "Point"
+      },
+      "id": "26340d7860e3f94789634bb11366d0da"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Electrical Laboratory Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663087,
+          12.508821
+        ],
+        "type": "Point"
+      },
+      "id": "26b76f69169110bddb8df3cf9aef48f3"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP - JAPAN COCO COIR CENTER"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6627,
+          12.5095
+        ],
+        "type": "Point"
+      },
+      "id": "2f6dd2c0fe7bbf208f692bbdeb6f833f"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UGTC / UPAO / PILLAR"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665939,
+          12.509985
+        ],
+        "type": "Point"
+      },
+      "id": "2f9a44bbcc6ae82a0d5ed184e373a3b8"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Office of the Sports Director"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665715,
+          12.509577
+        ],
+        "type": "Point"
+      },
+      "id": "3903847968fa60cbbb29af2816552066"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Piggery"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6623,
+          12.5061
+        ],
+        "type": "Point"
+      },
+      "id": "3ad2bf0322caa0e688394e4109927eed"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Center for Samar Studies BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.663603,
+          12.510841
+        ],
+        "type": "Point"
+      },
+      "id": "3b469de588046851897c42504e61a32b"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "R.O.T.C. Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6648,
+          12.5083
+        ],
+        "type": "Point"
+      },
+      "id": "3c84d45365fa482daef12020fb69d63f"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Industrial Education Hall"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663669,
+          12.508927
+        ],
+        "type": "Point"
+      },
+      "id": "3fbc20eae93002da451426a0791db3ad"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Mens Residence Hall"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664984,
+          12.511152
+        ],
+        "type": "Point"
+      },
+      "id": "40e13666387e8a5db7eaad5af88e4eaf"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Research Office"
+      },
+      "geometry": {
+        "coordinates": [
+          124.670038,
+          12.509107
+        ],
+        "type": "Point"
+      },
+      "id": "4592d7ac92d29c08a894a42fd9ded474"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Function Hall Bldg."
+      },
+      "geometry": {
+        "coordinates": [
+          124.679,
+          12.5087
+        ],
+        "type": "Point"
+      },
+      "id": "45f378dc61307b47e4eaa0c1e1deb450"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Grandstand"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665607,
+          12.509246
+        ],
+        "type": "Point"
+      },
+      "id": "4705bd4c89149cd743bbabc2bd606e43"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Carabao Rotonda"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664796,
+          12.510821
+        ],
+        "type": "Point"
+      },
+      "id": "4bab260baba98f415036cc03f916cb82"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP White Beach Resort"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6779,
+          12.5079
+        ],
+        "type": "Point"
+      },
+      "id": "4d2f03747461a7e3e3b1d849c76697b6"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "NORSARRC / Palayamanan"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6626,
+          12.5053
+        ],
+        "type": "Point"
+      },
+      "id": "50a9f098cf4d0fe769706fccaeb388e1"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bleacher (Near Basketball Court)"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665371,
+          12.508664
+        ],
+        "type": "Point"
+      },
+      "id": "514797bc39108bd693a68cee621fab43"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UMT Stage"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664648,
+          12.509461
+        ],
+        "type": "Point"
+      },
+      "id": "51e2155fd7cdf57603a34d1419908222"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Firing Range"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6651,
+          12.5059
+        ],
+        "type": "Point"
+      },
+      "id": "5970d6afeb46d2e2600975138aafa138"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Commercial Arcade"
+      },
+      "geometry": {
+        "coordinates": [
+          124.66468,
+          12.510986
+        ],
+        "type": "Point"
+      },
+      "id": "59e0a9b25348fc6726ec5192ea4486df"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Magsaysay Park"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6658,
+          12.510175
+        ],
+        "type": "Point"
+      },
+      "id": "5ce0d17af4ab6473cdd6c039229c175e"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Dormitory"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665156,
+          12.510916
+        ],
+        "type": "Point"
+      },
+      "id": "5da8369313da3ff2fb596ea9701cffd5"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "University Academic Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666691,
+          12.509404
+        ],
+        "type": "Point"
+      },
+      "id": "5ea9c98a61146080829ff3428225533d"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Quality Assurance Monument"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665484,
+          12.510623
+        ],
+        "type": "Point"
+      },
+      "id": "6185c978ec74c42a199c6b8985485dc1"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "D.O.S.T. Buidling"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665823,
+          12.508562
+        ],
+        "type": "Point"
+      },
+      "id": "64857da2201fd417ba35db9f09677088"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Swimming Pool & Lagoon"
+      },
+      "geometry": {
+        "coordinates": [
+          124.678505,
+          12.508312
+        ],
+        "type": "Point"
+      },
+      "id": "6835be3a31f5554cd3877822663a752a"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Water Tank"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6672,
+          12.5068
+        ],
+        "type": "Point"
+      },
+      "id": "6953288210088023b35998d8d6d3a1a7"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "BSP Headquarters"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666144,
+          12.5072
+        ],
+        "type": "Point"
+      },
+      "id": "699b3f4a634575cbb4ba76e0228cbdda"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Wild Life Sanctuary"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6655,
+          12.5072
+        ],
+        "type": "Point"
+      },
+      "id": "69d94ae17d95fee44c6f090f27bb9d7a"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Criminology Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.662805,
+          12.509929
+        ],
+        "type": "Point"
+      },
+      "id": "72c65f835544105aa03b4bffafb7c909"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Community Base Hatchery"
+      },
+      "geometry": {
+        "coordinates": [
+          124.670214,
+          12.509284
+        ],
+        "type": "Point"
+      },
+      "id": "76c3b72528e4ae1bc3da3d975b140bf0"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Agriculture Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663834,
+          12.508395
+        ],
+        "type": "Point"
+      },
+      "id": "7701dc4774636ce25d4844c36963431a"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Octagon Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6656,
+          12.5071
+        ],
+        "type": "Point"
+      },
+      "id": "792c5710944218ccc22e9ea683c88a07"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Asinas Monument"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6646,
+          12.50966
+        ],
+        "type": "Point"
+      },
+      "id": "7d311e10a09bc8ccb95b5a77536287ba"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Research & Extension Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.667053,
+          12.508183
+        ],
+        "type": "Point"
+      },
+      "id": "8349a6382eacdcf30a1cf9aed75a3047"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "CA Horticulture Center"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6595,
+          12.513
+        ],
+        "type": "Point"
+      },
+      "id": "89fd2157316fb6437650f8ae9bbf9577"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Warehouse Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.667,
+          12.5103
+        ],
+        "type": "Point"
+      },
+      "id": "8e10e415722f17bd57b012752b898234"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ADFC Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664445,
+          12.5093
+        ],
+        "type": "Point"
+      },
+      "id": "8e8886b2b2e7258f027e1cebf692a40d"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Science Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665187,
+          12.508277
+        ],
+        "type": "Point"
+      },
+      "id": "8ee19d66260f370d9edfce9b9bf75538"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Farmers Training Center"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666216,
+          12.509323
+        ],
+        "type": "Point"
+      },
+      "id": "8f735a56a09f36bd6e8fb0ac0486783b"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Clonal Nursery"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6633,
+          12.5064
+        ],
+        "type": "Point"
+      },
+      "id": "900a2733677844b28cd3e36bf58cae9f"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Machinery Section"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6674,
+          12.5101
+        ],
+        "type": "Point"
+      },
+      "id": "91dee0ba19d6a7be6f4102f3c6448b3c"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Welcome Rotonda"
+      },
+      "geometry": {
+        "coordinates": [
+          124.659079,
+          12.513034
+        ],
+        "type": "Point"
+      },
+      "id": "92e66c153118576e27c66dea36527fa5"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Hostel Buildinng"
+      },
+      "geometry": {
+        "coordinates": [
+          124.66552,
+          12.510815
+        ],
+        "type": "Point"
+      },
+      "id": "9360678d64e5f32f65f897d21551625a"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "BS HRM Department"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665528,
+          12.510815
+        ],
+        "type": "Point"
+      },
+      "id": "9656c286b4ddb1f8ea214ee2bfbe1bbe"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bleacher (Near Men's Baseball Screen)"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6648,
+          12.5101
+        ],
+        "type": "Point"
+      },
+      "id": "9c07b522c6d37bfe7ea3893ad8162d43"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Physical Plant Dev. Office"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665526,
+          12.510808
+        ],
+        "type": "Point"
+      },
+      "id": "a6d049d35a5e1e2e2f875a3f01fd0f5c"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP - DTI Food Processing Shared Service Facility"
+      },
+      "geometry": {
+        "coordinates": [
+          124.668765,
+          12.509214
+        ],
+        "type": "Point"
+      },
+      "id": "ac4b18f0fd30a13c30ac738fc7de6eb2"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Engineering Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.66295,
+          12.509485
+        ],
+        "type": "Point"
+      },
+      "id": "af2cfce5d1c1c050ff8450659b200290"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Administration Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666905,
+          12.509913
+        ],
+        "type": "Point"
+      },
+      "id": "b0968b31f4df150cb03f5511ccc313aa"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Nursing Arts Laboratory Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666638,
+          12.508205
+        ],
+        "type": "Point"
+      },
+      "id": "b478119f474a71a524a83f5eeba7effc"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "ILWARM Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6703,
+          12.5084
+        ],
+        "type": "Point"
+      },
+      "id": "b7cbf158ce224639deb449ee42fc0e03"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Chapel"
+      },
+      "geometry": {
+        "coordinates": [
+          124.666292,
+          12.510352
+        ],
+        "type": "Point"
+      },
+      "id": "ba145f5308b1206c2b4fb6f3479e70ca"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "HRM Laboratory Cottages"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6796,
+          12.5084
+        ],
+        "type": "Point"
+      },
+      "id": "bacf63cf56ad9480e179d4c2e1918d02"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bio - Physical Sciences Laboratory BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.665187,
+          12.50832
+        ],
+        "type": "Point"
+      },
+      "id": "d204d1df1a92c1733ab39312c88321e7"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Poultry"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6623,
+          12.5075
+        ],
+        "type": "Point"
+      },
+      "id": "d6f4cc31b5f2cb9caaebefab82ad32ab"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Security Outpost"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6634,
+          12.5081
+        ],
+        "type": "Point"
+      },
+      "id": "d8dab2e1ac269f770112b0a8f6246906"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Fisheries Department"
+      },
+      "geometry": {
+        "coordinates": [
+          124.669938,
+          12.508943
+        ],
+        "type": "Point"
+      },
+      "id": "d906a5e8b86b5b732b55644c877c37ad"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Arts & Communication BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.663432,
+          12.510686
+        ],
+        "type": "Point"
+      },
+      "id": "d9e808120b5d6adff1552556d3fff7d8"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Advance Education & Quality Assurance Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.667992,
+          12.509461
+        ],
+        "type": "Point"
+      },
+      "id": "dc3e38d09594549d6342f5390a6d5142"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Bleacher (Near Aquapark)"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664631,
+          12.508827
+        ],
+        "type": "Point"
+      },
+      "id": "e89192bada436b9dc6bc140c7bc865dd"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Nursing Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6663,
+          12.5082
+        ],
+        "type": "Point"
+      },
+      "id": "e934972775705d80ba8b9822d84116f4"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Smart Cell Site Tower"
+      },
+      "geometry": {
+        "coordinates": [
+          124.663,
+          12.5082
+        ],
+        "type": "Point"
+      },
+      "id": "eaf232225a1059ffd1945d2558e55a27"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP - Laboratory Elementary School"
+      },
+      "geometry": {
+        "coordinates": [
+          124.66341,
+          12.509972
+        ],
+        "type": "Point"
+      },
+      "id": "f0080669be888316b87720d7dea1b774"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Industrial Education Department BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.663344,
+          12.509183
+        ],
+        "type": "Point"
+      },
+      "id": "f144e39334cac09d0e899f792106c525"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "CAFNR Entrepreneurial Center BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.663368,
+          12.508582
+        ],
+        "type": "Point"
+      },
+      "id": "f23624955ec064b7e0aa97f44dd702ad"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Aquapark"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6645,
+          12.5087
+        ],
+        "type": "Point"
+      },
+      "id": "f419adc532b6616f0edf39dbf93bfe23"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Balite Monument"
+      },
+      "geometry": {
+        "coordinates": [
+          124.6677,
+          12.5093
+        ],
+        "type": "Point"
+      },
+      "id": "f49244a1e338e24cf32e1e91ae0731ab"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP - Laboratory High School"
+      },
+      "geometry": {
+        "coordinates": [
+          124.664133,
+          12.509703
+        ],
+        "type": "Point"
+      },
+      "id": "f6c57081f4e0cbfacdcee3d354eac37a"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Home Economics Building"
+      },
+      "geometry": {
+        "coordinates": [
+          124.667402,
+          12.50826
+        ],
+        "type": "Point"
+      },
+      "id": "f6e45d6ce3f3067d5b164c7b47b5ec0d"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "Golden Boy Monument"
+      },
+      "geometry": {
+        "coordinates": [
+          124.667379,
+          12.508483
+        ],
+        "type": "Point"
+      },
+      "id": "f77394ee0a9e7a03a544f4503fafed0a"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "UEP Stage Court"
+      },
+      "geometry": {
+        "coordinates": [
+          124.665904,
+          12.509438
+        ],
+        "type": "Point"
+      },
+      "id": "fa757c7e9cbd92cf626b8036bdeb66c8"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "title": "College of Veterinary Medicine BLDG."
+      },
+      "geometry": {
+        "coordinates": [
+          124.667719,
+          12.508916
+        ],
+        "type": "Point"
+      },
+      "id": "fef6e8e2093fef0c2ed8ee4bd968b221"
+    }
+  ],
+  "type": "FeatureCollection"
+}

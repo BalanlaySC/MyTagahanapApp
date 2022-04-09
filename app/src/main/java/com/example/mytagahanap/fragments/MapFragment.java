@@ -41,7 +41,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,7 +55,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
-import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.DatabaseAccess;
 import com.example.mytagahanap.activities.EnlargeImageActivity;
 import com.example.mytagahanap.models.EnlargedImageModel;
@@ -64,7 +63,7 @@ import com.example.mytagahanap.activities.MainActivity;
 import com.example.mytagahanap.interfaces.MapInterface;
 import com.example.mytagahanap.R;
 import com.example.mytagahanap.network.RequestHandler;
-import com.example.mytagahanap.SharedPrefManager;
+import com.example.mytagahanap.globals.SharedPrefManager;
 import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
 import com.example.mytagahanap.adapters.LocationAdapter;
 import com.example.mytagahanap.models.LocationModel;
@@ -116,7 +115,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -257,14 +255,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         } else {
             PermissionsManager permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
-            handler.postDelayed(() -> {
-                if (ActivityCompat.checkSelfPermission(mapFragmentContext, Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(mapFragmentContext, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    enableLocationComponent(loadedMapStyle);
-                }
-            }, 10000);
         }
     }
 
@@ -274,6 +264,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     @SuppressLint("MissingPermission")
     public LocationModel getDevCurrentLocation() {
         String defaultLocation = SharedPrefManager.getInstance(mapFragmentContext).getDefLoc();
+        Log.d(TAG, "getDevCurrentLocation: defaultlocation " + getLocationObj(defaultLocation));
         LocationModel currentLM;
         if (defaultLocation.contains(", ")){
             String[] parts = defaultLocation.split(", ");
@@ -325,30 +316,53 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }
         Log.d(TAG, "getRoute: currentLM " + SharedPrefManager.getInstance(mapFragmentContext).getDefLoc());
         Point currentLMPoint = Point.fromLngLat(currentLM.getLocationLng(), currentLM.getLocationLat());
-        Polygon polygon = Polygon.fromLngLats(com.example.mytagahanap.Constants.POINTS);
+//        Polygon polygon = Polygon.fromLngLats(Constants.POINTS_UEP_BOUNDARY);
+        Polygon polygon = Polygon.fromLngLats(Constants.POINTS_WAYPOINT1_BOUNDARY);
         MapboxDirections mapboxDirections;
+//        Toast.makeText(mapFragmentContext, "Currently outside of UEP\n" +
+//                "Generating path from " + currentLM.getLocationName(), Toast.LENGTH_LONG).show();
 
-        boolean isLocInsideUEP = TurfJoins.inside(origin, polygon);
+//        boolean isLocInsideUEP = TurfJoins.inside(origin, polygon);
+        boolean isUserInsideWB = TurfJoins.inside(origin, polygon); // if origin is inside waypoint1_boundary
+        boolean isLocInsideWB = TurfJoins.inside(destination, polygon); // if destination is inside waypoint1_boundary
         if (Mapbox.getAccessToken() != null) {
-            if (isLocInsideUEP) {
-                Log.d(TAG, "getRoute: origin is inside UEP");
+            if (isLocInsideWB) {
+                if (!isUserInsideWB && (origin.longitude() > 124.66425)) {
+                    currentLMPoint = Point.fromLngLat(124.66549, 12.50925);
+                    mapboxDirections = MapboxDirections.builder()
+                            .addWaypoint(currentLMPoint)
+                            .origin(origin)
+                            .destination(destination)
+                            .overview(DirectionsCriteria.OVERVIEW_FULL)
+                            .profile(DirectionsCriteria.PROFILE_DRIVING)
+                            .accessToken(Mapbox.getAccessToken())
+                            .build();
+                } else if (!isUserInsideWB && (origin.longitude() < 124.66425)) {
+                    currentLMPoint = Point.fromLngLat(124.66279, 12.50923);
+                    mapboxDirections = MapboxDirections.builder()
+                            .addWaypoint(currentLMPoint)
+                            .origin(origin)
+                            .destination(destination)
+                            .overview(DirectionsCriteria.OVERVIEW_FULL)
+                            .profile(DirectionsCriteria.PROFILE_DRIVING)
+                            .accessToken(Mapbox.getAccessToken())
+                            .build();
+                } else {
+                    mapboxDirections = MapboxDirections.builder()
+                            .origin(origin)
+                            .destination(destination)
+                            .overview(DirectionsCriteria.OVERVIEW_FULL)
+                            .profile(DirectionsCriteria.PROFILE_WALKING)
+                            .accessToken(Mapbox.getAccessToken())
+                            .build();
+                }
+            } else {
+//                Log.d(TAG, "getRoute: origin is inside UEP");
                 mapboxDirections = MapboxDirections.builder()
                         .origin(origin)
                         .destination(destination)
                         .overview(DirectionsCriteria.OVERVIEW_FULL)
                         .profile(DirectionsCriteria.PROFILE_WALKING)
-                        .accessToken(Mapbox.getAccessToken())
-                        .build();
-            } else {
-                Log.d(TAG, "getRoute: origin is outside of UEP");
-                Toast.makeText(mapFragmentContext, "Currently outside of UEP\n" +
-                        "Generating path from " + currentLM.getLocationName(), Toast.LENGTH_LONG).show();
-                mapboxDirections = MapboxDirections.builder()
-                        .addWaypoint(currentLMPoint)
-                        .origin(origin)
-                        .destination(destination)
-                        .overview(DirectionsCriteria.OVERVIEW_FULL)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING)
                         .accessToken(Mapbox.getAccessToken())
                         .build();
             }
@@ -515,9 +529,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             pathToRoomDialog.dismiss();
             initBldgLvlDialog();
             currentRasterLayer = rasterLayerList.get(0);
-            getMapboxMap().getStyle(style -> style.addLayer(currentRasterLayer));
             getMapboxMap().easeCamera(CameraUpdateFactory.bearingTo(mapRotation));
             getMapboxMap().easeCamera(CameraUpdateFactory.zoomTo(18.0));
+            getMapboxMap().getStyle(style -> style.addLayer(currentRasterLayer));
         });
         btnPathRoomImage.setOnClickListener(view -> {
             try {
@@ -538,6 +552,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         btnPathRoomClose.setOnClickListener(view -> {
             clearLayers();
             pathToRoomDialog.dismiss();
+            if (mapfragmentFab != null)
+                mapfragmentFab.hide();
+            if (mapfragFabStyle != null)
+                mapfragFabStyle.hide();
         });
     }
 
@@ -694,6 +712,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     // Display bottomsheet dialog to show information of the location
     public void openBottomSheetDialog(LocationModel clickedLocation, String room, Context context) {
         handler.postDelayed(() -> markMapboxMapOffset(getMapboxMap(), clickedLocation), 250);
+        Log.d(TAG, "openBottomSheetDialog: ->" + clickedLocation);
         bottomSheetDialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
         bottomSheetDialog.setOnCancelListener(dialogInterface -> clearLayers());
         bottomSheetDialog.setContentView(R.layout.layout_bottom_sheet);
@@ -779,7 +798,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
             smbtnViewRooms.setOnClickListener(view -> {
                 Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
-                intent.putParcelableArrayListExtra("enlargedImage", imageSet);
+                Log.d(TAG, "openBottomSheetDialog: -> Enlarged Image " + imageSet);
+                intent.putParcelableArrayListExtra("enLargedImage", imageSet);
                 startActivity(intent);
             });
         }
@@ -875,7 +895,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 ArrayList<EnlargedImageModel> imageSet = new ArrayList<>();
                 imageSet.add(new EnlargedImageModel(roomPreviewUrl, roomThumbnailUrl));
                 imageSet.add(new EnlargedImageModel(roomUrl, ""));
-                Log.d(TAG, "roomUrl sample" + roomUrl);
                 intent.putParcelableArrayListExtra("enlargedImage", imageSet);
                 startActivity(intent);
             });
@@ -963,6 +982,33 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         float latIncrease = destLat + areaConstant;
         float latDecrease = destLat - areaConstant;
         destination = Point.fromLngLat(destLng, destLat);
+
+        List<List<Point>> area = new ArrayList<>();
+        List<Point> points = new ArrayList<>();
+
+        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left
+        points.add(Point.fromLngLat(lngDecrease,latDecrease)); //top-right
+        points.add(Point.fromLngLat(lngIncrease,latDecrease)); //bottom-right
+        points.add(Point.fromLngLat(lngIncrease,latIncrease)); //bottom-left
+        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left & meeting pt
+        area.add(points);
+
+        Polygon polygon = Polygon.fromLngLats(area);
+        // checks if the device is within the
+        if (TurfJoins.inside(origin, polygon)) {
+            Toast.makeText(mapFragmentContext, "You are already here!", Toast.LENGTH_LONG).show();
+            clearLayers();
+            requestPathToRoom(destinationLM.getLocationName(), room);
+            visitLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+                    destinationLM.getLocationName());
+            directionsDialog.dismiss();
+            if (mapfragmentFab != null)
+                mapfragmentFab.show();
+            if (mapfragFabStyle != null)
+                mapfragFabStyle.show();
+            return;
+        }
+
         getRoute(getMapboxMap(), origin, destination);
 
         directionsStartLoc.setText(originLM.getLocationName());
@@ -977,19 +1023,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             if (mapfragFabStyle != null)
                 mapfragFabStyle.show();
         });
-
-        List<List<Point>> area = new ArrayList<>();
-        List<Point> points = new ArrayList<>();
-
-        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left
-        points.add(Point.fromLngLat(lngDecrease,latDecrease)); //top-right
-        points.add(Point.fromLngLat(lngIncrease,latDecrease)); //bottom-right
-        points.add(Point.fromLngLat(lngIncrease,latIncrease)); //bottom-left
-        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left & meeting pt
-        area.add(points);
-
-        Polygon polygon = Polygon.fromLngLats(area);
-
         searchLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
                 originLM.getLocationName(), destinationLM.getLocationName());
 
@@ -998,15 +1031,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 clearLayers();
             }
         }, 2500);
-        if (directionsDialog.isShowing()) {
-            if (TurfJoins.inside(origin, polygon)) {
-                Toast.makeText(mapFragmentContext, "You are already here!", Toast.LENGTH_LONG).show();
-                clearLayers();
-                requestPathToRoom(destinationLM.getLocationName(), room);
-                directionsDialog.dismiss();
-                return;
-            }
-        }
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -1020,6 +1044,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                                 timer.cancel();
                                 clearLayers();
                                 requestPathToRoom(destinationLM.getLocationName(), room);
+                                visitLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+                                        destinationLM.getLocationName());
                                 directionsDialog.dismiss();
                                 return;
                             }
@@ -1056,6 +1082,31 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 Map<String, String> params = new HashMap<>();
                 params.put("user_idnumber", userIdNumber);
                 params.put("origin", origin);
+                params.put("destination", destination);
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+    }
+
+    private void visitLog(String userIdNumber, String destination) {
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.URL_VISIT_LOG,
+                response -> {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        Log.d(TAG, "visitLog request" + obj.getString("message"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, error -> Log.d(TAG, "visitLog request No connection to server ")
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_idnumber", userIdNumber);
                 params.put("destination", destination);
                 return params;
             }
@@ -1113,13 +1164,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     // Remove generated icons or path
     @Override
     public void clearLayers() {
-        // Where LAYER_ID is a valid id of a layer that already
-        // exists in the style
         getMapboxMap().getStyle(style -> {
-//            if (!rasterLayerList.isEmpty() || !imageURLList.isEmpty()) {
-//                style.removeLayer(rasterLayerList.get(0));
-//                imageURLList.clear();
-//            }
             // If a route layer exists in the style, remove the layer
             if (routeGJS != null) {
                 routeGJS.setGeoJson(FeatureCollection.fromJson(""));

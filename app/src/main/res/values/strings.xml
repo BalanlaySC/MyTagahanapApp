@@ -147,7 +147,7 @@
     </string>
     <integer name="TEXT_NO_SUGGESTIONS">524288</integer>
     <string name="aboutappIntroText">
-        Hi there! "My Tagahanap" is a mobile application that we developed specifically for the University of Eastern Philippines Main Campus to help the user (students/faculty/staff) find a specific area/building by providing an optimal path that is displayed on map. This would lessen people asking for assistance to strangers when they need to find the room of their class, location of their meeting or orientation which they are not familiar with. I hope you enjoy your stay here in the campus with your trusty app, My Tagahanap!
+        Hi there! "My Tagahanap" is a mobile application that we developed specifically for the University of Eastern Philippines Main Campus to help the user (students/faculty/staff) find a specific area/building by providing an optimal path that is displayed on map. This would lessen people asking for assistance to strangers when they need to find the room of their class, location of their meeting or orientation for which new comers are not familiar with. I hope you enjoy your stay here in the campus with your trusty app, My Tagahanap!
     </string>
     <string name="tokenTitle">Token</string>
     <string name="tokenInstruction">Long click the text below and save it somewhere safe. It will be used for resetting password.</string>

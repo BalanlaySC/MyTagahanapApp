@@ -38,7 +38,7 @@ public class CollegeInfoFragment extends Fragment {
                 return false;
             }
         };
-        UEPAddInfoAdapter mAdapter = new UEPAddInfoAdapter(addInfos);
+        UEPAddInfoAdapter mAdapter = new UEPAddInfoAdapter(addInfos, getResources());
 
         recvCollegeInfo.setLayoutManager(mLayoutManager);
         recvCollegeInfo.setAdapter(mAdapter);

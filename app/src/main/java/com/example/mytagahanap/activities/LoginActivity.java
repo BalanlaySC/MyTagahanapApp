@@ -23,10 +23,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.example.mytagahanap.BuildConfig;
-import com.example.mytagahanap.Constants;
+import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.R;
 import com.example.mytagahanap.network.RequestHandler;
-import com.example.mytagahanap.SharedPrefManager;
+import com.example.mytagahanap.globals.SharedPrefManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONException;

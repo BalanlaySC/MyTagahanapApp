@@ -14,6 +14,8 @@
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_above="@+id/navProfileFullName"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         android:src="@drawable/ic_anonymous"
         app:shapeAppearanceOverlay="@style/Circular" />
 
@@ -31,7 +33,7 @@
             android:id="@+id/navheaderName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
+            android:paddingTop="15dp"
             android:text="@string/sample_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="20sp"
@@ -39,11 +41,9 @@
             tools:text="Full Name" />
 
         <TextView
-            android:id="@+id/navheaderidNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sample_text"
-            tools:text="@string/id_number" />
+            android:text="View profile" />
     </LinearLayout>
 
     <LinearLayout
