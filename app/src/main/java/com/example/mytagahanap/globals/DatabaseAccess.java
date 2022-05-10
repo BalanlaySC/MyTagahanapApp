@@ -1,4 +1,4 @@
-package com.example.mytagahanap;
+package com.example.mytagahanap.globals;
 
 import android.content.Context;
 import android.database.Cursor;

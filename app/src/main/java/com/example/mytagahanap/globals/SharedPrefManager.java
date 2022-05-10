@@ -86,7 +86,7 @@ public class SharedPrefManager {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString(KEY_DEF_LOC, newPass);
+        editor.putString(KEY_PASSWORD, newPass);
         editor.apply();
     }
 
@@ -181,17 +181,17 @@ public class SharedPrefManager {
         return sharedPreferences.getBoolean(FETCHED_DATA, false);
     }
 
-    public String getFullName() {
-        return getlName() + ", " + getfName();
-    }
-
-    public String getAllSharedPref() {
-        return getIdnumber() + " " + getfName() + " " +
-                getlName() + " " + getKeepMeSignedIn() + " " + getToken();
-    }
-
     public int getContributionCounter() {
         SharedPreferences sharedPreferences = mCtx.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getInt(KEY_CONT_COUNTER, 0);
+    }
+
+    public String printFullName() {
+        return getlName() + ", " + getfName();
+    }
+
+    public String printAllSharedPref() {
+        return getIdnumber() + " " + getfName() + " " +
+                getlName() + " " + getKeepMeSignedIn() + " " + getToken();
     }
 }

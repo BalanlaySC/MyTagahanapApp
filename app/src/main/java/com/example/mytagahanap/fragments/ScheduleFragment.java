@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.example.mytagahanap.globals.Constants;
-import com.example.mytagahanap.DatabaseAccess;
+import com.example.mytagahanap.globals.DatabaseAccess;
 import com.example.mytagahanap.interfaces.MapInterface;
 import com.example.mytagahanap.R;
 import com.example.mytagahanap.network.RequestHandler;

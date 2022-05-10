@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Constants {
+    // constant urls to server
 //    public static final String ROOT_URL = "http://192.168.1.195/mytagahanap/v1/"; // local server
     public static final String ROOT_URL = "http://mytagahanap.000webhostapp.com/mytagahanap/v1/";
     public static final String URL_CLASS_SCHED = ROOT_URL + "classSchedule.php?idnumber=";
@@ -26,6 +27,7 @@ public class Constants {
     public static final String ROOT_API_URL = "http://mytagahanap.pythonanywhere.com/";
 //    public static final String ROOT_API_URL = "http://192.168.1.195:5000/"; // local server
 
+    // mapbox constants
     public static final String STYLE_URL = "mapbox://styles/balanlaysc/ckwj3ml7b28rh15qafm4xzg2u";
     public static final String STREET_STYLE_URL = "mapbox://styles/balanlaysc/ckztgctxd00m914nybcatj974";
     public static final String ROUTE_LAYER_ID = "route-layer-id";
@@ -83,7 +85,7 @@ public class Constants {
         OUTER_POINTS2.add(Point.fromLngLat(124.66283, 12.50916));
         OUTER_POINTS2.add(Point.fromLngLat(124.6632, 12.50849));
         OUTER_POINTS2.add(Point.fromLngLat(124.6643, 12.50812));
-        OUTER_POINTS2.add(Point.fromLngLat(124.66525, 12.50833));
+        OUTER_POINTS2.add(Point.fromLngLat(124.6652, 12.5082));
         OUTER_POINTS2.add(Point.fromLngLat(124.66551, 12.50924));
         OUTER_POINTS2.add(Point.fromLngLat(124.66565, 12.51009));
         OUTER_POINTS2.add(Point.fromLngLat(124.6635, 12.51032));
@@ -94,5 +96,17 @@ public class Constants {
     public static final ProponentModel proponent1 = new ProponentModel("Samuel", "C.",
             "Balanlay", "UEP, Catarman N. Samar", "BSIT-4A", 22, R.drawable.image_prop1);
     public static final ProponentModel proponent2 = new ProponentModel("Joyce", "M.", "DeGuzman",
-            "Cawayan, Catarman N. Samar", "BSIT-4A", 21, R.drawable.image_prop2);
+            "Cawayan, Catarman N. Samar", "BSIT-4A", 22, R.drawable.image_prop2);
+
+    // keys for requests
+    public static final int KEY_CHANGE_PASS = 60;
+    public static final int KEY_SEND_FEEDBACK = 70;
+    public static final int KEY_REQUEST_PATH_TO_ROOM = 100;
+    public static final int KEY_SEARCH_LOG = 110;
+    public static final int KEY_VISIT_LOG = 120;
+    public static final int KEY_SUGGEST_LOCATION = 130;
+    public static final int KEY_CHANGE_DEFAULT_LOCATION = 140;
+    public static final int KEY_FETCH_SEARCHED = 160;
+    public static final int KEY_FETCH_VISITED = 170;
+    public static final int KEY_FETCH_REVIEWS = 180;
 }

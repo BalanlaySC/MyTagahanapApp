@@ -48,7 +48,7 @@ import androidx.fragment.app.Fragment;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
-import com.example.mytagahanap.DatabaseAccess;
+import com.example.mytagahanap.globals.DatabaseAccess;
 import com.example.mytagahanap.R;
 import com.example.mytagahanap.fragments.AboutAppFragment;
 import com.example.mytagahanap.fragments.DashboardFragment;
@@ -60,6 +60,7 @@ import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.globals.SharedPrefManager;
 import com.example.mytagahanap.interfaces.MainActivityInterface;
 import com.example.mytagahanap.interfaces.MapInterface;
+import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
 import com.example.mytagahanap.models.LocationModel;
 import com.example.mytagahanap.network.RequestHandler;
 import com.google.android.gms.common.api.ApiException;
@@ -81,7 +82,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainActivityInterface {
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener, MainActivityInterface, VolleyCallbackInterface {
     private static final String TAG = "MainActivity";
     final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -108,10 +110,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loadSharedPreference();
+        loadUserData();
 
-        // check if token is still valid
-        Log.d(TAG, "getdatatype " + SharedPrefManager.getInstance(this).getTimeOutSession());
+        // check if session is still valid
         if (SharedPrefManager.getInstance(this).getKeepMeSignedIn()) {
             if (isSessionTimedOut(SharedPrefManager.getInstance(this).getTimeOutSession()) < 0) {
                 logoutUser("Your session has timed out.\nPlease log in again.", Toast.LENGTH_LONG);
@@ -156,6 +157,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         feedbackDialog = new Dialog(this);
     }
 
+    /**
+     *
+     * @param userTimeMillis time in milliseconds on which the session will expire
+     * @return -1 if session is expired, 0 >= is session is valid
+     */
     private int isSessionTimedOut(long userTimeMillis) {
         Date userDate = new Date(userTimeMillis);
         Calendar cal = Calendar.getInstance();              // creates calendar
@@ -171,6 +177,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return result;
     }
 
+    /**
+     * Logs out the user and redirected to Login section
+     *
+     * @param strToast msg to be displayed for the user
+     * @param len duration of Toast
+     */
     private void logoutUser(String strToast, int len) {
         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
         intent.putExtra("previous User", SharedPrefManager.getInstance(this).getIdnumber());
@@ -184,19 +196,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivity(intent);
     }
 
-    private void loadSharedPreference() {
-        fullName = SharedPrefManager.getInstance(this).getFullName();
+    // Load info of currently logged in user upon opening the app
+    private void loadUserData() {
+        fullName = SharedPrefManager.getInstance(this).printFullName();
         idnumber = SharedPrefManager.getInstance(this).getIdnumber();
         token = SharedPrefManager.getInstance(this).getToken();
+
+
     }
 
     private void initViews() {
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.inflateMenu(R.menu.other_menu);
-
+        toolbar.inflateMenu(R.menu.other_menu); // Other menu, top-right
         setSupportActionBar(toolbar);
-
-        drawer = findViewById(R.id.main_layout);
 
         navigationView = findViewById(R.id.nav_view);
         if (idnumber != 1) {
@@ -213,6 +225,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navheaderLayout.setOnClickListener(view -> openProfileDialog());
         navLogout.setOnClickListener(view -> logoutUser("Logout Successfully", Toast.LENGTH_SHORT));
 
+        // Side drawer
+        drawer = findViewById(R.id.main_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
@@ -271,9 +285,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 parcelDataToFragment("Locations", locations, mapFragment);
                 navigationView.setCheckedItem(R.id.nav_map);
             }
-            handler.postDelayed(() -> {
-                mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this);
-            }, 500);
+            handler.postDelayed(() -> mapInterface.openBottomSheetDialog(clickedLocation, "", MainActivity.this), 500);
         });
 
         // Below event is triggered when submit search query.
@@ -355,6 +367,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    /**
+     * Handles moving from one fragment to another
+     * @param actionBarTitle title to be shown in the Toolbar
+     * @param fragment the fragment to move into
+     */
     private void initFragment(String actionBarTitle, Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                 fragment).commit();
@@ -363,6 +380,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // Display a window pop-up showing the user's profile
     private void openProfileDialog() {
         drawer.closeDrawer(GravityCompat.START);
         profileDialog.setContentView(R.layout.layout_dialog_profile);
@@ -424,7 +442,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             profilePassword.setFocusable(false);
             profilePassword.setFocusableInTouchMode(false);
             profileSaveBtn.setVisibility(View.GONE);
-            changePassword(String.valueOf(idnumber), String.valueOf(profilePassword.getText()).trim());
+            changePassword(getApplicationContext(), String.valueOf(idnumber),
+                    String.valueOf(profilePassword.getText()).trim());
         });
 
         profileImgBtnClose.setOnClickListener(view -> profileDialog.dismiss());
@@ -432,6 +451,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileDialog.show();
     }
 
+    // Display a window pop-up showing user's feedback
     private void openFeedbackDialog() {
         drawer.closeDrawer(GravityCompat.START);
         feedbackDialog.setContentView(R.layout.layout_dialog_react);
@@ -446,11 +466,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TextView reactAngry = feedbackDialog.findViewById(R.id.reactAngry);
         ImageButton reactImgBtnClose = feedbackDialog.findViewById(R.id.reactImgBtnClose);
 
-        sendFeedback(reactGreat, String.valueOf(idnumber));
-        sendFeedback(reactHappy, String.valueOf(idnumber));
-        sendFeedback(reactWow, String.valueOf(idnumber));
-        sendFeedback(reactSad, String.valueOf(idnumber));
-        sendFeedback(reactAngry, String.valueOf(idnumber));
+        sendFeedback(getApplicationContext(), feedbackDialog,
+                reactGreat, String.valueOf(idnumber));
+        sendFeedback(getApplicationContext(), feedbackDialog,
+                reactHappy, String.valueOf(idnumber));
+        sendFeedback(getApplicationContext(), feedbackDialog,
+                reactWow, String.valueOf(idnumber));
+        sendFeedback(getApplicationContext(), feedbackDialog,
+                reactSad, String.valueOf(idnumber));
+        sendFeedback(getApplicationContext(), feedbackDialog,
+                reactAngry, String.valueOf(idnumber));
 
         reactImgBtnClose.setOnClickListener(view -> feedbackDialog.dismiss());
         feedbackDialog.show();
@@ -549,8 +574,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    /* Check if GPS/Location is enabled
-     * !isLocationEnabled return true if enabled and false if disabled
+    /**
+     * Checks if device's GPS/Location is enabled
+     *
+     * @param context current state of the app
+     * @return !isLocationEnabled return true if enabled and false if disabled
      */
     public static boolean isLocationEnabled(Context context) {
         int locationMode;
@@ -591,28 +619,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return null;
     }
 
+    /**
+     * Initializing interface for MapFragment in order to use functions
+     * from the said class
+     *
+     * @param mapInterface Fragment's instance
+     */
     public void setMapInterface(MapInterface mapInterface) {
         this.mapInterface = mapInterface;
     }
 
-    /*  Compare two Date objects
-        -1 is past, 0 is equal, 1 is future */
+    /**
+     * Compare two Date objects
+     *
+     * @param date1 1st Date object
+     * @param date2 2nd Date object
+     * @return -1 is past, 0 is equal, 1 is future
+     */
     public int compareDates(Date date1, Date date2) {
         return date1.compareTo(date2);
     }
 
-    private void changePassword(String userIdNumber, String password) {
-        Log.d(TAG, "changePassword: " + userIdNumber + ", " + password);
+    /**
+     * Sends request to change current user's password
+     *
+     * @param userIdNumber current user's id number
+     * @param password new password
+     */
+    public void changePassword(Context context, String userIdNumber, String password) {
         StringRequest stringRequest = new StringRequest(
                 Request.Method.POST, Constants.URL_CHANGE_PASSWORD,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        Toast.makeText(MainActivity.this, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(MainActivity.this, "No connection to server.", Toast.LENGTH_SHORT).show()
+                response -> onSuccessRequest(context, response, Constants.KEY_CHANGE_PASS),
+                error -> Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show()
         ) {
             @NonNull
             @Override
@@ -624,22 +662,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
+        RequestHandler.getInstance(context).addToRequestQueue(stringRequest);
     }
 
-    private void sendFeedback(TextView tv, String userIdNumber) {
+    /**
+     * Sends request to submit a feedback on "What do you feel about the app?"
+     *
+     * @param tv the chosen feedback of the user
+     * @param userIdNumber current user's id number
+     */
+    public void sendFeedback(Context context, Dialog feedbackDialog, TextView tv, String userIdNumber) {
         tv.setOnClickListener(view -> {
-            Log.d(TAG, "userIdNumber: " + userIdNumber + ", " + (String) tv.getText());
             StringRequest stringRequest = new StringRequest(
                     Request.Method.POST, Constants.URL_SEND_FEEDBACK,
-                    response -> {
-                        try {
-                            JSONObject obj = new JSONObject(response);
-                            Toast.makeText(MainActivity.this, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }, error -> Toast.makeText(MainActivity.this, "No connection to server.", Toast.LENGTH_SHORT).show()
+                    response -> onSuccessRequest(context, response, Constants.KEY_SEND_FEEDBACK),
+                    error -> Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show()
             ) {
                 @NonNull
                 @Override
@@ -651,22 +688,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             };
 
-            RequestHandler.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+            RequestHandler.getInstance(context).addToRequestQueue(stringRequest);
             feedbackDialog.dismiss();
         });
     }
 
+    @Override
+    public void onSuccessRequest(Context context, String response, int request) {
+        String message = "";
+        try {
+            JSONObject obj = new JSONObject(response);
+            message = obj.getString("message");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        switch (request) {
+            case Constants.KEY_CHANGE_PASS:
+            case Constants.KEY_SEND_FEEDBACK:
+                Log.d(TAG, "onSuccessRequest: " + message);
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    /**
+     * This allows us to pass on data to another fragment
+     *
+     * @param parcelableTag unique name that will be used to access parcel data
+     * @param arrayList a list to be passed on
+     * @param fragment to where the data is going
+     */
     private void parcelDataToFragment(String parcelableTag, ArrayList<? extends Parcelable> arrayList, Fragment fragment) {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(parcelableTag, arrayList);
         fragment.setArguments(bundle);
     }
 
+    /** @return Returns the instance of the Navigation View of the toolbar */
     @Override
     public NavigationView getNavigationView() {
         return navigationView;
     }
 
+    /** @return Returns the instance of the Menu of the toolbar */
     @Override
     public Menu getMenu() {
         return menu;

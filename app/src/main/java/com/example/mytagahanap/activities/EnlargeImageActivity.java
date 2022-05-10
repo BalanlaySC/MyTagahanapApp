@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,13 +14,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.mytagahanap.models.EnlargedImageModel;
 import com.example.mytagahanap.R;
-import com.example.mytagahanap.TouchImageView;
+import com.example.mytagahanap.models.TouchImageView;
 
 import java.util.ArrayList;
 
 public class EnlargeImageActivity extends AppCompatActivity {
     private static final String TAG = "EnlargeImageActivity";
-    final Handler handler = new Handler(Looper.getMainLooper());
     private TouchImageView tivEnlarged;
 
     @SuppressLint("NotifyDataSetChanged")
@@ -32,8 +29,8 @@ public class EnlargeImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_enlarge_image);
         Context enlargeImageContext = getApplicationContext();
 
-        EnlargedImageModel s = this.getIntent().getParcelableExtra("enLargedImage");
-        ArrayList<EnlargedImageModel> imageset = this.getIntent().getParcelableArrayListExtra("enLargedImage");
+        EnlargedImageModel s = this.getIntent().getParcelableExtra("enlargedImage");
+        ArrayList<EnlargedImageModel> imageset = this.getIntent().getParcelableArrayListExtra("enlargedImage");
         tivEnlarged = findViewById(R.id.tivEnlarged);
         ImageButton enlargedCloseBtn = findViewById(R.id.enlargedCloseBtn);
         final int[] currentPosition = {0};

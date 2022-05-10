@@ -6,17 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activities.LoginActivity">
 
-    <CheckBox
-        android:id="@+id/checkboxKMSI"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:buttonTint="@color/go_button"
-        android:minHeight="36dp"
-        android:text="@string/keep_me_signed_in"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout2"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
-
     <ImageView
         android:layout_width="200dp"
         android:layout_height="200dp"
@@ -84,6 +73,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideline1" />
+
+    <CheckBox
+        android:id="@+id/checkboxKMSI"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/go_button"
+        android:minHeight="36dp"
+        android:text="@string/keep_me_signed_in"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout2"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
 
     <CheckBox
         android:id="@+id/checkboxShowPass"

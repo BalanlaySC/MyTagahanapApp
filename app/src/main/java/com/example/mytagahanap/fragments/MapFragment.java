@@ -56,7 +56,7 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
 import com.example.mytagahanap.globals.Constants;
-import com.example.mytagahanap.DatabaseAccess;
+import com.example.mytagahanap.globals.DatabaseAccess;
 import com.example.mytagahanap.activities.EnlargeImageActivity;
 import com.example.mytagahanap.models.EnlargedImageModel;
 import com.example.mytagahanap.activities.MainActivity;
@@ -439,82 +439,15 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
     }
 
-    // Immediately called from
-    public void requestPathToRoom(String building_name, String room_name) {
-        Log.d(TAG, "requestPathToRoom: " + building_name + room_name);
-        StringRequest stringRequest = new StringRequest(
-                Request.Method.POST, Constants.ROOT_API_URL,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        List<LatLng> building_boundary = new ArrayList<>();
-                        List<String> imageURLs = new ArrayList<>();
-                        for (int i = 0; i < obj.getJSONArray("building_boundary").length(); i++) {
-                            JSONArray currentJSONArray = obj.getJSONArray("building_boundary").getJSONArray(i);
-                            building_boundary.add(new LatLng((double) currentJSONArray.get(0), (double) currentJSONArray.get(1)));
-                        }
-                        LatLngQuad quad = new LatLngQuad(
-                                building_boundary.get(0), building_boundary.get(1),
-                                building_boundary.get(2), building_boundary.get(3)
-                        );
-                        for (int n = 0; n < obj.getInt("floors"); n++) {
-                            String img_url = Constants.ROOT_API_URL +
-                                    obj.getString("image_url" + (n + 1)).replace(" ", "%20");
-                            imageURLs.add(img_url);
-                            String id_source = Constants.ID_IMAGE_SOURCE + (n + 1);
-                            String id_layer = Constants.ID_IMAGE_LAYER + (n + 1);
-                            getMapboxMap().getStyle(style -> {
-                                try {
-                                    style.addSource(new ImageSource(id_source, quad, new URI(img_url)));
-                                } catch (URISyntaxException e) {
-                                    e.printStackTrace();
-                                }
-
-                            });
-                        }
-                        onSuccessRequest(imageURLs, (float) obj.getDouble("building_rotation"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> {
-            Log.d(TAG, "requestPathToRoom: No connection to server ");
-            Toast.makeText(mapFragmentContext, error.toString(), Toast.LENGTH_SHORT).show();
-        }
-        ) {
-            @NonNull
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("building", building_name);
-                params.put("room", room_name);
-                params.put("dpi", String.valueOf(300));
-                return params;
-            }
-        };
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
-    }
-
-    @Override
-    public void onSuccessRequest(List<String> imageURLs, float rotation) {
-        mapRotation = rotation;
-        imageURLList = imageURLs;
-        if (rasterLayerList == null) {
-            rasterLayerList = new ArrayList<>();
-        } else {
-            rasterLayerList.clear();
-        }
-        for (int x = 0; x < imageURLList.size(); x++) {
-            String id_source = Constants.ID_IMAGE_SOURCE + (x + 1);
-            String id_layer = Constants.ID_IMAGE_LAYER + (x + 1);
-            rasterLayerList.add(new RasterLayer(id_layer, id_source));
-        }
-        initPathToRoomDialog();
-    }
-
+    // Show dialog with option to show Path to Room in the map or as image
     public void initPathToRoomDialog() {
         pathToRoomDialog.setContentView(R.layout.layout_dialog_pathtoroom);
+        pathToRoomDialog.setOnDismissListener(dialogInterface -> {
+            if (mapfragmentFab != null)
+                mapfragmentFab.hide();
+            if (mapfragFabStyle != null)
+                mapfragFabStyle.hide();
+        });
         Window window = pathToRoomDialog.getWindow();
         window.setGravity(Gravity.CENTER_VERTICAL);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -541,6 +474,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 for (String url : imageURLList) {
                     imageSet.add(new EnlargedImageModel(url, ""));
                 }
+                Log.d(TAG, "imageset " + imageSet);
                 intent.putParcelableArrayListExtra("enlargedImage", imageSet);
                 startActivity(intent);
             } catch (NullPointerException e) {
@@ -559,6 +493,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
     }
 
+    // Display Path to Room in the map and able to change floor level
     public void initBldgLvlDialog() {
         bldgLvlDialog.setContentView(R.layout.layout_dialog_buildinglevel);
         Window window = bldgLvlDialog.getWindow();
@@ -569,7 +504,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        mapFragmentContext.getDisplay().getMetrics(displayMetrics);
+        requireActivity().getDisplay().getMetrics(displayMetrics);
         Button exitBtn = bldgLvlDialog.findViewById(R.id.bldgLvlExitBtn);
         exitBtn.setOnClickListener(view -> {
             bldgLvlDialog.dismiss();
@@ -608,7 +543,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         bldgLvlDialog.show();
     }
 
-    // Marks the map on the clicked location
+    /**
+     * Marks the map on the clicked location
+     *
+     * @param mapboxMap Current instance of Mapbox.mapboxMap
+     * @param clickedLoc Point object where it holds the coordinates
+     *                   of the clicked location
+     */
     public void markMapboxMap(MapboxMap mapboxMap, Point clickedLoc) {
         mapboxMap.getStyle(style -> {
             Objects.requireNonNull(style.getLayer(symbolLayerId)).setProperties(
@@ -626,7 +567,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
     }
 
-    // Marks the map on the clicked location but with a offset
+    /**
+     * Marks the map on the clicked location but with an offset
+     *
+     * @param mapboxMap Current instance of mapboxMap
+     * @param clickedLocation Point object where it holds the coordinates
+     *                        of the clicked location
+     */
     public void markMapboxMapOffset(MapboxMap mapboxMap, LocationModel clickedLocation) {
         float cLLng = clickedLocation.getLocationLng();
         float cLLat = clickedLocation.getLocationLat();
@@ -643,11 +590,14 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
             mapboxMap.easeCamera(CameraUpdateFactory.newLatLng(
                     new LatLng(cLLat - 0.001, cLLng)), 1000);
+            mapboxMap.easeCamera(CameraUpdateFactory.zoomTo(16.0));
         });
     }
 
     /**
      * Add the route and marker icon layers to the map
+     *
+     * @param loadedMapStyle Current instance of Mapbox.style
      */
     private void initLayers(@NonNull Style loadedMapStyle) {
         LineLayer routeLayer = new LineLayer(Constants.ROUTE_LAYER_ID, Constants.ROUTE_SOURCE_ID);
@@ -678,7 +628,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(getResources(),
                         R.drawable.image_blue_marker, null))));
 
-        // Add the red marker icon SymbolLayer to the map
+        // Add the marker icon SymbolLayers to the map
         loadedMapStyle.addLayer(new SymbolLayer(Constants.ICON_LAYER_ID_O, Constants.ICON_SOURCE_ID_O).withProperties(
                 iconImage(Constants.GREEN_PIN_ICON_ID),
                 iconSize((float) 0.25),
@@ -709,7 +659,15 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         loadedMapStyle.addLayer(symbolLayer);
     }
 
-    // Display bottomsheet dialog to show information of the location
+    /**
+     * Display bottomsheet dialog to show information of the location
+     *
+     * @param clickedLocation LocationModel object holds the name and coordinates
+     *                        of the clicked location or building
+     * @param room Name of the room (from class schedule)
+     * @param context Enables the ability to allows access to application-specific
+     *                resources and classes
+     */
     public void openBottomSheetDialog(LocationModel clickedLocation, String room, Context context) {
         handler.postDelayed(() -> markMapboxMapOffset(getMapboxMap(), clickedLocation), 250);
         Log.d(TAG, "openBottomSheetDialog: ->" + clickedLocation);
@@ -720,10 +678,10 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         // Set bottomsheet title to clicked location
         TextView btsTxtLocation = bottomSheetDialog.findViewById(R.id.btsTxtLocation);
         if (btsTxtLocation != null) {
+            btsTxtLocation.setText(clickedLocation.getLocationName());
             if (!room.equals("")) {
                 btsTxtLocation.setText(clickedLocation.getLocationName() + " -> " + room);
             }
-            btsTxtLocation.setText(clickedLocation.getLocationName());
         }
 
         // OnClickListener for Directions Button
@@ -799,7 +757,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             smbtnViewRooms.setOnClickListener(view -> {
                 Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
                 Log.d(TAG, "openBottomSheetDialog: -> Enlarged Image " + imageSet);
-                intent.putParcelableArrayListExtra("enLargedImage", imageSet);
+                intent.putParcelableArrayListExtra("enlargedImage", imageSet);
                 startActivity(intent);
             });
         }
@@ -833,6 +791,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         bottomSheetDialog.show();
     }
 
+    /**
+     * Fast way to verify if location's name is in the location database
+     *
+     * @param clickedLocation A LocationModel object containing the name
+     *                        and coordinates of a clicked location
+     * @return True if location's name is in the location database, otherwise False
+     */
     private boolean getStreamRM(LocationModel clickedLocation) {
         return DatabaseAccess.getInstance(mapFragmentContext)
                 .getAllRooms()
@@ -840,7 +805,15 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 .anyMatch(o -> o.getLocationName().equals(clickedLocation.getLocationName()));
     }
 
-    // Displays images for a clicked location in bottom sheet
+    /**
+     * Display images for a clicked location in bottom sheet
+     *
+     * @param clickedLocation A LocationModel object containing the name
+     *                        and coordinates of a clicked location
+     * @param room Name of the room (from class schedule)
+     * @param bsImageLayout LinearLayout where the it contains ImageViews
+     *                      where images of location will be displayed
+     */
     private void initImageLayout(LocationModel clickedLocation, String room, LinearLayout bsImageLayout) {
         String holder = (Constants.ROOT_URL + "img/" +
                 clickedLocation.getLocationName().replace(".", "")
@@ -853,7 +826,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         ShapeableImageView locationimg1 = bottomSheetDialog.findViewById(R.id.locationimg1);
         ShapeableImageView locationimg2 = bottomSheetDialog.findViewById(R.id.locationimg2);
 
-        // thumbnails in bottomsheet
+        // thumbnails in bottom sheet
         if (containsLocation(clickedLocation.getLocationName())) {
             bsImageLayout.setVisibility(View.VISIBLE);
             if (locationimg1 != null && locationimg2 != null) {
@@ -883,7 +856,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         if (locationimg1 != null) {
             locationimg1.setOnClickListener(view -> {
                 Intent intent = new Intent(mapFragmentContext, EnlargeImageActivity.class);
-                intent.putExtra("enLargedImage",
+                intent.putExtra("enlargedImage",
                         new EnlargedImageModel(holder + "Preview.jpg", holder + "Thumb.jpg"));
                 startActivity(intent);
 
@@ -901,7 +874,12 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }
     }
 
-    // Display dialog for sending suggestions
+    /**
+     * Display dialog for sending suggestions
+     *
+     * @param point LatLng object where it holds the coordinates
+     *              where the user long clicked in the map
+     */
     private void openSuggestionDialog(LatLng point) {
         suggestionDialog.setContentView(R.layout.layout_dialog_suggestion);
         suggestionDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -926,7 +904,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             String mLocDesc = suggestionDescription.getText().toString();
             String mLocLong = String.valueOf(point.getLongitude());
             String mLocLat = String.valueOf(suggestionLat.getText());
-            sendSuggestion(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+            suggestLocation(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
                     mLocName, mLocLong, mLocLat, mLocDesc);
             suggestionDialog.dismiss();
         });
@@ -935,7 +913,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         suggestionDialog.show();
     }
 
-    // Display dialog for a current location and destination
+    /**
+     * Display dialog for a current location and destination
+     *
+     * @param destinationLM LocationModel object holds the name and coordinates
+     *                      of the destination
+     * @param room Name of the room (from class schedule)
+     */
     public void initDirectionDialog(LocationModel destinationLM, String room) {
         handler.postDelayed(() -> {
             if (mapfragmentFab != null)
@@ -955,6 +939,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         });
         directionsDialog.setContentView(R.layout.layout_dialog_directions);
 
+        // Configurations to the position of the dialog and make the map still clickable
         Window window = directionsDialog.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.setGravity(Gravity.BOTTOM);
@@ -971,34 +956,24 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         TextView directionsDestination = directionsDialog.findViewById(R.id.directionsDestination);
         ImageButton directionsImgBtnClose = directionsDialog.findViewById(R.id.directionsImgBtnClose);
 
+        // Setting up the Point object: origin & destination
         LocationModel originLM = getDevCurrentLocation();
         origin = Point.fromLngLat(originLM.getLocationLng(),
                 originLM.getLocationLat());
-        float areaConstant = 0.00015F;
-        float destLng = destinationLM.getLocationLng();
-        float lngIncrease = destLng + areaConstant;
-        float lngDecrease = destLng - areaConstant;
-        float destLat = destinationLM.getLocationLat();
-        float latIncrease = destLat + areaConstant;
-        float latDecrease = destLat - areaConstant;
-        destination = Point.fromLngLat(destLng, destLat);
+        destination = Point.fromLngLat(destinationLM.getLocationLng(),
+                destinationLM.getLocationLat());
 
-        List<List<Point>> area = new ArrayList<>();
-        List<Point> points = new ArrayList<>();
-
-        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left
-        points.add(Point.fromLngLat(lngDecrease,latDecrease)); //top-right
-        points.add(Point.fromLngLat(lngIncrease,latDecrease)); //bottom-right
-        points.add(Point.fromLngLat(lngIncrease,latIncrease)); //bottom-left
-        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left & meeting pt
-        area.add(points);
-
-        Polygon polygon = Polygon.fromLngLats(area);
-        // checks if the device is within the
+        // Setting the area for the destination
+        Polygon polygon = getArrivalArea(destinationLM);
+        // Checks if the device is within the perimeter of the destination
         if (TurfJoins.inside(origin, polygon)) {
+            searchLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+                    originLM.getLocationName(), destinationLM.getLocationName());
             Toast.makeText(mapFragmentContext, "You are already here!", Toast.LENGTH_LONG).show();
             clearLayers();
-            requestPathToRoom(destinationLM.getLocationName(), room);
+            if (!room.equals("")) {
+                requestPathToRoom(destinationLM.getLocationName(), room);
+            }
             visitLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
                     destinationLM.getLocationName());
             directionsDialog.dismiss();
@@ -1009,6 +984,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             return;
         }
 
+        // Request route from device location to where the user want to go
         getRoute(getMapboxMap(), origin, destination);
 
         directionsStartLoc.setText(originLM.getLocationName());
@@ -1031,6 +1007,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 clearLayers();
             }
         }, 2500);
+        //
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -1043,7 +1020,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                                 Toast.makeText(mapFragmentContext, "You have arrived!", Toast.LENGTH_LONG).show();
                                 timer.cancel();
                                 clearLayers();
-                                requestPathToRoom(destinationLM.getLocationName(), room);
+                                if (!room.equals("")) {
+                                    requestPathToRoom(destinationLM.getLocationName(), room);
+                                }
                                 visitLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
                                         destinationLM.getLocationName());
                                 directionsDialog.dismiss();
@@ -1064,57 +1043,6 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }, 10000, 10000);
     }
 
-    private void searchLog(String userIdNumber, String origin, String destination) {
-        StringRequest stringRequest = new StringRequest(
-                Request.Method.POST, Constants.URL_SEARCH_LOG,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        Log.d(TAG, "searchLog request" + obj.getString("message"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Log.d(TAG, "searchLog request No connection to server ")
-        ) {
-            @NonNull
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("user_idnumber", userIdNumber);
-                params.put("origin", origin);
-                params.put("destination", destination);
-                return params;
-            }
-        };
-
-        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
-    }
-
-    private void visitLog(String userIdNumber, String destination) {
-        StringRequest stringRequest = new StringRequest(
-                Request.Method.POST, Constants.URL_VISIT_LOG,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        Log.d(TAG, "visitLog request" + obj.getString("message"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Log.d(TAG, "visitLog request No connection to server ")
-        ) {
-            @NonNull
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("user_idnumber", userIdNumber);
-                params.put("destination", destination);
-                return params;
-            }
-        };
-
-        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
-    }
-
     // Display dialog for list of locations
     private void openLocationsDialog() {
         locationsDialog.setContentView(R.layout.layout_dialog_locations);
@@ -1126,6 +1054,7 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
             return true;
         });
+        // Configurations to the position of the dialog and make the map still clickable
         Window window = locationsDialog.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.setGravity(Gravity.BOTTOM);
@@ -1180,18 +1109,105 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         getMapboxMap().easeCamera(CameraUpdateFactory.zoomTo(16.0));
     }
 
-    private void sendSuggestion(String userIdNumber, String locName,
-                                String longitude, String latitude, String locDescription) {
+    /**
+     * Called upon arriving in the building
+     *
+     * @param building_name The building's name where the room is located
+     * @param room_name The room of the selected subject
+     */
+    public void requestPathToRoom(String building_name, String room_name) {
+        Log.d(TAG, "requestPathToRoom: " + building_name + room_name);
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.ROOT_API_URL,
+                response -> onSuccessRequest(mapFragmentContext, response, Constants.KEY_REQUEST_PATH_TO_ROOM),
+                error -> Toast.makeText(mapFragmentContext, error.toString(), Toast.LENGTH_SHORT).show()
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("building", building_name);
+                params.put("room", room_name);
+                params.put("dpi", String.valueOf(300));
+                return params;
+            }
+        };
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+    }
+
+    /**
+     * Sends request to log the user's searched location
+     *
+     * @param userIdNumber ID number of the current user
+     * @param origin Location (or coordinates) of the current user
+     * @param destination Name of the building/destination
+     */
+    private void searchLog(String userIdNumber, String origin, String destination) {
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.URL_SEARCH_LOG,
+                response -> onSuccessRequest(mapFragmentContext, response, Constants.KEY_SEARCH_LOG),
+                error -> Log.d(TAG, "Search not recorded")
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_idnumber", userIdNumber);
+                params.put("origin", origin);
+                params.put("destination", destination);
+                return params;
+            }
+        };
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+    }
+
+    /**
+     * Sends request to log user's visited location
+     *
+     * @param userIdNumber ID number of the current user
+     * @param destination Name of the building/destination
+     */
+    private void visitLog(String userIdNumber, String destination) {
+        StringRequest stringRequest = new StringRequest(
+                Request.Method.POST, Constants.URL_VISIT_LOG,
+                response -> onSuccessRequest(mapFragmentContext, response, Constants.KEY_VISIT_LOG),
+                error -> Log.d(TAG, "Visit not recorded.")
+        ) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("user_idnumber", userIdNumber);
+                params.put("destination", destination);
+                return params;
+            }
+        };
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+    }
+
+    /**
+     * Sends to request to submit a location to be added in the map
+     *
+     * @param userIdNumber ID number of the current user
+     * @param locName Name of the suggested location
+     * @param longitude Suggested location's longitude
+     * @param latitude Suggested location's latitude
+     * @param locDescription Short description of the suggested location
+     */
+    private void suggestLocation(String userIdNumber, String locName,
+                                 String longitude, String latitude, String locDescription) {
         StringRequest stringRequest = new StringRequest(
                 Request.Method.POST, Constants.URL_SUBMIT_SUGGESTION,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        Toast.makeText(mapFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(mapFragmentContext, "No connection to server.", Toast.LENGTH_SHORT).show()
+                response -> onSuccessRequest(mapFragmentContext, response, Constants.KEY_SUGGEST_LOCATION),
+                error -> Toast.makeText(mapFragmentContext, "Suggestion not sent", Toast.LENGTH_SHORT).show()
         ) {
             @NonNull
             @Override
@@ -1206,21 +1222,24 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
         };
 
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
     }
 
+    /**
+     * Change the default location of the current user
+     * The default location is used when the user is currently outside of UEP
+     *
+     * @param userIdNumber ID number of the current user
+     * @param newDefLoc A building or coordinates
+     */
     private void changeDefaultLocation(String userIdNumber, String newDefLoc) {
         Log.d(TAG, "changeDefaultLocation: " + userIdNumber + ", " + newDefLoc);
         StringRequest stringRequest = new StringRequest(
                 Request.Method.POST, Constants.URL_CHANGE_DEF_LOC,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        Toast.makeText(mapFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(mapFragmentContext, "No connection to server.", Toast.LENGTH_SHORT).show()
+                response -> onSuccessRequest(mapFragmentContext, response, Constants.KEY_CHANGE_DEFAULT_LOCATION),
+                error -> Toast.makeText(mapFragmentContext, "Default location not changed.", Toast.LENGTH_SHORT).show()
         ) {
             @NonNull
             @Override
@@ -1233,6 +1252,76 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         };
 
         RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+    }
+
+    @Override
+    public void onSuccessRequest(Context context, String response, int request) {
+        try {
+            JSONObject obj = new JSONObject(response);
+            if (obj.getBoolean("error")) {
+                Toast.makeText(context, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            switch (request) {
+                // Set up the images to be displayed on the map by layer
+                case Constants.KEY_REQUEST_PATH_TO_ROOM:
+                    Log.d(TAG, "onSuccessRequest: Path to room");
+                    JSONArray array = obj.getJSONArray("building_boundary");
+                    List<LatLng> building_boundary = new ArrayList<>();
+                    List<String> imageURLs = new ArrayList<>();
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONArray currentJSONArray = array.getJSONArray(i);
+                        building_boundary.add(new LatLng((double) currentJSONArray.get(0), (double) currentJSONArray.get(1)));
+                    }
+                    LatLngQuad quad = new LatLngQuad(
+                            building_boundary.get(0), building_boundary.get(1),
+                            building_boundary.get(2), building_boundary.get(3)
+                    );
+                    for (int n = 0; n < obj.getInt("floors"); n++) {
+                        String img_url = Constants.ROOT_API_URL +
+                                obj.getString("image_url" + (n + 1)).replace(" ", "%20");
+                        imageURLs.add(img_url);
+                        String id_source = Constants.ID_IMAGE_SOURCE + (n + 1);
+                        String id_layer = Constants.ID_IMAGE_LAYER + (n + 1);
+                        getMapboxMap().getStyle(style -> {
+                            try {
+                                style.addSource(new ImageSource(id_source, quad, new URI(img_url)));
+                            } catch (URISyntaxException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                    // a float from 0 to 360 where the screen will face
+                    // 0 or 360 North, 90 East, 180 South and 270 West
+                    mapRotation = (float) obj.getDouble("building_rotation");
+                    // URLs of images (floor plan) to be displayed in the map
+                    imageURLList = imageURLs;
+                    if (rasterLayerList == null) {
+                        rasterLayerList = new ArrayList<>();
+                    } else {
+                        rasterLayerList.clear();
+                    }
+                    for (int x = 0; x < imageURLList.size(); x++) {
+                        String id_source = Constants.ID_IMAGE_SOURCE + (x + 1);
+                        String id_layer = Constants.ID_IMAGE_LAYER + (x + 1);
+                        rasterLayerList.add(new RasterLayer(id_layer, id_source));
+                    }
+                    initPathToRoomDialog();
+                    break;
+                case Constants.KEY_SEARCH_LOG:
+                case Constants.KEY_VISIT_LOG:
+                    Log.d(TAG, "onSuccessRequest: " + obj.getString("message"));
+                    break;
+                case Constants.KEY_SUGGEST_LOCATION:
+                case Constants.KEY_CHANGE_DEFAULT_LOCATION:
+                    Log.d(TAG, "onSuccessRequest: " + obj.getString("message"));
+                    Toast.makeText(mapFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -1276,6 +1365,34 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         SharedPrefManager.getInstance(mapFragmentContext).setFetchedData(false);
         super.onDestroy();
         mapView.onDestroy();
+    }
+
+    /**
+     * Create a square around the location
+     *
+     * @param loc A LocationModel object containing the name
+     *            and coordinates of a clicked location
+     * @return Polygon from a set of points
+     */
+    private Polygon getArrivalArea(LocationModel loc) {
+        float areaConstant = 0.00015F;
+        float destLng = loc.getLocationLng();
+        float lngIncrease = destLng + areaConstant;
+        float lngDecrease = destLng - areaConstant;
+        float destLat = loc.getLocationLat();
+        float latIncrease = destLat + areaConstant;
+        float latDecrease = destLat - areaConstant;
+
+        List<List<Point>> area = new ArrayList<>();
+        List<Point> points = new ArrayList<>();
+
+        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left
+        points.add(Point.fromLngLat(lngDecrease,latDecrease)); //top-right
+        points.add(Point.fromLngLat(lngIncrease,latDecrease)); //bottom-right
+        points.add(Point.fromLngLat(lngIncrease,latIncrease)); //bottom-left
+        points.add(Point.fromLngLat(lngDecrease,latIncrease)); //top-left & closing pt
+        area.add(points);
+        return Polygon.fromLngLats(area);
     }
 
     @Override

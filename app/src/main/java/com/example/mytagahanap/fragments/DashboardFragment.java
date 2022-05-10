@@ -26,8 +26,7 @@ import com.example.mytagahanap.adapters.SliderAdapter;
 import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.globals.SharedPrefManager;
 import com.example.mytagahanap.globals.Utils;
-import com.example.mytagahanap.interfaces.VolleyCallbackInterface2;
-import com.example.mytagahanap.models.LocationModel;
+import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
 import com.example.mytagahanap.models.SliderModel;
 import com.example.mytagahanap.network.RequestHandler;
 import com.github.mikephil.charting.data.BarEntry;
@@ -38,13 +37,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DashboardFragment extends Fragment implements VolleyCallbackInterface2 {
+public class DashboardFragment extends Fragment implements VolleyCallbackInterface {
     private static final String TAG = "DashboardFragment";
     public final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -52,8 +49,6 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
 
     private SliderAdapter sliderAdapter;
     private List<SliderModel> sliderModelList;
-    private ArrayList<BarEntry> mostSearched, mostVisited;
-    private ArrayList<PieEntry> userReviews;
 
     private int idnumber;
 
@@ -64,124 +59,45 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         idnumber = SharedPrefManager.getInstance(dashboardFragmentContext).getIdnumber();
 
-        fetchSearchedLocations();
-        fetchVisitedLocations();
-        fetchUserReviews();
+        // Fetch the searched locations for analytics
+        Log.d(TAG, "Fetching searched locations");
+        fetchAnalytics(Constants.URL_SEARCHED_LOCS + idnumber, Constants.KEY_FETCH_SEARCHED);
+
+        // Fetch the visited locations for analytics
+        handler.postDelayed(() -> {
+            Log.d(TAG, "Fetching visited locations");
+            fetchAnalytics(Constants.URL_VISITED_LOCS + idnumber, Constants.KEY_FETCH_VISITED);
+        }, 1000);
+
+        // Fetch user reviews for analytics
+        handler.postDelayed(() -> {
+            Log.d(TAG, "Fetching user reviews");
+            fetchAnalytics(Constants.URL_USER_REVIEWS + idnumber, Constants.KEY_FETCH_REVIEWS);
+        }, 1500);
 
         ViewPager2 viewPager2 = view.findViewById(R.id.viewPagerAnalyticSlider);
         sliderModelList = new ArrayList<>();
-        mostSearched = new ArrayList<>();
-        mostVisited = new ArrayList<>();
-        userReviews = new ArrayList<>();
 
         sliderAdapter = new SliderAdapter(sliderModelList, viewPager2);
         viewPager2.setAdapter(sliderAdapter);
 
         LinearLayout dashboardLayoutMap = view.findViewById(R.id.dashboardLayoutMap);
-        dashboardLayoutMap.setOnClickListener(view1 -> {
-            initFragment("Map", new MapFragment());
-            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_map);
-        });
         LinearLayout dashboardLayoutSched = view.findViewById(R.id.dashboardLayoutSched);
-        dashboardLayoutSched.setOnClickListener(view1 -> {
-            initFragment("Class Schedule", new ScheduleFragment());
-            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_subjects);
-        });
         LinearLayout dashboardLayoutInfo = view.findViewById(R.id.dashboardLayoutInfo);
-        dashboardLayoutInfo.setOnClickListener(view1 -> {
-            initFragment("School Information", new SchoolInfoFragment());
-            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_schoolinfo);
-        });
         LinearLayout dashboardLayoutAbtApp = view.findViewById(R.id.dashboardLayoutAbtApp);
-        dashboardLayoutAbtApp.setOnClickListener(view1 -> {
-            initFragment("About App", new AboutAppFragment());
-            ((MainActivity) getActivity()).getNavigationView().setCheckedItem(R.id.nav_aboutapp);
-        });
+
+        setDashboardFragments(dashboardLayoutMap, "Map", new MapFragment());
+        setDashboardFragments(dashboardLayoutSched, "Class Schedule", new ScheduleFragment());
+        setDashboardFragments(dashboardLayoutInfo, "School Information", new SchoolInfoFragment());
+        setDashboardFragments(dashboardLayoutAbtApp, "About App", new AboutAppFragment());
         return view;
     }
 
-    // Fetch the searched locations for analytics
-    public void fetchSearchedLocations() {
-        Log.d(TAG, "fetchSearchedLocations: Fetching data");
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,
-                Constants.URL_SEARCHED_LOCS + idnumber,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        if (!obj.getBoolean("error")) {
-                            JSONArray allSearchedLocs = obj.getJSONArray("searched_locations");
-                            handler.post(() -> onSuccessRequest(allSearchedLocs, "mostSearched"));
-                        } else {
-                            Toast.makeText(dashboardFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(dashboardFragmentContext, "Server is down.", Toast.LENGTH_SHORT).show()) {
-            @NonNull
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("idnumber", String.valueOf(SharedPrefManager.getInstance(dashboardFragmentContext).getIdnumber()));
-                return params;
-            }
-        };
-
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestHandler.getInstance(dashboardFragmentContext).addToRequestQueue(stringRequest);
-    }
-
-    // Fetch the visited locations for analytics
-    public void fetchVisitedLocations() {
-        Log.d(TAG, "fetchVisitedLocations: Fetching data");
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,
-                Constants.URL_VISITED_LOCS + idnumber,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        if (!obj.getBoolean("error")) {
-                            JSONArray allVisitedLocs = obj.getJSONArray("visited_locations");
-                            handler.postDelayed(() -> onSuccessRequest(allVisitedLocs, "mostVisited"), 1000);
-                        } else {
-                            Toast.makeText(dashboardFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(dashboardFragmentContext, "Server is down.", Toast.LENGTH_SHORT).show()) {
-            @NonNull
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<>();
-                params.put("idnumber", String.valueOf(SharedPrefManager.getInstance(dashboardFragmentContext).getIdnumber()));
-                return params;
-            }
-        };
-
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000, 5,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestHandler.getInstance(dashboardFragmentContext).addToRequestQueue(stringRequest);
-    }
-
-    // Fetch user reviews for analytics
-    public void fetchUserReviews() {
-        Log.d(TAG, "fetchVisitedLocations: Fetching data");
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,
-                Constants.URL_USER_REVIEWS + idnumber,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        if (!obj.getBoolean("error")) {
-                            JSONArray allUserReviews = obj.getJSONArray("user_reviews");
-                            handler.postDelayed(() -> onSuccessRequest(allUserReviews, "userReviews"), 2000);
-                        } else {
-                            Toast.makeText(dashboardFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(dashboardFragmentContext, "Server is down.", Toast.LENGTH_SHORT).show()) {
+    public void fetchAnalytics(String url, int request) {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                response -> onSuccessRequest(dashboardFragmentContext, response, request),
+                error -> Toast.makeText(dashboardFragmentContext, "Server is down.", Toast.LENGTH_SHORT).show()
+        ) {
             @NonNull
             @Override
             protected Map<String, String> getParams() {
@@ -197,67 +113,69 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
     }
 
     @Override
-    public void onSuccessRequest(JSONArray jsonArray, String type) {
-        Log.d(TAG, "onSuccessRequest: " + type);
-        ArrayList<String> locations = new ArrayList<>();
-        if (type.equals("mostSearched")) {
-            Map<String, Integer> map = Utils.countFreq(jsonArray, jsonArray.length());
-            map.values().removeAll(Collections.singleton(1));
-            ArrayList<String> keys = new ArrayList<>(map.keySet());
-
-            for (int i = 0; i < map.size(); i++) {
-                String currentLoc = keys.get(i);
-                mostSearched.add(new BarEntry(i, map.get(currentLoc)));
-                locations.add(currentLoc);
-            }
-            if (sliderModelList.isEmpty()) {
-                sliderModelList.add(0, new SliderModel(mostSearched, locations, "Most searched locations"));
-                sliderAdapter.notifyItemInserted(0);
-            } else {
-                int size = sliderModelList.size();
-                sliderModelList.add(size, new SliderModel(mostSearched, locations, "Most searched locations"));
-                sliderAdapter.notifyItemInserted(size);
-            }
-        } else if (type.equals("mostVisited")) {
-            Map<String, Integer> map = Utils.countFreq(jsonArray, jsonArray.length());
-            ArrayList<String> keys = new ArrayList<>(map.keySet());
-
-            for (int i = 0; i < map.size(); i++) {
-                String currentLoc = keys.get(i);
-                mostVisited.add(new BarEntry(i, map.get(currentLoc)));
-                locations.add(currentLoc);
-            }
-            if (sliderModelList.isEmpty()) {
-                sliderModelList.add(0, new SliderModel(mostVisited, locations, "Most visited locations"));
-                sliderAdapter.notifyItemInserted(0);
-            } else {
-                int size = sliderModelList.size();
-                sliderModelList.add(size, new SliderModel(mostVisited, locations, "Most visited locations"));
-                sliderAdapter.notifyItemInserted(size);
-            }
-        } else if (type.equals("userReviews")) {
-            Map<String, Integer> map = Utils.countFreq(jsonArray, jsonArray.length());
-            ArrayList<String> keys = new ArrayList<>(map.keySet());
-
-            for (int i = map.size() - 1; i >= 0; i--) {
-                String currentReact = keys.get(i);
-                userReviews.add(new PieEntry(map.get(currentReact), currentReact));
+    public void onSuccessRequest(Context context, String response, int request) {
+        try {
+            JSONObject obj = new JSONObject(response);
+            if (obj.getBoolean("error")) {
+                Toast.makeText(context, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            if (sliderModelList.isEmpty()) {
-                sliderModelList.add(0, new SliderModel(userReviews));
-                sliderAdapter.notifyItemInserted(0);
-            } else {
-                int size = sliderModelList.size();
-                sliderModelList.add(size, new SliderModel(userReviews));
-                sliderAdapter.notifyItemInserted(size);
+            switch (request) {
+                case Constants.KEY_FETCH_SEARCHED:
+                    Log.d(TAG, "onSuccessRequest: Fetched searched locations");
+                    initRetrievedAnalytics(obj.getJSONArray("searched_locations"),
+                            "Most searched locations", "bar");
+                    break;
+                case Constants.KEY_FETCH_VISITED:
+                    Log.d(TAG, "onSuccessRequest: Fetched visited locations");
+                    initRetrievedAnalytics(obj.getJSONArray("visited_locations"),
+                            "Most visited locations", "bar");
+                    break;
+                case Constants.KEY_FETCH_REVIEWS:
+                    Log.d(TAG, "onSuccessRequest: Fetched user reviews");
+                    initRetrievedAnalytics(obj.getJSONArray("user_reviews"),
+                            "User reviews", "pie");
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
-    private void initFragment(String actionBarTitle, Fragment fragment) {
-        requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                fragment).commit();
-        ((AppCompatActivity)requireActivity()).getSupportActionBar().setTitle(actionBarTitle);
+    private void initRetrievedAnalytics(JSONArray jsonArray, String title, String type) {
+        SliderModel sliderModel = null;
+        Map<String, Integer> map = Utils.countFreq(jsonArray, jsonArray.length());
+        ArrayList<String> keys = new ArrayList<>(map.keySet());
+        ArrayList<String> locations = new ArrayList<>();
+        ArrayList<PieEntry> pieEntryArrayList = new ArrayList<>();
+        ArrayList<BarEntry> barEntryArrayList = new ArrayList<>();
+
+        if (type.equals("bar")) {
+            for (int i = 0; i < map.size(); i++) {
+                String currentLoc = keys.get(i);
+                barEntryArrayList.add(new BarEntry(i, map.get(currentLoc)));
+                locations.add(currentLoc);
+            }
+            sliderModel = new SliderModel(barEntryArrayList, locations, title);
+        } else if (type.equals("pie")) {
+            for (int i = map.size() - 1; i >= 0; i--) {
+                String currentReact = keys.get(i);
+                pieEntryArrayList.add(new PieEntry(map.get(currentReact), currentReact));
+            }
+            sliderModel = new SliderModel(pieEntryArrayList);
+        }
+
+        int position = sliderModelList.isEmpty() ? 0 : sliderModelList.size();
+        sliderModelList.add(position, sliderModel);
+        sliderAdapter.notifyItemInserted(position);
+    }
+
+    private void setDashboardFragments(LinearLayout linearLayout, String actionBarTitle, Fragment fragment) {
+        linearLayout.setOnClickListener(view -> {
+            requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    fragment).commit();
+            ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(actionBarTitle);
+            ((MainActivity) requireActivity()).getNavigationView().setCheckedItem(R.id.nav_map);
+        });
     }
 }

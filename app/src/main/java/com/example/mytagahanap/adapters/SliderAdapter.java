@@ -178,11 +178,11 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
             if (sliderModel.getReviews() != null) {
                 PieDataSet pieDataSet = new PieDataSet(sliderModel.getReviews(), "");
                 ArrayList<Integer> colors = new ArrayList<>();
-                colors.add(Color.parseColor("#0094ca"));
-                colors.add(Color.parseColor("#e0000f"));
-                colors.add(Color.parseColor("#0067a7"));
-                colors.add(Color.parseColor("#4f5153"));
-                colors.add(Color.parseColor("#e52a8c"));
+                colors.add(Color.parseColor("#4f5153")); // gray
+                colors.add(Color.parseColor("#0067a7")); // blue
+                colors.add(Color.parseColor("#e0000f")); // red
+                colors.add(Color.parseColor("#e52a8c")); // pink
+                colors.add(Color.parseColor("#0094ca")); // light-blue
                 pieDataSet.setColors(colors);
                 pieDataSet.setValueTextColor(Color.WHITE);
                 pieDataSet.setValueTextSize(16f);

@@ -80,7 +80,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         initViews();
-
     }
 
     private void initViews() {
@@ -142,7 +141,14 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void logIn(String idnumber, String password) {
+    /**
+     * Sends request to the server in order to verify if credentials are valid
+     * and if any account match with user's ID number and password
+     *
+     * @param idNumber user's ID number
+     * @param password user's password
+     */
+    private void logIn(String idNumber, String password) {
         progressBar.setVisibility(View.VISIBLE);
         tvMessage.setVisibility(View.GONE);
         StringRequest stringRequest = new StringRequest(
@@ -189,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("idnumber", idnumber);
+                params.put("idnumber", idNumber);
                 params.put("password", password);
                 params.put("appver", curVersion);
                 return params;
@@ -199,8 +205,14 @@ public class LoginActivity extends AppCompatActivity {
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    private void resetPassword(String userIdNumber, String token) {
-        Log.d(TAG, "resetPassword: " + userIdNumber + ", " + token);
+    /**
+     * Sends request to server to reset the current user's password
+     *
+     * @param idNumber user's ID number
+     * @param token    a random string of characters generated during logging in
+     */
+    private void resetPassword(String idNumber, String token) {
+        Log.d(TAG, "resetPassword: " + idNumber + ", " + token);
         StringRequest stringRequest = new StringRequest(
                 Request.Method.POST, Constants.URL_RESET_PASSWORD,
                 response -> {
@@ -216,7 +228,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("user_idnumber", userIdNumber);
+                params.put("user_idnumber", idNumber);
                 params.put("user_token", token);
                 return params;
             }
@@ -225,10 +237,13 @@ public class LoginActivity extends AppCompatActivity {
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
     }
 
+    /**
+     * @return time 2 hours after logging in
+     */
     private long initTimeSession() {
         Calendar cal = Calendar.getInstance();              // creates calendar
         cal.setTime(new Date(System.currentTimeMillis()));  // sets calendar time/date
-        cal.add(Calendar.HOUR_OF_DAY, 2);                // adds 2 hrs .HOUR_OF_DAY for hours
+        cal.add(Calendar.HOUR_OF_DAY, 4);                // adds 4 hrs - .HOUR_OF_DAY for hours
         return cal.getTime().getTime();
     }
 }
