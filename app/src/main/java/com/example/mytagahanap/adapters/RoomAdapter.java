@@ -1,7 +1,6 @@
 package com.example.mytagahanap.adapters;
 
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,40 +14,39 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mytagahanap.R;
 import com.example.mytagahanap.models.LocationModel;
+import com.example.mytagahanap.models.RoomModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationViewHolder> implements Filterable {
-    private final ArrayList<LocationModel> mLocations;
-    private final ArrayList<LocationModel> mLocationsAll;
-    private OnItemClickListener mListener;
+public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomViewHolder> implements Filterable {
+    private ArrayList<RoomModel> itemList;
+    private ArrayList<RoomModel> origList;
+    private OnItemClickListener listener;
 
-    public LocationAdapter(ArrayList<LocationModel> locations) {
-        mLocationsAll = new ArrayList<>(locations);
-        mLocations = locations;
-    }
-
-    @Override
-    public Filter getFilter() {
-        return filter;
+    public RoomAdapter(ArrayList<RoomModel> itemList) {
+        this.itemList = itemList;
+        this.origList = new ArrayList<>(itemList);
     }
 
     Filter filter = new Filter() {
-        // run on background thread
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
-            List<LocationModel> filteredList = new ArrayList<>();
+            List<RoomModel> filteredList = new ArrayList<>();
 
             if (charSequence.toString().isEmpty()) {
-                filteredList.addAll(mLocationsAll);
+                filteredList.addAll(origList);
             } else {
-                filteredList.addAll(mLocations.stream()
+                filteredList.addAll(itemList.stream()
                         .filter(obj -> obj.getLocationName().toLowerCase()
-                                .contains(charSequence.toString().toLowerCase()))
+                                .contains(charSequence.toString().toLowerCase()) ||
+                                obj.getRoomName().toLowerCase().contains(
+                                        charSequence.toString().toLowerCase()))
                         .collect(Collectors.toList()));
+                filteredList.sort(Comparator.comparing(RoomModel::getRoomName));
             }
 
             FilterResults filteredResults = new FilterResults();
@@ -56,32 +54,31 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
             return filteredResults;
         }
 
-        // run on a ui thread
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            mLocations.clear();
-            Log.d("LocationAdapter", "publishResults: " + mLocations.toString());
-            mLocations.addAll((Collection<? extends LocationModel>) filterResults.values);
+            itemList.clear();
+            itemList.addAll((Collection<? extends RoomModel>) filterResults.values);
             notifyDataSetChanged();
         }
     };
 
-    public interface OnItemClickListener { void onItemClick(int position); }
-
-    public void setOnItemClickListener(OnItemClickListener listener) { mListener = listener; }
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
 
     public void resetList() {
-        mLocations.clear();
-        mLocations.addAll(mLocationsAll);
+        itemList.clear();
+        itemList.addAll(origList);
         notifyDataSetChanged();
     }
 
-    public static class LocationViewHolder extends RecyclerView.ViewHolder {
+    public static class RoomViewHolder extends RecyclerView.ViewHolder {
         public TextView cvtxtLocationName;
         public TextView cvtxtBldgName;
         public RelativeLayout cvrlLocations;
 
-        public LocationViewHolder(@NonNull View itemView, OnItemClickListener listener) {
+        public RoomViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             cvtxtLocationName = itemView.findViewById(R.id.cvtxtLocationName);
             cvtxtBldgName = itemView.findViewById(R.id.cvtxtBldgName);
@@ -98,18 +95,24 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         }
     }
 
+    public interface OnItemClickListener { void onItemClick(int position); }
+
+    public void setOnItemClickListener(OnItemClickListener listener) { this.listener = listener; }
+
     @NonNull
     @Override
-    public LocationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RoomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_location, parent, false);
-        return new LocationViewHolder(v, mListener);
+        return new RoomViewHolder(v, listener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull LocationViewHolder holder, int position) {
-        LocationModel currentLocation = mLocations.get(position);
+    public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
+        RoomModel currentLocation = itemList.get(position);
 
-        holder.cvtxtLocationName.setText(currentLocation.getLocationName());
+        holder.cvtxtLocationName.setText(currentLocation.getRoomName());
+        holder.cvtxtBldgName.setVisibility(View.VISIBLE);
+        holder.cvtxtBldgName.setText(currentLocation.getLocationName());
         if(position % 2 == 1) {
             holder.cvrlLocations.setBackgroundColor(Color.parseColor("#aeaaaa"));
         } else {
@@ -118,5 +121,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     }
 
     @Override
-    public int getItemCount() { return mLocations.size(); }
+    public int getItemCount() {
+        return itemList.size();
+    }
 }

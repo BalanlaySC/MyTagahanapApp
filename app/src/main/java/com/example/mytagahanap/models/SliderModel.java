@@ -8,20 +8,28 @@ import java.util.ArrayList;
 public class SliderModel {
     private int numActiveUsers;
     private String analyticType;
-    private ArrayList<BarEntry> mostVisit;
-    private ArrayList<String> locations;
-    private ArrayList<PieEntry> reviews;
+    private ArrayList<BarEntry> barEntries;
+    private ArrayList<LocationModel> locations;
+    private ArrayList<Integer> colors;
+    private ArrayList<PieEntry> pieEntries;
 
     public SliderModel(int numActiveUsers) {
         this.numActiveUsers = numActiveUsers;
     }
 
-    public SliderModel(ArrayList<PieEntry> pieData) {
-        this.reviews = pieData;
+    public SliderModel(ArrayList<PieEntry> pieData, ArrayList<Integer> colors, String type) {
+        this.pieEntries = pieData;
+        this.colors = colors;
+        this.analyticType = type;
     }
 
-    public SliderModel(ArrayList<BarEntry> barData, ArrayList<String> locations, String type) {
-        this.mostVisit = barData;
+    public SliderModel(ArrayList<LocationModel> locations, String type) {
+        this.locations = locations;
+        this.analyticType = type;
+    }
+
+    public SliderModel(ArrayList<BarEntry> barData, ArrayList<LocationModel> locations, String type, String period) {
+        this.barEntries = barData;
         this.locations = locations;
         this.analyticType = type;
     }
@@ -33,15 +41,19 @@ public class SliderModel {
             return String.format("CURRENT ACTIVE USERS: <b>%s</b>", numActiveUsers);
     }
 
-    public ArrayList<BarEntry> getMostVisit() {
-        return mostVisit;
+    public ArrayList<BarEntry> getBarEntries() {
+        return barEntries;
     }
 
-    public ArrayList<PieEntry> getReviews() {
-        return reviews;
+    public ArrayList<PieEntry> getPieEntries() {
+        return pieEntries;
     }
 
-    public ArrayList<String> getLocations() {
+    public ArrayList<Integer> getColors() {
+        return colors;
+    }
+
+    public ArrayList<LocationModel> getLocations() {
         return locations;
     }
 
@@ -53,8 +65,8 @@ public class SliderModel {
     public String toString() {
         return "SliderModel{" +
                 "numActiveUsers=" + numActiveUsers +
-                ", mostVisit=" + mostVisit +
-                ", reviews=" + reviews +
+                ", mostVisit=" + barEntries +
+                ", reviews=" + pieEntries +
                 '}';
     }
 }

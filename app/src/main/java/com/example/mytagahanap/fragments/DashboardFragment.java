@@ -1,6 +1,7 @@
 package com.example.mytagahanap.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,9 +25,10 @@ import com.example.mytagahanap.R;
 import com.example.mytagahanap.activities.MainActivity;
 import com.example.mytagahanap.adapters.SliderAdapter;
 import com.example.mytagahanap.globals.Constants;
+import com.example.mytagahanap.globals.DatabaseAccess;
 import com.example.mytagahanap.globals.SharedPrefManager;
-import com.example.mytagahanap.globals.Utils;
 import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
+import com.example.mytagahanap.models.LocationModel;
 import com.example.mytagahanap.models.SliderModel;
 import com.example.mytagahanap.network.RequestHandler;
 import com.github.mikephil.charting.data.BarEntry;
@@ -49,6 +51,7 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
 
     private SliderAdapter sliderAdapter;
     private List<SliderModel> sliderModelList;
+    private ArrayList<LocationModel> locations;
 
     private int idnumber;
 
@@ -59,27 +62,18 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         idnumber = SharedPrefManager.getInstance(dashboardFragmentContext).getIdnumber();
 
-        // Fetch the searched locations for analytics
-        Log.d(TAG, "Fetching searched locations");
-        fetchAnalytics(Constants.URL_SEARCHED_LOCS + idnumber, Constants.KEY_FETCH_SEARCHED);
-
-        // Fetch the visited locations for analytics
-        handler.postDelayed(() -> {
-            Log.d(TAG, "Fetching visited locations");
-            fetchAnalytics(Constants.URL_VISITED_LOCS + idnumber, Constants.KEY_FETCH_VISITED);
-        }, 1000);
-
-        // Fetch user reviews for analytics
-        handler.postDelayed(() -> {
-            Log.d(TAG, "Fetching user reviews");
-            fetchAnalytics(Constants.URL_USER_REVIEWS + idnumber, Constants.KEY_FETCH_REVIEWS);
-        }, 1500);
+        // Fetch the for analytics
+        Log.d(TAG, "Fetching analytics");
+        fetchAnalytics(Constants.URL_ANALYTICS + idnumber, idnumber);
 
         ViewPager2 viewPager2 = view.findViewById(R.id.viewPagerAnalyticSlider);
         sliderModelList = new ArrayList<>();
 
         sliderAdapter = new SliderAdapter(sliderModelList, viewPager2);
         viewPager2.setAdapter(sliderAdapter);
+
+        DatabaseAccess databaseAccess = DatabaseAccess.getInstance(dashboardFragmentContext);
+        locations = databaseAccess.getAllLocations();
 
         LinearLayout dashboardLayoutMap = view.findViewById(R.id.dashboardLayoutMap);
         LinearLayout dashboardLayoutSched = view.findViewById(R.id.dashboardLayoutSched);
@@ -93,9 +87,9 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
         return view;
     }
 
-    public void fetchAnalytics(String url, int request) {
+    public void fetchAnalytics(String url, int idnumber) {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                response -> onSuccessRequest(dashboardFragmentContext, response, request),
+                response -> onSuccessRequest(dashboardFragmentContext, response, idnumber),
                 error -> Toast.makeText(dashboardFragmentContext, "Server is down.", Toast.LENGTH_SHORT).show()
         ) {
             @NonNull
@@ -113,7 +107,7 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
     }
 
     @Override
-    public void onSuccessRequest(Context context, String response, int request) {
+    public void onSuccessRequest(Context context, String response, int idnumber) {
         try {
             JSONObject obj = new JSONObject(response);
             if (obj.getBoolean("error")) {
@@ -121,48 +115,92 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
                 return;
             }
 
-            switch (request) {
-                case Constants.KEY_FETCH_SEARCHED:
-                    Log.d(TAG, "onSuccessRequest: Fetched searched locations");
-                    initRetrievedAnalytics(obj.getJSONArray("searched_locations"),
-                            "Most searched locations", "bar");
-                    break;
-                case Constants.KEY_FETCH_VISITED:
-                    Log.d(TAG, "onSuccessRequest: Fetched visited locations");
-                    initRetrievedAnalytics(obj.getJSONArray("visited_locations"),
-                            "Most visited locations", "bar");
-                    break;
-                case Constants.KEY_FETCH_REVIEWS:
-                    Log.d(TAG, "onSuccessRequest: Fetched user reviews");
-                    initRetrievedAnalytics(obj.getJSONArray("user_reviews"),
-                            "User reviews", "pie");
+            if(idnumber > 5) {
+                initRetrievedAnalytics(obj.getJSONArray("recently_searched_locs"),
+                        "Recently searched locations", 1);
+                initRetrievedAnalytics(obj.getJSONArray("recently_visited_locs"),
+                        "Recently visited locations", 2);
+            } else {
+                initRetrievedAnalytics(obj.getJSONArray("most_searched_today"),
+                        "Most searched locations today", 3);
+                initRetrievedAnalytics(obj.getJSONArray("most_visited_today"),
+                        "Most visited locations today", 4);
+                initRetrievedAnalytics(obj.getJSONArray("most_searched_week"),
+                        "Most searched locations this week", 5);
+                initRetrievedAnalytics(obj.getJSONArray("most_visited_week"),
+                        "Most visited locations this week", 6);
+//                initRetrievedAnalytics(obj.getJSONArray("most_searched_month"),
+//                        "Most searched locations this month", 7);
+//                initRetrievedAnalytics(obj.getJSONArray("most_visited_month"),
+//                        "Most visited locations this month", 8);
             }
+            initRetrievedAnalytics(obj.getJSONArray("user_reviews"),
+                    "User feedback", 9);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void initRetrievedAnalytics(JSONArray jsonArray, String title, String type) {
+    /**
+     * Formatting received response of
+     * @param jsonArray
+     * @param title
+     * @param type
+     */
+    private void initRetrievedAnalytics(JSONArray jsonArray, String title, int type) {
         SliderModel sliderModel = null;
-        Map<String, Integer> map = Utils.countFreq(jsonArray, jsonArray.length());
-        ArrayList<String> keys = new ArrayList<>(map.keySet());
-        ArrayList<String> locations = new ArrayList<>();
-        ArrayList<PieEntry> pieEntryArrayList = new ArrayList<>();
-        ArrayList<BarEntry> barEntryArrayList = new ArrayList<>();
+        ArrayList<LocationModel> recentLocs = new ArrayList<>();
+        ArrayList<PieEntry> reviews = new ArrayList<>();
+        ArrayList<Integer> colors = new ArrayList<>();
+        ArrayList<BarEntry> timelyLocs = new ArrayList<>();
+        ArrayList<LocationModel> tempLocs = new ArrayList<>();
 
-        if (type.equals("bar")) {
-            for (int i = 0; i < map.size(); i++) {
-                String currentLoc = keys.get(i);
-                barEntryArrayList.add(new BarEntry(i, map.get(currentLoc)));
-                locations.add(currentLoc);
+        try {
+            switch (type){
+                case 1:
+                case 2:
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        recentLocs.add(new LocationModel(jsonArray.getString(i),
+                                0f, 0f));
+                    }
+                    sliderModel = new SliderModel(recentLocs, title);
+                    break;
+                case 9:
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String review = jsonArray.getJSONArray(i).getString(0);
+                        int review_count = jsonArray.getJSONArray(i).getInt(1);
+                        if(review.equals("Great!"))
+                            colors.add(Color.parseColor("#e52a8c")); // pink
+                        if(review.equals("Happy"))
+                            colors.add(Color.parseColor("#0094ca")); // light-blue
+                        if(review.equals("Wow!"))
+                            colors.add(Color.parseColor("#0067a7")); // blue
+                        if(review.equals("Angry!"))
+                            colors.add(Color.parseColor("#e0000f")); // red
+                        if(review.equals("Sad."))
+                            colors.add(Color.parseColor("#4f5153")); // gray
+
+                        reviews.add(new PieEntry((float) review_count , review));
+                    }
+                    sliderModel = new SliderModel(reviews, colors, title);
+                    break;
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String currentLoc = jsonArray.getJSONArray(i).getString(0);
+                        int locCount = jsonArray.getJSONArray(i).getInt(1);
+                        timelyLocs.add(new BarEntry(i, locCount));
+                        tempLocs.add(new LocationModel(currentLoc,0f, 0f));
+                    }
+                    sliderModel = new SliderModel(timelyLocs, tempLocs, title, "Updated");
+                    break;
             }
-            sliderModel = new SliderModel(barEntryArrayList, locations, title);
-        } else if (type.equals("pie")) {
-            for (int i = map.size() - 1; i >= 0; i--) {
-                String currentReact = keys.get(i);
-                pieEntryArrayList.add(new PieEntry(map.get(currentReact), currentReact));
-            }
-            sliderModel = new SliderModel(pieEntryArrayList);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         int position = sliderModelList.isEmpty() ? 0 : sliderModelList.size();
@@ -172,6 +210,11 @@ public class DashboardFragment extends Fragment implements VolleyCallbackInterfa
 
     private void setDashboardFragments(LinearLayout linearLayout, String actionBarTitle, Fragment fragment) {
         linearLayout.setOnClickListener(view -> {
+            if (actionBarTitle.equals("Map")) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("Locations", locations);
+                fragment.setArguments(bundle);
+            }
             requireActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     fragment).commit();
             ((AppCompatActivity) requireActivity()).getSupportActionBar().setTitle(actionBarTitle);

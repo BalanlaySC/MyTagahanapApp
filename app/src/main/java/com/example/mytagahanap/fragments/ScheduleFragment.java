@@ -73,6 +73,7 @@ public class ScheduleFragment extends Fragment {
         setMapInterface(mapFragment);
 
         DatabaseAccess databaseAccess = DatabaseAccess.getInstance(scheduleFragmentContext);
+        rooms = null;
         rooms = databaseAccess.getAllRooms();
         locations = databaseAccess.getAllLocations();
 
@@ -144,7 +145,7 @@ public class ScheduleFragment extends Fragment {
             mapFragment.setArguments(bundle);
 
             handler.postDelayed(() -> mapInterface.openBottomSheetDialog(destinationLM, currentRoom,
-                    mapInterface.getMapFragView().getContext()), 1000);
+                    mapInterface.getMapFragView().getContext()), 2500);
         });
     }
 

@@ -1,5 +1,7 @@
 package com.example.mytagahanap.models;
 
+import android.os.Parcel;
+
 public class RoomModel {
     private final String roomName;
     private final String locationName;

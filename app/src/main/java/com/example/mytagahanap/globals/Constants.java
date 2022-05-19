@@ -21,9 +21,8 @@ public class Constants {
     public static final String URL_CHANGE_DEF_LOC = ROOT_URL + "changeDefLoc.php";
     public static final String URL_RESET_PASSWORD = ROOT_URL + "resetPassword.php";
     public static final String URL_SUBMITTED_LOC = ROOT_URL + "submittedLocations.php?idnumber=";
-    public static final String URL_SEARCHED_LOCS = ROOT_URL + "searchedLocations.php?idnumber=";
-    public static final String URL_VISITED_LOCS = ROOT_URL + "visitedLocations.php?idnumber=";
-    public static final String URL_USER_REVIEWS = ROOT_URL + "userReviews.php?idnumber=";
+    public static final String URL_ANALYTICS = ROOT_URL + "retrieveAnalytics.php?idnumber=";
+    public static final String URL_RETRIEVE_LOCATIONS = ROOT_URL + "retrieveAllLocations.php?idnumber=";
     public static final String ROOT_API_URL = "http://mytagahanap.pythonanywhere.com/";
 //    public static final String ROOT_API_URL = "http://192.168.1.195:5000/"; // local server
 
@@ -99,14 +98,17 @@ public class Constants {
             "Cawayan, Catarman N. Samar", "BSIT-4A", 22, R.drawable.image_prop2);
 
     // keys for requests
+    public static final int KEY_LOGIN = 10;
+    public static final int KEY_RESET_PASS = 20;
     public static final int KEY_CHANGE_PASS = 60;
     public static final int KEY_SEND_FEEDBACK = 70;
-    public static final int KEY_REQUEST_PATH_TO_ROOM = 100;
-    public static final int KEY_SEARCH_LOG = 110;
-    public static final int KEY_VISIT_LOG = 120;
-    public static final int KEY_SUGGEST_LOCATION = 130;
-    public static final int KEY_CHANGE_DEFAULT_LOCATION = 140;
-    public static final int KEY_FETCH_SEARCHED = 160;
-    public static final int KEY_FETCH_VISITED = 170;
-    public static final int KEY_FETCH_REVIEWS = 180;
+    public static final int KEY_FETCH_LOCATIONS = 100;
+    public static final int KEY_REQUEST_PATH_TO_ROOM = 110;
+    public static final int KEY_SEARCH_LOG = 120;
+    public static final int KEY_VISIT_LOG = 130;
+    public static final int KEY_SUGGEST_LOCATION = 140;
+    public static final int KEY_CHANGE_DEFAULT_LOCATION = 150;
+    public static final int KEY_FETCH_SEARCHED = 210;
+    public static final int KEY_FETCH_VISITED = 220;
+    public static final int KEY_FETCH_REVIEWS = 230;
 }

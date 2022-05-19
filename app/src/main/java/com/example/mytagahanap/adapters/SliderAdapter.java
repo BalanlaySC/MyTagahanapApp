@@ -1,10 +1,10 @@
 package com.example.mytagahanap.adapters;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -20,7 +21,6 @@ import com.example.mytagahanap.globals.Utils;
 import com.example.mytagahanap.models.SliderModel;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -30,8 +30,6 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.listener.ChartTouchListener;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import java.util.ArrayList;
@@ -62,15 +60,15 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
     @Override
     public void onBindViewHolder(@NonNull SliderViewHolder holder, int position) {
         SliderModel currentSliderModel = sliderModelList.get(position);
-        if (currentSliderModel.getMostVisit() == null &&
-                currentSliderModel.getReviews() == null) {
+        if (!currentSliderModel.getNumActiveUsers().equals("")) {
             holder.setActiveUsersText(currentSliderModel);
-        } else if (currentSliderModel.getNumActiveUsers().equals("") &&
-                currentSliderModel.getReviews() == null) {
+        } else if (currentSliderModel.getBarEntries() != null) {
             holder.setHorizontalBarChart(currentSliderModel);
-        } else if (currentSliderModel.getMostVisit() == null &&
-                currentSliderModel.getNumActiveUsers().equals("")) {
+        } else if (currentSliderModel.getPieEntries() != null) {
             holder.setPieChart(currentSliderModel);
+        } else if (currentSliderModel.getLocations() != null &&
+                !currentSliderModel.getAnalyticType().equals("")) {
+            holder.setListChart(currentSliderModel);
         }
     }
 
@@ -81,17 +79,21 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
 
     class SliderViewHolder extends RecyclerView.ViewHolder {
         final int WHITE = itemView.getContext().getColor(R.color.white);
-        private LinearLayout linearLayout;
-        private TextView textView;
+        private LinearLayout linearLayout, linearLayout2;
+        private TextView textView, textView2;
         private HorizontalBarChart horizontalBarChart;
         private PieChart pieChart;
+        private RecyclerView recyclerView;
 
         public SliderViewHolder(@NonNull View itemView) {
             super(itemView);
             linearLayout = itemView.findViewById(R.id.analyticLinLayout);
+            linearLayout2 = itemView.findViewById(R.id.analyticLinLayout2);
             textView = itemView.findViewById(R.id.analyticActiveUsersText);
+            textView2 = itemView.findViewById(R.id.analyticListTitle);
             horizontalBarChart = itemView.findViewById(R.id.analyticHorBarChart);
             pieChart = itemView.findViewById(R.id.analyticPieChart);
+            recyclerView = itemView.findViewById(R.id.analyticList);
         }
 
         void setActiveUsersText(SliderModel sliderModel) {
@@ -102,12 +104,13 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
         }
 
         void setHorizontalBarChart(SliderModel sliderModel) {
-            if (sliderModel.getMostVisit() != null) {
+            if (sliderModel.getBarEntries() != null) {
                 horizontalBarChart.setDrawBarShadow(false);
                 horizontalBarChart.getDescription().setText(sliderModel.getAnalyticType());
                 horizontalBarChart.getDescription().setTextColor(WHITE);
+                horizontalBarChart.getDescription().setTypeface(Typeface.DEFAULT_BOLD);
                 horizontalBarChart.getDescription().setTextSize(16f);
-                horizontalBarChart.getDescription().setYOffset(-10);
+                horizontalBarChart.getDescription().setYOffset(-15);
                 horizontalBarChart.getLegend().setEnabled(false);
                 horizontalBarChart.setPinchZoom(false);
                 horizontalBarChart.setDrawValueAboveBar(true);
@@ -128,7 +131,7 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
                 xAxis.setValueFormatter(new IndexAxisValueFormatter() {
                     @Override
                     public String getFormattedValue(float value) {
-                        return Utils.ellipsize(sliderModel.getLocations().get((int) value), 10);
+                        return Utils.ellipsize(sliderModel.getLocations().get((int) value).getLocationName(), 10);
                     }
                 });
 
@@ -141,7 +144,7 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
                 yAxisRight.setDrawGridLines(false);
                 yAxisRight.setEnabled(false);
 
-                BarDataSet barDataSet = new BarDataSet(sliderModel.getMostVisit(), "Locations");
+                BarDataSet barDataSet = new BarDataSet(sliderModel.getBarEntries(), "Locations");
                 barDataSet.setColor(WHITE);
                 barDataSet.setValueFormatter(new IndexAxisValueFormatter() {
                     @Override
@@ -168,22 +171,17 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
 
                     }
                 });
-                horizontalBarChart.setExtraOffsets(-10,-10,-10,-10);
+                horizontalBarChart.setExtraOffsets(-10,-20,-10,-5);
                 horizontalBarChart.invalidate();
                 horizontalBarChart.setVisibility(View.VISIBLE);
             }
         }
 
         void setPieChart(SliderModel sliderModel) {
-            if (sliderModel.getReviews() != null) {
-                PieDataSet pieDataSet = new PieDataSet(sliderModel.getReviews(), "");
-                ArrayList<Integer> colors = new ArrayList<>();
-                colors.add(Color.parseColor("#4f5153")); // gray
-                colors.add(Color.parseColor("#0067a7")); // blue
-                colors.add(Color.parseColor("#e0000f")); // red
-                colors.add(Color.parseColor("#e52a8c")); // pink
-                colors.add(Color.parseColor("#0094ca")); // light-blue
-                pieDataSet.setColors(colors);
+            Log.d(TAG, "setPieChart: started");
+            if (sliderModel.getPieEntries() != null) {
+                PieDataSet pieDataSet = new PieDataSet(sliderModel.getPieEntries(), "");
+                pieDataSet.setColors(sliderModel.getColors());
                 pieDataSet.setValueTextColor(Color.WHITE);
                 pieDataSet.setValueTextSize(16f);
 
@@ -194,10 +192,27 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
                 pieChart.getLegend().setTextColor(WHITE);
                 pieChart.getLegend().setTextSize(16f);
                 pieChart.getDescription().setText("");
-                pieChart.setCenterText("User reviews");
+                pieChart.setCenterText(sliderModel.getAnalyticType());
                 pieChart.animateY(2000);
                 pieChart.setVisibility(View.VISIBLE);
             }
+        }
+
+        void setListChart(SliderModel sliderModel) {
+            Log.d(TAG, "setListChart: started");
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(itemView.getContext());
+            LocationAdapter locationAdapter = new LocationAdapter(sliderModel.getLocations());
+            recyclerView.setLayoutManager(mLayoutManager);
+            recyclerView.setAdapter(locationAdapter);
+
+            locationAdapter.setOnItemClickListener(position -> Toast.makeText(itemView.getContext(),
+                    sliderModel.getLocations().get(position).getLocationName(), Toast.LENGTH_SHORT).show());
+
+            textView2.setText(sliderModel.getAnalyticType());
+            if (sliderModel.getLocations().isEmpty()) {
+                textView2.setText(sliderModel.getAnalyticType() + "\n\n" + "No visited locations yet.");
+            }
+            linearLayout2.setVisibility(View.VISIBLE);
         }
     }
 }

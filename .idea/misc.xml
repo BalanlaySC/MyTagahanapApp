@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/background_bottom_sheet.xml" value="0.22870370370370371" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/background_header_dashboard.xml" value="0.22870370370370371" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/background_image_with_alpha.xml" value="0.19907407407407407" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/bottom_sheet_background.xml" value="0.20277777777777778" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_added_location.xml" value="0.18981481481481483" />
@@ -10,6 +12,7 @@
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_close.xml" value="0.15572916666666667" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_launcher_background.xml" value="0.18518518518518517" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_list.xml" value="0.2074074074074074" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_map.xml" value="0.20277777777777778" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_mytagahanap_background.xml" value="0.18981481481481483" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_satellite.xml" value="0.2911458333333333" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/ic_search.xml" value="0.2074074074074074" />
@@ -20,33 +23,40 @@
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/roundcorner_lightblue.xml" value="0.2911458333333333" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/roundcorner_mapbox_theme.xml" value="0.21944444444444444" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/shape_circle_grayish.xml" value="0.2911458333333333" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/shape_roundcorner_grayish_outlined.xml" value="0.2212962962962963" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/shape_roundcorner_white.xml" value="0.2212962962962963" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/drawable/splashscreen_layout.xml" value="0.2911458333333333" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/activity_enlarge_image.xml" value="0.4125" />
-        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/activity_login.xml" value="0.4125" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/activity_login.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/activity_main.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/btmsheet_txtview.xml" value="0.4125" />
-        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/cardview_location.xml" value="0.6" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/cardview_location.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/cardview_proponents.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/cardview_school_info.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/cardview_subject.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_aboutapp.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_aboutdevs.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_college_info.xml" value="0.4125" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_dashboard.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_map.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_schedule.xml" value="0.13958333333333334" />
-        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_school_info.xml" value="0.4125" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_school_info.xml" value="0.25" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_spots.xml" value="0.12314814814814815" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/fragment_submissions.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_bottom_sheet.xml" value="0.4125" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_buildinglevel.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_directions.xml" value="0.15648148148148147" />
-        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_locations.xml" value="0.4" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_locations.xml" value="0.26033834586466165" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_longclick.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_longclick_.xml" value="0.275" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_pathtoroom.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_profile.xml" value="0.4125" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_react.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_dialog_suggestion.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_enlagredimage.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_enlarged_image.xml" value="0.4125" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_fragment_dashboard.xml" value="0.4125" />
+        <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/layout_slide_item_container.xml" value="0.175" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/location_cardview.xml" value="0.16296296296296298" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/nav_header.xml" value="0.275" />
         <entry key="..\:/Users/Marksman/AndroidStudioProjects/MyTagahanap/app/src/main/res/layout/slide_item_container.xml" value="0.12314814814814815" />

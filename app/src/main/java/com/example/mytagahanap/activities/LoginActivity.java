@@ -25,6 +25,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.mytagahanap.BuildConfig;
 import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.R;
+import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
 import com.example.mytagahanap.network.RequestHandler;
 import com.example.mytagahanap.globals.SharedPrefManager;
 import com.google.android.material.textfield.TextInputEditText;
@@ -37,7 +38,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements VolleyCallbackInterface {
     private static final String TAG = "Login";
 
     private String idnumber, password;
@@ -153,44 +154,12 @@ public class LoginActivity extends AppCompatActivity {
         tvMessage.setVisibility(View.GONE);
         StringRequest stringRequest = new StringRequest(
                 Request.Method.POST, Constants.URL_LOGIN,
-                response -> {
+                response -> onSuccessRequest(loginContext, response, Constants.KEY_LOGIN),
+                error -> {
                     progressBar.setVisibility(View.GONE);
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        if (!obj.getBoolean("error")) {
-                            SharedPrefManager.getInstance(loginContext)
-                                    .userLogin(obj.getInt("idnumber"),
-                                            password,
-                                            obj.getString("f_name"),
-                                            obj.getString("l_name"),
-                                            obj.getString("def_loc"),
-                                            true,
-                                            obj.getString("token"),
-                                            initTimeSession());
-                            // uncomment if need to view user info
-                            // Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
-                            Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(loginContext, MainActivity.class);
-                            Bundle mBundle = new Bundle();
-                            mBundle.putBoolean("KeepMeSignedIn", checkboxKMSI.isChecked());
-                            intent.putExtras(mBundle);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            tvMessage.setText(obj.getString("message"));
-                            tvMessage.setVisibility(View.VISIBLE);
-                            tietIDNumber.setText("");
-                            tietPassword.setText("");
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> {
-            progressBar.setVisibility(View.GONE);
-            tietPassword.setText("");
-            Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show();
-        }
-        ) {
+                    tietPassword.setText("");
+                    Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show();
+        }) {
             @NonNull
             @Override
             protected Map<String, String> getParams() {
@@ -215,14 +184,8 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "resetPassword: " + idNumber + ", " + token);
         StringRequest stringRequest = new StringRequest(
                 Request.Method.POST, Constants.URL_RESET_PASSWORD,
-                response -> {
-                    try {
-                        JSONObject obj = new JSONObject(response);
-                        Toast.makeText(loginContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, error -> Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show()
+                response -> onSuccessRequest(loginContext, response, Constants.KEY_RESET_PASS),
+                error -> Toast.makeText(loginContext, "No connection to server.", Toast.LENGTH_SHORT).show()
         ) {
             @NonNull
             @Override
@@ -237,8 +200,52 @@ public class LoginActivity extends AppCompatActivity {
         RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
     }
 
+    @Override
+    public void onSuccessRequest(Context context, String response, int request) {
+        progressBar.setVisibility(View.GONE);
+        try {
+            JSONObject obj = new JSONObject(response);
+            if (obj.getBoolean("error")) {
+//                Toast.makeText(context, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                tvMessage.setText(obj.getString("message"));
+                tvMessage.setVisibility(View.VISIBLE);
+                tietPassword.setText("");
+                return;
+            }
+            Log.d(TAG, "onSuccessRequest: " + obj.getString("message"));
+
+            switch (request) {
+                case Constants.KEY_LOGIN:
+                    SharedPrefManager.getInstance(loginContext).userLogin(
+                            obj.getInt("idnumber"),
+                            password,
+                            obj.getString("f_name"),
+                            obj.getString("l_name"),
+                            obj.getString("def_loc"),
+                            true,
+                            obj.getString("token"),
+                            initTimeSession());
+                    // uncomment if need to view user info
+                    // Log.d(TAG, SharedPrefManager.getInstance(loginContext).getAllSharedPref());
+                    Toast.makeText(loginContext, "Login Success", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(loginContext, MainActivity.class);
+                    Bundle mBundle = new Bundle();
+                    mBundle.putBoolean("KeepMeSignedIn", checkboxKMSI.isChecked());
+                    intent.putExtras(mBundle);
+                    startActivity(intent);
+                    finish();
+                    break;
+                case Constants.KEY_RESET_PASS:
+                    Toast.makeText(loginContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                    tokenLayout.setVisibility(View.GONE);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
-     * @return time 2 hours after logging in
+     * @return time 4 hours after logging in
      */
     private long initTimeSession() {
         Calendar cal = Calendar.getInstance();              // creates calendar

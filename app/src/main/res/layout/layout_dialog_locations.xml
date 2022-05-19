@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:layout_gravity="bottom">
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:focusableInTouchMode="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -12,21 +13,123 @@
         android:layout_margin="12dp"
         android:background="@drawable/shape_roundcorner_grayish_outlined"
         android:elevation="4dp"
+        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="4dp">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recvLocations"
+        <SearchView
+            android:id="@+id/dialogLocsSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:iconifiedByDefault="false"
+            android:queryHint="College Buildings/Rooms/Offices/Services" />
+
+        <ScrollView
+            android:id="@+id/recvScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="4dp" />
+            android:layout_below="@id/dialogLocsSearch">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/recvBuildingsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/recvBuildings"
+                    android:layout_alignEnd="@+id/recvBuildings"
+                    android:background="@color/UEP_blue"
+                    android:padding="8dp"
+                    android:singleLine="true"
+                    android:text="Buildings"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recvBuildings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvBuildingsTitle"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:id="@+id/recvRoomsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvBuildings"
+                    android:layout_alignStart="@+id/recvRooms"
+                    android:layout_alignEnd="@+id/recvRooms"
+                    android:background="@color/UEP_blue"
+                    android:padding="8dp"
+                    android:singleLine="true"
+                    android:text="Rooms"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recvRooms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvRoomsTitle"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/recvOfficesTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvRooms"
+                    android:layout_alignStart="@+id/recvOffices"
+                    android:layout_alignEnd="@+id/recvOffices"
+                    android:background="@color/UEP_blue"
+                    android:padding="8dp"
+                    android:singleLine="true"
+                    android:text="Offices"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recvOffices"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvOfficesTitle"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/recvServicesTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvOffices"
+                    android:layout_alignStart="@+id/recvServices"
+                    android:layout_alignEnd="@+id/recvServices"
+                    android:background="@color/UEP_blue"
+                    android:padding="8dp"
+                    android:singleLine="true"
+                    android:text="Services"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recvServices"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/recvServicesTitle"
+                    android:padding="4dp" />
+
+            </RelativeLayout>
+        </ScrollView>
     </RelativeLayout>
 
     <ImageButton
-        android:id="@+id/recvImgBtnClose"
+        android:id="@+id/dialogLocCloseBtn"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="top|end"

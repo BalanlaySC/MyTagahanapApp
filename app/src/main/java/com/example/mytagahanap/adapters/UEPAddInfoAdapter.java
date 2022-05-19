@@ -82,16 +82,11 @@ public class UEPAddInfoAdapter extends RecyclerView.Adapter<UEPAddInfoAdapter.UE
             holder.tvAddInfo.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
         }
 
-        final DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
-        int metric = displayMetrics.widthPixels;
-
         boolean cardviewStatus = currentUEPAddInfo.isExpanded();
         if(cardviewStatus) {
             holder.tvAddInfo.setVisibility(View.VISIBLE);
             if (currentUEPAddInfo.getImgId() > 0) {
                 holder.ivAddInfo.setImageResource(currentUEPAddInfo.getImgId());
-//                holder.ivAddInfo.requestLayout();
-//                holder.ivAddInfo.getLayoutParams().height = metric;
                 holder.ivAddInfo.setVisibility(View.VISIBLE);
             } else {
                 holder.ivAddInfo.setVisibility(View.GONE);

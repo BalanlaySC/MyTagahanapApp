@@ -41,6 +41,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +57,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
+import com.example.mytagahanap.adapters.RoomAdapter;
 import com.example.mytagahanap.globals.Constants;
 import com.example.mytagahanap.globals.DatabaseAccess;
 import com.example.mytagahanap.activities.EnlargeImageActivity;
@@ -62,6 +65,7 @@ import com.example.mytagahanap.models.EnlargedImageModel;
 import com.example.mytagahanap.activities.MainActivity;
 import com.example.mytagahanap.interfaces.MapInterface;
 import com.example.mytagahanap.R;
+import com.example.mytagahanap.models.SubjectModel;
 import com.example.mytagahanap.network.RequestHandler;
 import com.example.mytagahanap.globals.SharedPrefManager;
 import com.example.mytagahanap.interfaces.VolleyCallbackInterface;
@@ -72,6 +76,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.gson.JsonParser;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -108,12 +113,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -129,26 +147,30 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
     private static final String TAG = "MapFragment";
     final Handler handler = new Handler(Looper.getMainLooper());
 
-    private View view;
-    private MapView mapView;
     private MapboxMap mapboxMap;
     private LatLng latLng;
     private Point origin, destination;
     private DirectionsRoute currentRoute;
     private GeoJsonSource routeGJS, iconGJSOrigin, iconGJSDestination, iconGJSLongClick;
+
+    private View view;
+    private MapView mapView;
     private BottomSheetDialog bottomSheetDialog;
     private Dialog directionsDialog, suggestionDialog, locationsDialog,
             pathToRoomDialog, bldgLvlDialog;
     private ExtendedFloatingActionButton mapfragmentFab;
     private FloatingActionButton mapfragFabStyle;
-
+    private ScrollView recvScrollView;
     private Context mapFragmentContext;
 
     private String symbolLayerId;
     private ArrayList<LocationModel> locations;
+    private ArrayList<RoomModel> roomModels, officeModels, serviceModels;
     private List<String> imageURLList;
     private List<RasterLayer> rasterLayerList;
     private RasterLayer currentRasterLayer;
+    private LocationAdapter locationAdapter;
+    private RoomAdapter roomAdapter, officeAdapter, serviceAdapter;
     private float mapRotation;
 
     public MapFragment() {
@@ -162,6 +184,12 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         setMapFragView(view);
         String styleUrl = SharedPrefManager.getInstance(mapFragmentContext).getCurrentStyleUrl();
+
+        locations = new ArrayList<>();
+        roomModels = new ArrayList<>();
+        officeModels = new ArrayList<>();
+        serviceModels = new ArrayList<>();
+        importLocations();
 
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -214,15 +242,16 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         locationsDialog = new Dialog(getActivity());
         pathToRoomDialog = new Dialog(getActivity());
         bldgLvlDialog = new Dialog(getActivity());
-
-        locations = new ArrayList<>();
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            locations = getArguments().getParcelableArrayList("Locations");
-            locations.sort(Comparator.comparing(LocationModel::getLocationName));
-        } else {
-            locations.add(new LocationModel("Unable to retrieve data", (float) 0.0, (float) 0.0));
-        }
+//        Bundle bundle = getArguments();
+//        if (bundle != null) {
+//            locations = getArguments().getParcelableArrayList("Locations");
+//            locations.sort(Comparator.comparing(LocationModel::getLocationName));
+//        } else {
+//            locations.add(new LocationModel("Unable to retrieve data", (float) 0.0, (float) 0.0));
+//        }
+//        roomModels = new ArrayList<>(
+//                DatabaseAccess.getInstance(mapFragmentContext).getAllRooms());
+//        roomModels.sort(Comparator.comparing(RoomModel::getRoomName));
         return view;
     }
 
@@ -316,53 +345,32 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         }
         Log.d(TAG, "getRoute: currentLM " + SharedPrefManager.getInstance(mapFragmentContext).getDefLoc());
         Point currentLMPoint = Point.fromLngLat(currentLM.getLocationLng(), currentLM.getLocationLat());
-//        Polygon polygon = Polygon.fromLngLats(Constants.POINTS_UEP_BOUNDARY);
-        Polygon polygon = Polygon.fromLngLats(Constants.POINTS_WAYPOINT1_BOUNDARY);
+        Polygon polygon = Polygon.fromLngLats(Constants.POINTS_UEP_BOUNDARY);
         MapboxDirections mapboxDirections;
 //        Toast.makeText(mapFragmentContext, "Currently outside of UEP\n" +
 //                "Generating path from " + currentLM.getLocationName(), Toast.LENGTH_LONG).show();
 
-//        boolean isLocInsideUEP = TurfJoins.inside(origin, polygon);
-        boolean isUserInsideWB = TurfJoins.inside(origin, polygon); // if origin is inside waypoint1_boundary
-        boolean isLocInsideWB = TurfJoins.inside(destination, polygon); // if destination is inside waypoint1_boundary
+        boolean isLocInsideUEP = TurfJoins.inside(origin, polygon); // if origin is inside UEP
         if (Mapbox.getAccessToken() != null) {
-            if (isLocInsideWB) {
-                if (!isUserInsideWB && (origin.longitude() > 124.66425)) {
-                    currentLMPoint = Point.fromLngLat(124.66549, 12.50925);
-                    mapboxDirections = MapboxDirections.builder()
-                            .addWaypoint(currentLMPoint)
-                            .origin(origin)
-                            .destination(destination)
-                            .overview(DirectionsCriteria.OVERVIEW_FULL)
-                            .profile(DirectionsCriteria.PROFILE_DRIVING)
-                            .accessToken(Mapbox.getAccessToken())
-                            .build();
-                } else if (!isUserInsideWB && (origin.longitude() < 124.66425)) {
-                    currentLMPoint = Point.fromLngLat(124.66279, 12.50923);
-                    mapboxDirections = MapboxDirections.builder()
-                            .addWaypoint(currentLMPoint)
-                            .origin(origin)
-                            .destination(destination)
-                            .overview(DirectionsCriteria.OVERVIEW_FULL)
-                            .profile(DirectionsCriteria.PROFILE_DRIVING)
-                            .accessToken(Mapbox.getAccessToken())
-                            .build();
-                } else {
-                    mapboxDirections = MapboxDirections.builder()
-                            .origin(origin)
-                            .destination(destination)
-                            .overview(DirectionsCriteria.OVERVIEW_FULL)
-                            .profile(DirectionsCriteria.PROFILE_WALKING)
-                            .accessToken(Mapbox.getAccessToken())
-                            .build();
-                }
-            } else {
-//                Log.d(TAG, "getRoute: origin is inside UEP");
+            if (isLocInsideUEP) {
+                Log.d(TAG, "getRoute: origin is inside UEP");
                 mapboxDirections = MapboxDirections.builder()
                         .origin(origin)
                         .destination(destination)
                         .overview(DirectionsCriteria.OVERVIEW_FULL)
                         .profile(DirectionsCriteria.PROFILE_WALKING)
+                        .accessToken(Mapbox.getAccessToken())
+                        .build();
+            } else {
+                Log.d(TAG, "getRoute: origin is outside of UEP");
+                Toast.makeText(mapFragmentContext, "Currently outside of UEP\n" +
+                        "Generating path from " + currentLM.getLocationName(), Toast.LENGTH_LONG).show();
+                mapboxDirections = MapboxDirections.builder()
+                        .addWaypoint(currentLMPoint)
+                        .origin(origin)
+                        .destination(destination)
+                        .overview(DirectionsCriteria.OVERVIEW_FULL)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING)
                         .accessToken(Mapbox.getAccessToken())
                         .build();
             }
@@ -410,9 +418,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                         mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(new LatLngBounds.Builder()
                                 .include(new LatLng(origin.latitude(), origin.longitude()))
                                 .include(new LatLng(destination.latitude(), destination.longitude()))
-                                .build(), 100), 1000);
-                        // Create a LineString with the directions route's
-                        // geometry and
+                                .build(), 200), 1000);
+                        // Create a LineString with the directions route's geometry and
                         // reset the GeoJSON routeGeoJsonSource for the route LineLayer source
                         // Also generate markers for origin and destination
                         if (routeGJS != null) {
@@ -678,9 +685,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         // Set bottomsheet title to clicked location
         TextView btsTxtLocation = bottomSheetDialog.findViewById(R.id.btsTxtLocation);
         if (btsTxtLocation != null) {
-            btsTxtLocation.setText(clickedLocation.getLocationName());
-            if (!room.equals("")) {
-                btsTxtLocation.setText(clickedLocation.getLocationName() + " -> " + room);
+            btsTxtLocation.setText(clickedLocation.getLocationName() + " -> " + room);
+            if (room.equals("")) {
+                btsTxtLocation.setText(clickedLocation.getLocationName());
             }
         }
 
@@ -738,20 +745,14 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             } else {
                 smbtnViewRooms.setVisibility(View.GONE);
             }
-            String imgUrl = (Constants.ROOT_URL + "img/" +
-                    clickedLocation.getLocationName() + "/" + clickedLocation.getLocationName())
-                    .replace(" ", "%20");
             // check if location is college building, else feature disabled
             // .filter(o -> o.getName().equals(name)).findFirst().isPresent()
-            Stream<RoomModel> stream =  DatabaseAccess.getInstance(mapFragmentContext)
-                    .getAllRooms()
-                    .stream()
-                    .filter(o -> o.getLocationName().equals(clickedLocation.getLocationName()));
-            List<RoomModel> clickedLocationRooms = stream.collect(Collectors.toList());
             ArrayList<EnlargedImageModel> imageSet = new ArrayList<>();
-            for (RoomModel roomModel : clickedLocationRooms) {
-                imageSet.add(new EnlargedImageModel(imgUrl +
-                        roomModel.getRoomName().replace(" ", "%20") + "Room.jpg", ""));
+            int floors = clickedLocation.getLocationName().equals("College of Science Building") ? 3 : 1;
+            for (int n = 0; n < floors; n++) {
+                String img_url = Constants.ROOT_API_URL + "static/img/" +
+                        clickedLocation.getLocationName() + "_FloorPlan" + (n + 1) + ".png";
+                imageSet.add(new EnlargedImageModel(img_url.replace(" ", "%20"), ""));
             }
 
             smbtnViewRooms.setOnClickListener(view -> {
@@ -932,8 +933,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 directionsDialog.dismiss();
                 clearLayers();
                 Log.d(TAG, "initDirectionDialog: directDialog " + directionsDialog.isShowing());
-                if (mapfragmentFab != null)
-                    mapfragmentFab.show();
+                if (mapfragmentFab != null || mapfragFabStyle != null)
+                    showFloatingButtons();
             }
             return true;
         });
@@ -941,8 +942,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
 
         // Configurations to the position of the dialog and make the map still clickable
         Window window = directionsDialog.getWindow();
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.setGravity(Gravity.BOTTOM);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
@@ -962,13 +963,13 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                 originLM.getLocationLat());
         destination = Point.fromLngLat(destinationLM.getLocationLng(),
                 destinationLM.getLocationLat());
+        searchLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
+                originLM.getLocationName(), destinationLM.getLocationName());
 
         // Setting the area for the destination
         Polygon polygon = getArrivalArea(destinationLM);
         // Checks if the device is within the perimeter of the destination
         if (TurfJoins.inside(origin, polygon)) {
-            searchLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
-                    originLM.getLocationName(), destinationLM.getLocationName());
             Toast.makeText(mapFragmentContext, "You are already here!", Toast.LENGTH_LONG).show();
             clearLayers();
             if (!room.equals("")) {
@@ -977,10 +978,8 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             visitLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
                     destinationLM.getLocationName());
             directionsDialog.dismiss();
-            if (mapfragmentFab != null)
-                mapfragmentFab.show();
-            if (mapfragFabStyle != null)
-                mapfragFabStyle.show();
+            if (mapfragmentFab != null || mapfragFabStyle != null)
+                showFloatingButtons();
             return;
         }
 
@@ -994,13 +993,9 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         directionsImgBtnClose.setOnClickListener(view -> {
             clearLayers();
             directionsDialog.dismiss();
-            if (mapfragmentFab != null)
-                mapfragmentFab.show();
-            if (mapfragFabStyle != null)
-                mapfragFabStyle.show();
+            if (mapfragmentFab != null || mapfragFabStyle != null)
+                showFloatingButtons();
         });
-        searchLog(String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()),
-                originLM.getLocationName(), destinationLM.getLocationName());
 
         handler.postDelayed(() -> {
             if (!directionsDialog.isShowing()){
@@ -1049,42 +1044,116 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         locationsDialog.setOnKeyListener((dialogInterface, i, keyEvent) -> {
             if (i == KeyEvent.KEYCODE_BACK) {
                 locationsDialog.dismiss();
-                mapfragmentFab.show();
-                mapfragFabStyle.show();
+                showFloatingButtons();
             }
             return true;
         });
         // Configurations to the position of the dialog and make the map still clickable
         Window window = locationsDialog.getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        window.setGravity(Gravity.BOTTOM);
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
-        WindowManager.LayoutParams wlp = window.getAttributes();
-        wlp.y = 30;
-        window.setAttributes(wlp);
+        recvScrollView = locationsDialog.findViewById(R.id.recvScrollView);
+        SearchView recvSearch = locationsDialog.findViewById(R.id.dialogLocsSearch);
+        ImageButton recvImgBtnClose = locationsDialog.findViewById(R.id.dialogLocCloseBtn);
 
-        ImageButton recvImgBtnClose = locationsDialog.findViewById(R.id.recvImgBtnClose);
-        RecyclerView mRecyclerView = locationsDialog.findViewById(R.id.recvLocations);
-        mRecyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mapFragmentContext);
-        LocationAdapter mAdapter = new LocationAdapter(locations);
+        RecyclerView recvBuildings = locationsDialog.findViewById(R.id.recvBuildings);
+        RecyclerView recvRooms = locationsDialog.findViewById(R.id.recvRooms);
+        RecyclerView recvOffices = locationsDialog.findViewById(R.id.recvOffices);
+        RecyclerView recvServices = locationsDialog.findViewById(R.id.recvServices);
 
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(mapFragmentContext) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        locationAdapter = new LocationAdapter(locations);
 
-        mAdapter.setOnItemClickListener(position -> {
-            mapfragmentFab.show();
+        RecyclerView.LayoutManager mLayoutManager2 = new LinearLayoutManager(mapFragmentContext) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        roomAdapter  = new RoomAdapter(roomModels);
+
+        RecyclerView.LayoutManager mLayoutManager3 = new LinearLayoutManager(mapFragmentContext) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        officeAdapter  = new RoomAdapter(officeModels);
+
+        RecyclerView.LayoutManager mLayoutManager4 = new LinearLayoutManager(mapFragmentContext) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        serviceAdapter  = new RoomAdapter(serviceModels);
+
+        recvBuildings.setLayoutManager(mLayoutManager);
+        recvBuildings.setAdapter(locationAdapter);
+        locationAdapter.setOnItemClickListener(position -> {
+            showFloatingButtons();
 
             openBottomSheetDialog(locations.get(position), "", requireContext());
-            locationsDialog.dismiss();
+            resetAllAdapters();
+        });
+
+        recvRooms.setLayoutManager(mLayoutManager2);
+        recvRooms.setAdapter(roomAdapter);
+        roomAdapter.setOnItemClickListener(position -> {
+            showFloatingButtons();
+            locationAdapter.resetList();
+            LocationModel currentLoc = getLocObjFromListPos(locations, roomModels, position);
+
+            openBottomSheetDialog(currentLoc, roomModels.get(position).getRoomName(), requireContext());
+            resetAllAdapters();
+        });
+
+        recvOffices.setLayoutManager(mLayoutManager3);
+        recvOffices.setAdapter(officeAdapter);
+        officeAdapter.setOnItemClickListener(position -> {
+            showFloatingButtons();
+            locationAdapter.resetList();
+            LocationModel currentLoc = getLocObjFromListPos(locations, officeModels, position);
+
+            openBottomSheetDialog(currentLoc, officeModels.get(position).getRoomName(), requireContext());
+            resetAllAdapters();
+        });
+
+        recvServices.setLayoutManager(mLayoutManager4);
+        recvServices.setAdapter(serviceAdapter);
+        serviceAdapter.setOnItemClickListener(position -> {
+            showFloatingButtons();
+            locationAdapter.resetList();
+            LocationModel currentLoc = getLocObjFromListPos(locations, serviceModels, position);
+
+            openBottomSheetDialog(currentLoc, serviceModels.get(position).getRoomName(), requireContext());
+            resetAllAdapters();
+        });
+
+        recvSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                locationAdapter.getFilter().filter(s);
+                roomAdapter.getFilter().filter(s);
+                officeAdapter.getFilter().filter(s);
+                serviceAdapter.getFilter().filter(s);
+                return false;
+            }
         });
         recvImgBtnClose.setOnClickListener(view -> {
-            locationsDialog.dismiss();
-            mapfragmentFab.show();
+            resetAllAdapters();
+            showFloatingButtons();
         });
 
         locationsDialog.show();
@@ -1254,6 +1323,93 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
         RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
     }
 
+    // Fetch the class schedule of the current user
+//    public void fetchLocations() {
+//        Log.d(TAG, "fetchLocations: Fetching data");
+//        StringRequest stringRequest = new StringRequest(Request.Method.GET,
+//                Constants.URL_RETRIEVE_LOCATIONS + SharedPrefManager.getInstance(mapFragmentContext).getIdnumber(),
+//                response -> onSuccessRequest(mapFragmentContext, response, Constants.KEY_FETCH_LOCATIONS),
+//                error -> Toast.makeText(mapFragmentContext, "Server is down.", Toast.LENGTH_SHORT).show()) {
+//            @NonNull
+//            @Override
+//            protected Map<String, String> getParams() {
+//                Map<String, String> params = new HashMap<>();
+//                params.put("idnumber", String.valueOf(SharedPrefManager.getInstance(mapFragmentContext).getIdnumber()));
+//                return params;
+//            }
+//        };
+//
+//        RequestHandler.getInstance(mapFragmentContext).addToRequestQueue(stringRequest);
+//    }
+    public void importLocations() {
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+        String fileName = "locations-" + dateFormat.format(date) + ".json";
+        File file = mapFragmentContext.getFileStreamPath(fileName);
+
+        if (file.exists()) {
+            try {
+                JSONObject obj = new JSONObject(loadJSON(fileName));
+                if (obj.getBoolean("error")) {
+                    Toast.makeText(mapFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                JSONArray buildings = obj.getJSONArray("buildings");
+                for (int i = 0; i < buildings.length(); i++) {
+                    JSONObject arrayJObj = buildings.getJSONObject(i);
+                    locations.add(new LocationModel(arrayJObj.getString("bldg_name"),
+                            (float) arrayJObj.getDouble("bldg_x"),
+                            (float) arrayJObj.getDouble("bldg_y")));
+                }
+                locations.sort(Comparator.comparing(LocationModel::getLocationName));
+
+                JSONArray rooms = obj.getJSONArray("rooms");
+                for (int i = 0; i < rooms.length(); i++) {
+                    JSONObject arrayJObj = rooms.getJSONObject(i);
+                    roomModels.add(new RoomModel(arrayJObj.getString("room_name"),
+                            arrayJObj.getString("room_bldg")));
+                }
+                roomModels.sort(Comparator.comparing(RoomModel::getRoomName));
+
+                JSONArray offices = obj.getJSONArray("offices");
+                for (int i = 0; i < offices.length(); i++) {
+                    JSONObject arrayJObj = offices.getJSONObject(i);
+                    officeModels.add(new RoomModel(arrayJObj.getString("ofc_name"),
+                            arrayJObj.getString("ofc_bldg")));
+                }
+                officeModels.sort(Comparator.comparing(RoomModel::getRoomName));
+
+                JSONArray services = obj.getJSONArray("services");
+                for (int i = 0; i < services.length(); i++) {
+                    JSONObject arrayJObj = services.getJSONObject(i);
+                    serviceModels.add(new RoomModel(arrayJObj.getString("svc_name"),
+                            arrayJObj.getString("svc_bldg")));
+                }
+                serviceModels.sort(Comparator.comparing(RoomModel::getRoomName));
+                Log.d(TAG, "location.json successfully loaded");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String loadJSON(String fileName) {
+        String json = null;
+        try {
+            InputStream is = mapFragmentContext.openFileInput(fileName);
+            Log.d(TAG, "loadJSON: is.available" + is.available());
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
     @Override
     public void onSuccessRequest(Context context, String response, int request) {
         try {
@@ -1318,6 +1474,46 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
                     Log.d(TAG, "onSuccessRequest: " + obj.getString("message"));
                     Toast.makeText(mapFragmentContext, obj.getString("message"), Toast.LENGTH_SHORT).show();
                     break;
+                case Constants.KEY_FETCH_LOCATIONS:
+                    JSONArray buildings = obj.getJSONArray("buildings");
+                    for (int i = 0; i < buildings.length(); i++) {
+                        JSONObject arrayJObj = buildings.getJSONObject(i);
+                        locations.add(new LocationModel(arrayJObj.getString("bldg_name"),
+                                (float) arrayJObj.getDouble("bldg_x"),
+                                (float) arrayJObj.getDouble("bldg_y")));
+                    }
+                    locations.sort(Comparator.comparing(LocationModel::getLocationName));
+
+                    JSONArray rooms = obj.getJSONArray("rooms");
+                    for (int i = 0; i < rooms.length(); i++) {
+                        JSONObject arrayJObj = rooms.getJSONObject(i);
+                        roomModels.add(new RoomModel(arrayJObj.getString("room_name"),
+                                arrayJObj.getString("room_bldg")));
+                    }
+                    roomModels.sort(Comparator.comparing(RoomModel::getRoomName));
+
+                    JSONArray offices = obj.getJSONArray("offices");
+                    for (int i = 0; i < offices.length(); i++) {
+                        JSONObject arrayJObj = offices.getJSONObject(i);
+                        officeModels.add(new RoomModel(arrayJObj.getString("ofc_name"),
+                                arrayJObj.getString("ofc_bldg")));
+                    }
+                    officeModels.sort(Comparator.comparing(RoomModel::getRoomName));
+
+                    JSONArray services = obj.getJSONArray("services");
+                    for (int i = 0; i < services.length(); i++) {
+                        JSONObject arrayJObj = services.getJSONObject(i);
+                        serviceModels.add(new RoomModel(arrayJObj.getString("svc_name"),
+                                arrayJObj.getString("svc_bldg")));
+                    }
+                    serviceModels.sort(Comparator.comparing(RoomModel::getRoomName));
+                    Log.d(TAG, "Location data fetch succesfully");
+                    if (recvScrollView != null) {
+                        locationAdapter.notifyDataSetChanged();
+                        roomAdapter.notifyDataSetChanged();
+                        officeAdapter.notifyDataSetChanged();
+                        serviceAdapter.notifyDataSetChanged();
+                    }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1453,6 +1649,30 @@ public class MapFragment extends Fragment implements PermissionsListener, MapInt
             }
         }
         return null;
+    }
+
+    // Return LocationModel object from arrList position
+    public LocationModel getLocObjFromListPos(ArrayList<LocationModel> arrList1,
+            ArrayList<RoomModel> arrList2, int position) {
+        return arrList1.stream()
+                .filter(locationModel -> locationModel.getLocationName()
+                        .equals(arrList2.get(position).getLocationName()))
+                .findFirst().orElse(null);
+    }
+
+    // Reset lists after search
+    public void resetAllAdapters() {
+        locationsDialog.dismiss();
+        locationAdapter.resetList();
+        roomAdapter.resetList();
+        officeAdapter.resetList();
+        serviceAdapter.resetList();
+    }
+
+    // Show or reappear floating buttons
+    private void showFloatingButtons() {
+        mapfragmentFab.show();
+        mapfragFabStyle.show();
     }
 
     // Check if the string loc is in the Arraylist location

@@ -3,21 +3,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cvrlLocations"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
+    android:layout_height="wrap_content"
     android:background="@color/divider"
+    android:padding="8dp"
     tools:ignore="RtlSymmetry">
 
     <TextView
         android:id="@+id/cvtxtLocationName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_alignParentTop="true"
         android:ellipsize="end"
-        android:maxLines="1"
         android:paddingStart="8dp"
+        android:singleLine="true"
         android:text="(Location Name)"
         android:textColor="@color/light_gray_75darker"
         android:textSize="20sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/cvtxtBldgName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cvtxtLocationName"
+        android:layout_centerVertical="true"
+        android:ellipsize="end"
+        android:paddingStart="100dp"
+        android:singleLine="true"
+        android:text="(Building Name)"
+        android:textColor="@color/light_gray_50darker"
+        android:textSize="15sp"
+        android:visibility="gone" />
 
 </RelativeLayout>

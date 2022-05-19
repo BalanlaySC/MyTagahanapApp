@@ -76,10 +76,17 @@ import com.google.android.material.navigation.NavigationView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements
@@ -130,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements
 
         DatabaseAccess databaseAccess = DatabaseAccess.getInstance(getApplicationContext());
         locations = new ArrayList<>();
-        locations = databaseAccess.getAllLocations();
+        saveLocationsToJSON();
+//        locations = databaseAccess.getAllLocations();
         String parcelableTag = "Locations";
         mapFragment = new MapFragment();
         setMapInterface(mapFragment);
@@ -693,6 +701,25 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    // Fetch the class schedule of the current user
+    public void saveLocationsToJSON() {
+        Log.d(TAG, "fetchLocations: Fetching data");
+        StringRequest stringRequest = new StringRequest(Request.Method.GET,
+                Constants.URL_RETRIEVE_LOCATIONS + SharedPrefManager.getInstance(this).getIdnumber(),
+                response -> onSuccessRequest(this, response, Constants.KEY_FETCH_LOCATIONS),
+                error -> Toast.makeText(this, "Server is down.", Toast.LENGTH_SHORT).show()) {
+            @NonNull
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("idnumber", String.valueOf(SharedPrefManager.getInstance(MainActivity.this).getIdnumber()));
+                return params;
+            }
+        };
+
+        RequestHandler.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
     @Override
     public void onSuccessRequest(Context context, String response, int request) {
         String message = "";
@@ -707,6 +734,24 @@ public class MainActivity extends AppCompatActivity implements
             case Constants.KEY_SEND_FEEDBACK:
                 Log.d(TAG, "onSuccessRequest: " + message);
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                break;
+            case Constants.KEY_FETCH_LOCATIONS:
+                Date date = Calendar.getInstance().getTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+                File file = getFileStreamPath("locations-" + dateFormat.format(date) + ".json");
+                if (!file.exists()) {
+                    Log.d(TAG, "writing locations.json");
+                    try {
+                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+                                openFileOutput("locations-" + dateFormat.format(date) + ".json",
+                                        Context.MODE_PRIVATE));
+                        outputStreamWriter.write(response);
+                        outputStreamWriter.close();
+                        Log.d(TAG, "locations.json saved.");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
         }
     }
